@@ -25,7 +25,6 @@
 		724E90841768E0E6007E6939 /* MyGPSPosition.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FAA1768E0E6007E6939 /* MyGPSPosition.m */; };
 		724E90851768E0E6007E6939 /* LocationDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FAB1768E0E6007E6939 /* LocationDataModel.m */; };
 		724E90861768E0E6007E6939 /* BHCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */; };
-		724E90871768E0E6007E6939 /* AnottationCoordinateUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FAF1768E0E6007E6939 /* AnottationCoordinateUtilities.m */; };
 		724E90881768E0E6007E6939 /* MapViewAnnotationPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */; };
 		724E90891768E0E6007E6939 /* PhotosMapViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */; };
 		724E908A1768E0E6007E6939 /* MYAlbumViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E8FB41768E0E6007E6939 /* MYAlbumViewController.m */; };
@@ -112,7 +111,6 @@
 		724E90DC1768E0E6007E6939 /* list-add.png in Resources */ = {isa = PBXBuildFile; fileRef = 724E90741768E0E6007E6939 /* list-add.png */; };
 		724E90DD1768E0E6007E6939 /* Cell.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90761768E0E6007E6939 /* Cell.m */; };
 		724E90DE1768E0E6007E6939 /* CustomCellBackground.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90781768E0E6007E6939 /* CustomCellBackground.m */; };
-		724E90DF1768E0E6007E6939 /* MTViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90791768E0E6007E6939 /* MTViewController.m */; };
 		724E90E01768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E907C1768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.m */; };
 		724E90E71768E1B8007E6939 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90E61768E1B8007E6939 /* CoreData.framework */; };
 		724E90E91768E1BF007E6939 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90E81768E1BF007E6939 /* AVFoundation.framework */; };
@@ -125,6 +123,8 @@
 		724E90F71768E3AA007E6939 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90F61768E3AA007E6939 /* QuartzCore.framework */; };
 		724E90F91768E3CA007E6939 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90F81768E3CA007E6939 /* Security.framework */; };
 		724E90FB1768E3E7007E6939 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90FA1768E3E7007E6939 /* MapKit.framework */; };
+		724E91011769245D007E6939 /* AlbumOptionsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */; };
+		724E91021769245D007E6939 /* AlbumOptionsTableViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -139,28 +139,26 @@
 		724E8F941768E07E007E6939 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		724E8F961768E07E007E6939 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		724E8F981768E07E007E6939 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BHCollectionViewController.xib; sourceTree = "<group>"; };
+		724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BHCollectionViewController.xib; path = ../BHCollectionViewController.xib; sourceTree = "<group>"; };
 		724E8FA01768E0E6007E6939 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		724E8FA11768E0E6007E6939 /* PhotosMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PhotosMapViewController.m; path = ../PhotosMapViewController.m; sourceTree = "<group>"; };
 		724E8FA21768E0E6007E6939 /* SearchLocationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SearchLocationViewController.m; path = ../SearchLocationViewController.m; sourceTree = "<group>"; };
 		724E8FA31768E0E6007E6939 /* SearchLocationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SearchLocationViewController.h; path = ../SearchLocationViewController.h; sourceTree = "<group>"; };
-		724E8FA41768E0E6007E6939 /* PhotoDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoDetailViewController.m; sourceTree = "<group>"; };
-		724E8FA51768E0E6007E6939 /* PhotoDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoDetailViewController.h; sourceTree = "<group>"; };
+		724E8FA41768E0E6007E6939 /* PhotoDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PhotoDetailViewController.m; path = ../PhotoDetailViewController.m; sourceTree = "<group>"; };
+		724E8FA51768E0E6007E6939 /* PhotoDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhotoDetailViewController.h; path = ../PhotoDetailViewController.h; sourceTree = "<group>"; };
 		724E8FA61768E0E6007E6939 /* PCAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PCAppDelegate.m; path = ../PCAppDelegate.m; sourceTree = "<group>"; };
 		724E8FA81768E0E6007E6939 /* LocationDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LocationDataModel.xcdatamodel; sourceTree = "<group>"; };
 		724E8FA91768E0E6007E6939 /* LocationDataModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocationDataModel.h; path = ../LocationDataModel.h; sourceTree = "<group>"; };
 		724E8FAA1768E0E6007E6939 /* MyGPSPosition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyGPSPosition.m; path = ../MyGPSPosition.m; sourceTree = "<group>"; };
 		724E8FAB1768E0E6007E6939 /* LocationDataModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LocationDataModel.m; path = ../LocationDataModel.m; sourceTree = "<group>"; };
 		724E8FAC1768E0E6007E6939 /* PCAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PCAppDelegate.h; path = ../PCAppDelegate.h; sourceTree = "<group>"; };
-		724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BHCollectionViewController.m; sourceTree = "<group>"; };
+		724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BHCollectionViewController.m; path = ../BHCollectionViewController.m; sourceTree = "<group>"; };
 		724E8FAE1768E0E6007E6939 /* PhotosMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhotosMapViewController.h; path = ../PhotosMapViewController.h; sourceTree = "<group>"; };
-		724E8FAF1768E0E6007E6939 /* AnottationCoordinateUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnottationCoordinateUtilities.m; sourceTree = "<group>"; };
-		724E8FB01768E0E6007E6939 /* AnottationCoordinateUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnottationCoordinateUtilities.h; sourceTree = "<group>"; };
-		724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapViewAnnotationPoint.m; sourceTree = "<group>"; };
-		724E8FB21768E0E6007E6939 /* MapViewAnnotationPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapViewAnnotationPoint.h; sourceTree = "<group>"; };
+		724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MapViewAnnotationPoint.m; path = ../MapViewAnnotationPoint.m; sourceTree = "<group>"; };
+		724E8FB21768E0E6007E6939 /* MapViewAnnotationPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MapViewAnnotationPoint.h; path = ../MapViewAnnotationPoint.h; sourceTree = "<group>"; };
 		724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PhotosMapViewController.xib; path = ../PhotosMapViewController.xib; sourceTree = "<group>"; };
 		724E8FB41768E0E6007E6939 /* MYAlbumViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MYAlbumViewController.m; path = ../MYAlbumViewController.m; sourceTree = "<group>"; };
-		724E8FB51768E0E6007E6939 /* BHCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BHCollectionViewController.h; sourceTree = "<group>"; };
+		724E8FB51768E0E6007E6939 /* BHCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BHCollectionViewController.h; path = ../BHCollectionViewController.h; sourceTree = "<group>"; };
 		724E8FB61768E0E6007E6939 /* MYAlbumViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MYAlbumViewController.h; path = ../MYAlbumViewController.h; sourceTree = "<group>"; };
 		724E8FB71768E0E6007E6939 /* MyGPSPosition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyGPSPosition.h; path = ../MyGPSPosition.h; sourceTree = "<group>"; };
 		724E8FBB1768E0E6007E6939 /* SearchLocationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SearchLocationViewController.xib; path = ../SearchLocationViewController.xib; sourceTree = "<group>"; };
@@ -294,9 +292,9 @@
 		724E90591768E0E6007E6939 /* SHKViewControllerWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SHKViewControllerWrapper.m; sourceTree = "<group>"; };
 		724E905A1768E0E6007E6939 /* AlbumsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlbumsListViewController.h; sourceTree = "<group>"; };
 		724E905B1768E0E6007E6939 /* AlbumsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlbumsListViewController.m; sourceTree = "<group>"; };
-		724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AlbumsListViewController.xib; sourceTree = "<group>"; };
+		724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AlbumsListViewController.xib; path = ../AlbumsListViewController.xib; sourceTree = "<group>"; };
 		724E905D1768E0E6007E6939 /* AlbumViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlbumViewController.h; sourceTree = "<group>"; };
-		724E905E1768E0E6007E6939 /* PhotoDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhotoDetailViewController.xib; sourceTree = "<group>"; };
+		724E905E1768E0E6007E6939 /* PhotoDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PhotoDetailViewController.xib; path = ../PhotoDetailViewController.xib; sourceTree = "<group>"; };
 		724E905F1768E0E6007E6939 /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
 		724E90601768E0E6007E6939 /* DetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
 		724E90611768E0E6007E6939 /* AlbumViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlbumViewController.m; sourceTree = "<group>"; };
@@ -323,8 +321,6 @@
 		724E90761768E0E6007E6939 /* Cell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Cell.m; path = ../Cell.m; sourceTree = "<group>"; };
 		724E90771768E0E6007E6939 /* CustomCellBackground.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CustomCellBackground.h; path = ../CustomCellBackground.h; sourceTree = "<group>"; };
 		724E90781768E0E6007E6939 /* CustomCellBackground.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CustomCellBackground.m; path = ../CustomCellBackground.m; sourceTree = "<group>"; };
-		724E90791768E0E6007E6939 /* MTViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MTViewController.m; path = ../MTViewController.m; sourceTree = "<group>"; };
-		724E907A1768E0E6007E6939 /* MTViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MTViewController.h; path = ../MTViewController.h; sourceTree = "<group>"; };
 		724E907B1768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAssetsLibrary+CustomPhotoAlbum.h"; sourceTree = "<group>"; };
 		724E907C1768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAssetsLibrary+CustomPhotoAlbum.m"; sourceTree = "<group>"; };
 		724E90E61768E1B8007E6939 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -338,6 +334,9 @@
 		724E90F61768E3AA007E6939 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		724E90F81768E3CA007E6939 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		724E90FA1768E3E7007E6939 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		724E90FE1769245D007E6939 /* AlbumOptionsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlbumOptionsTableViewController.h; sourceTree = "<group>"; };
+		724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlbumOptionsTableViewController.m; sourceTree = "<group>"; };
+		724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AlbumOptionsTableViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -379,22 +378,11 @@
 				724E90EA1768E1C6007E6939 /* CoreLocation.framework */,
 				724E90E81768E1BF007E6939 /* AVFoundation.framework */,
 				724E90E61768E1B8007E6939 /* CoreData.framework */,
-				724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */,
 				724E8FA01768E0E6007E6939 /* InfoPlist.strings */,
-				724E8FA41768E0E6007E6939 /* PhotoDetailViewController.m */,
-				724E8FA51768E0E6007E6939 /* PhotoDetailViewController.h */,
-				724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */,
-				724E8FAF1768E0E6007E6939 /* AnottationCoordinateUtilities.m */,
-				724E8FB01768E0E6007E6939 /* AnottationCoordinateUtilities.h */,
-				724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */,
-				724E8FB21768E0E6007E6939 /* MapViewAnnotationPoint.h */,
-				724E8FB51768E0E6007E6939 /* BHCollectionViewController.h */,
 				724E8FBC1768E0E6007E6939 /* ShareKit */,
 				724E905A1768E0E6007E6939 /* AlbumsListViewController.h */,
 				724E905B1768E0E6007E6939 /* AlbumsListViewController.m */,
-				724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */,
 				724E905D1768E0E6007E6939 /* AlbumViewController.h */,
-				724E905E1768E0E6007E6939 /* PhotoDetailViewController.xib */,
 				724E905F1768E0E6007E6939 /* DetailViewController.m */,
 				724E90601768E0E6007E6939 /* DetailViewController.h */,
 				724E90611768E0E6007E6939 /* AlbumViewController.m */,
@@ -432,6 +420,8 @@
 		724E8F881768E07E007E6939 /* MyPhotoMap */ = {
 			isa = PBXGroup;
 			children = (
+				724E90FD1769221F007E6939 /* VIEW */,
+				724E90FC176921D2007E6939 /* PHOTOS */,
 				724E90E51768E18F007E6939 /* SEARCH */,
 				724E90E41768E16C007E6939 /* MODEL */,
 				724E90E31768E156007E6939 /* DELEGATE */,
@@ -817,10 +807,11 @@
 		724E90E11768E100007E6939 /* MAP */ = {
 			isa = PBXGroup;
 			children = (
+				724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */,
+				724E8FB21768E0E6007E6939 /* MapViewAnnotationPoint.h */,
 				724E8FA11768E0E6007E6939 /* PhotosMapViewController.m */,
 				724E8FAA1768E0E6007E6939 /* MyGPSPosition.m */,
 				724E8FAE1768E0E6007E6939 /* PhotosMapViewController.h */,
-				724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */,
 				724E8FB71768E0E6007E6939 /* MyGPSPosition.h */,
 			);
 			name = MAP;
@@ -829,6 +820,8 @@
 		724E90E21768E12A007E6939 /* ALBUM */ = {
 			isa = PBXGroup;
 			children = (
+				724E8FB51768E0E6007E6939 /* BHCollectionViewController.h */,
+				724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */,
 				724E8FB41768E0E6007E6939 /* MYAlbumViewController.m */,
 				724E8FB61768E0E6007E6939 /* MYAlbumViewController.h */,
 				724E90621768E0E6007E6939 /* BHAlbum.m */,
@@ -849,8 +842,6 @@
 				724E90761768E0E6007E6939 /* Cell.m */,
 				724E90771768E0E6007E6939 /* CustomCellBackground.h */,
 				724E90781768E0E6007E6939 /* CustomCellBackground.m */,
-				724E90791768E0E6007E6939 /* MTViewController.m */,
-				724E907A1768E0E6007E6939 /* MTViewController.h */,
 			);
 			name = ALBUM;
 			sourceTree = "<group>";
@@ -879,9 +870,32 @@
 			children = (
 				724E8FA21768E0E6007E6939 /* SearchLocationViewController.m */,
 				724E8FA31768E0E6007E6939 /* SearchLocationViewController.h */,
-				724E8FBB1768E0E6007E6939 /* SearchLocationViewController.xib */,
 			);
 			name = SEARCH;
+			sourceTree = "<group>";
+		};
+		724E90FC176921D2007E6939 /* PHOTOS */ = {
+			isa = PBXGroup;
+			children = (
+				724E8FA41768E0E6007E6939 /* PhotoDetailViewController.m */,
+				724E8FA51768E0E6007E6939 /* PhotoDetailViewController.h */,
+			);
+			name = PHOTOS;
+			sourceTree = "<group>";
+		};
+		724E90FD1769221F007E6939 /* VIEW */ = {
+			isa = PBXGroup;
+			children = (
+				724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */,
+				724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */,
+				724E8FBB1768E0E6007E6939 /* SearchLocationViewController.xib */,
+				724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */,
+				724E905E1768E0E6007E6939 /* PhotoDetailViewController.xib */,
+				724E90FE1769245D007E6939 /* AlbumOptionsTableViewController.h */,
+				724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */,
+				724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */,
+			);
+			name = VIEW;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -955,6 +969,7 @@
 				724E90DA1768E0E6007E6939 /* Default.png in Resources */,
 				724E90DB1768E0E6007E6939 /* Default@2x.png in Resources */,
 				724E90DC1768E0E6007E6939 /* list-add.png in Resources */,
+				724E91021769245D007E6939 /* AlbumOptionsTableViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -974,7 +989,6 @@
 				724E90841768E0E6007E6939 /* MyGPSPosition.m in Sources */,
 				724E90851768E0E6007E6939 /* LocationDataModel.m in Sources */,
 				724E90861768E0E6007E6939 /* BHCollectionViewController.m in Sources */,
-				724E90871768E0E6007E6939 /* AnottationCoordinateUtilities.m in Sources */,
 				724E90881768E0E6007E6939 /* MapViewAnnotationPoint.m in Sources */,
 				724E908A1768E0E6007E6939 /* MYAlbumViewController.m in Sources */,
 				724E908D1768E0E6007E6939 /* SHKOAuthSharer.m in Sources */,
@@ -1049,8 +1063,8 @@
 				724E90D81768E0E6007E6939 /* BHPhotoAlbumLayout.m in Sources */,
 				724E90DD1768E0E6007E6939 /* Cell.m in Sources */,
 				724E90DE1768E0E6007E6939 /* CustomCellBackground.m in Sources */,
-				724E90DF1768E0E6007E6939 /* MTViewController.m in Sources */,
 				724E90E01768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.m in Sources */,
+				724E91011769245D007E6939 /* AlbumOptionsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1174,6 +1188,7 @@
 				724E8F9E1768E07E007E6939 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

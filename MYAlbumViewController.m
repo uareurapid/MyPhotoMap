@@ -8,7 +8,7 @@
 
 #import "MYAlbumViewController.h"
 
-
+#import "AlbumOptionsTableViewController.h"
 
 @interface MYAlbumViewController ()
 
@@ -34,6 +34,11 @@
         detailViewController = [[PhotoDetailViewController alloc] initWithNibName:@"PhotoDetailViewController" bundle:nil];
         listAlbums = [[AlbumsListViewController alloc] initWithNibName:@"AlbumsListViewController" bundle:nil];
         
+        //add the settings button
+        UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Options"
+                                                                           style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
+        self.navigationItem.rightBarButtonItem = addAlbumButton;
+        
     }
     return self;
 }
@@ -49,12 +54,20 @@
     
     NSLog(@"Album map is: %@",self.mapViewController);
     
-    self.navigationItem.rightBarButtonItem=nil;
-    UIBarButtonItem *takePicture = [[UIBarButtonItem alloc] initWithTitle:@"Take photo"
-                                                                    style:UIBarButtonItemStyleDone target:self action:@selector(takePhoto:)];
+    //self.navigationItem.rightBarButtonItem=nil;
     
     
-    self.navigationItem.rightBarButtonItem = takePicture;
+    //UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
+     //                                                 style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
+    
+    
+    //UIBarButtonItem *takePicture = [[UIBarButtonItem alloc] initWithTitle:@"Take photo"
+    //                                                                style:UIBarButtonItemStyleDone target:self action:@selector(takePhoto:)];
+    
+    
+    //self.navigationItem.rightBarButtonItem = takePicture;
+    
+    //self.navigationItem.rightBarButtonItem = addAlbumButton;
     
     
 }
@@ -68,6 +81,23 @@
     // Dispose of any resources that can be recreated.
 }
 
+/*
+-(IBAction)editLocation:(id)sender {
+    SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
+    view.assetURL = assetURL; //set the asset url
+    view.image = thumbnail;
+    [self.navigationController pushViewController:view animated:YES];
+}*/
+
+
+-(IBAction)settingsClicked:(id) sender{
+  //will show a lit with two options
+    //edit location and take photo
+    AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
+    [self.navigationController pushViewController:optionsController animated:YES];
+}
+
+
 #pragma take photo selector
 - (IBAction)takePhoto:(id)sender {
     UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
@@ -76,6 +106,19 @@
     imagePickerController.delegate = (id)self;
     
     [self presentModalViewController:imagePickerController animated:YES];
+}
+
+-(IBAction)addLocation:(id)sender {
+    SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
+    view.navigationItem.rightBarButtonItem = nil;
+    view.navigationItem.leftBarButtonItem = nil;
+    view.assetURL = selectedAlbum.assetURL; //set the asset url
+    if(selectedAlbum.photos.count>0) {
+        BHPhoto *photo = [selectedAlbum.photos objectAtIndex:0];
+        view.image = photo.image;
+    }
+    
+    [self.navigationController pushViewController:view animated:YES];
 }
 
 

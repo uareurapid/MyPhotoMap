@@ -198,6 +198,7 @@
                                       BHAlbum *album = [[BHAlbum alloc] init];
                                       album.photosURLs = [[NSMutableArray alloc] init];
                                       album.name = albumName;
+                                      
                                       BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
                                       [album addPhoto:photo];
                                       [self.albums addObject:album];
@@ -265,10 +266,10 @@
  
              BHAlbum *album = [[BHAlbum alloc] init];
              album.photosURLs = [[NSMutableArray alloc] init];
+             album.assetURL = [group valueForProperty:ALAssetsGroupPropertyURL];
              album.name = name;
              [self.albums addObject:album];
-             //NSLog(@"Adding album : %@, %d",album.name, self.albums.count);
-    
+   
              //get only the first 3 images thumbnails to display
  
              NSInteger numOfAssets = [group numberOfAssets];
@@ -501,8 +502,7 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
     [alert show];
-    //SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
-    //[self.navigationController pushViewController:view animated:YES];
+
 }
 
 //the delegate for the new Album
@@ -513,17 +513,6 @@
         [self createNewAlbum:albumName];
     }
     
-    
-    /*
-    NSString* detailString = textField.text;
-    NSLog(@"String is: %@", detailString); //Put it on the debugger
-    if ([textField.text length] <= 0 || buttonIndex == 0){
-        return; //If cancel or 0 length string the string doesn't matter
-    }
-    if (buttonIndex == 1) {
-        ...
-        
-    }*/
 }
 
 

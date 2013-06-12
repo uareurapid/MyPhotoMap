@@ -17,6 +17,8 @@
 
 @property(strong,nonatomic) NSMutableArray *photosURLs;
 
+@property (nonatomic, strong) NSURL *assetURL;
+
 - (void)addPhoto:(BHPhoto *)photo;
 - (BOOL)removePhoto:(BHPhoto *)photo;
 

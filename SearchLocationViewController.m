@@ -44,20 +44,17 @@
     if (managedObjectContext == nil)
     {
         managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-        NSLog(@"After managedObjectContext: %@",  managedObjectContext);
-        
         //get a reference to map view too
         mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
-        NSLog(@"After mapview: %@",  mapView);
     }
     
-    
+    //load existing data on database
     [self fetchLocationRecords];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    NSLog(@"Asset url is %@",assetURL);
+    NSLog(@"viewWillAppear--> Asset url is %@",assetURL);
     // Do any additional setup after loading the view from its nib.
 }
 
@@ -254,11 +251,13 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] ;//using ARC otherwise would have to call autorelease at the end
     }
+    //just play safe here
+    if(indexPath.row < placesList.count) {
+        MyGPSPosition *item = (MyGPSPosition *)[placesList objectAtIndex:indexPath.row];
+        cell.textLabel.text = item.location;
+    }
     
-    //NSInteger section = indexPath.section;
-    MyGPSPosition *item = (MyGPSPosition *)[placesList objectAtIndex:indexPath.row];
-	cell.textLabel.text = item.location;
-	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 	
     return cell;
 }
@@ -312,8 +311,10 @@
             }
         }
     }
+ 
     // Save our fetched data to an array
     [self setLocationEntitiesArray: mutableFetchResults];
+
     //if(image!=nil && OK==YES) {
     //NSLog(@"Adding to the map....");
     //[mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
@@ -328,7 +329,16 @@ LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription in
     [locationObject setName:@"teste"];
     locationObject.latitude = location.latitude;
     locationObject.longitude= location.longitude;
-    locationObject.type = TYPE_PHOTO;
+    
+    if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
+    {
+      //it is an image
+        locationObject.type = TYPE_PHOTO;
+    }
+    else {
+        locationObject.type = TYPE_ALBUM;
+    }
+    
     locationObject.assetURL = [assetURL absoluteString];
 
    BOOL OK = YES;
@@ -372,23 +382,16 @@ LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription in
             ALAssetRepresentation *rep = [asset defaultRepresentation];
             NSLog(@"image metadata is %@",rep.metadata);
             NSDictionary *metaInfo = rep.metadata;
-            [metaInfo setValue:0 forKey:@"Orientation"];
             
             Byte *buffer = (Byte*)malloc(rep.size);
             NSUInteger buffered = [rep getBytes:buffer fromOffset:0.0 length:rep.size error:nil];
             NSData *data = [NSData dataWithBytesNoCopy:buffer length:buffered freeWhenDone:YES];
-            /*
-            Byte *buffer = (Byte *)malloc(dr.size);
-            NSUInteger k = [dr getBytes:buffer fromOffset:0.0 length:dr.size error:nil];
-            NSData *data = [NSData dataWithBytesNoCopy:buffer length:k freeWhenDone:YES];*/
+
             [asset setImageData:data metadata:metaInfo completionBlock:
             ^(NSURL *assetURL, NSError *error) {
                 NSLog(@"got an error here %@",error);
             }];
-            //[asset setImageData: data: metadata:gpsLocation:completionBlock:nil];
-            
-            //[assetslibrary writeImageDataToSavedPhotosAlbum:data metadata:gpsLocation completionBlock:nil];
-            //[viewImage CGImage]
+
         }
             
     
@@ -491,7 +494,7 @@ LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription in
            
             __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
             //image = imageThumb;
-            
+            NSLog(@"HERE 1");
             //alwyas update the UI in the main thread
             dispatch_async(dispatch_get_main_queue(), ^{
                 
@@ -499,6 +502,7 @@ LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription in
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
                 [mapView addLocation:locationCL withImage:image andTitle:@"other test"];
+                NSLog(@"HERE 2");
                 
             });
         }
@@ -512,6 +516,6 @@ LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription in
     };
     
     ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
-    [assetslibrary assetForURL:self.assetURL resultBlock:resultblock failureBlock:failureblock];
+    [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
 }
 @end

@@ -42,6 +42,8 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 - (void)readAlbumThumbnails;
 
 - (IBAction)takePhoto:(id)sender;
+-(IBAction)settingsClicked:(id)sender;
+-(IBAction)addLocation:(id)sender;
 
 
 

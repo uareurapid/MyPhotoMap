@@ -28,11 +28,11 @@
         //*************************************************************
         //O botao so aparece se a imagem seleccionada (ou o assetURL) não estiver nabd
         //ou theno uma flag, para alterar a localização
-        UIBarButtonItem *takePicture = [[UIBarButtonItem alloc] initWithTitle:@"Edit location"
+        UIBarButtonItem *editLocation = [[UIBarButtonItem alloc] initWithTitle:@"Edit location"
                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(editLocation:)];
         
         
-        self.navigationItem.rightBarButtonItem = takePicture;
+        self.navigationItem.rightBarButtonItem = editLocation;
         
     }
     return self;
