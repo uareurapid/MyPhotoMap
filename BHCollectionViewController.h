@@ -27,7 +27,7 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;
 
-@property (strong,nonatomic) MYAlbumViewController *albumView;
+@property (strong,nonatomic) MYAlbumViewController *albumViewController;
 @property (strong, nonatomic) PhotosMapViewController *mapViewController;
 //was retain
 @property (strong,nonatomic) NSMutableArray *assetsURLs;

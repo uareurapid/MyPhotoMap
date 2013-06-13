@@ -27,7 +27,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property (retain,nonatomic) PhotoDetailViewController *detailViewController;
 
-@property (retain,nonatomic) AlbumsListViewController *listAlbums;//available for save
+@property (retain,nonatomic) AlbumsListViewController *listAlbumsAvailableController;//available for save
 
 //will actaully be abums of just one photo/thumbnail
 @property (strong, nonatomic) NSMutableArray *albumPhotos;

@@ -25,7 +25,7 @@
 
 @implementation BHCollectionViewController
 
-@synthesize albums,albumView;
+@synthesize albums,albumViewController;
 @synthesize assetsURLs;
 @synthesize tabBarController;
 @synthesize numExistingAlbums;
@@ -516,7 +516,7 @@
 }
 
 
-//clicked on a non empty album and show all the pics
+//clicked on a empty album and show all the pics inside (if any)
 - (void)didTapAlbumWithGesture:(UITapGestureRecognizer *)tapGesture{
    
     UIImageView *imageView = (UIImageView*)tapGesture.view;
@@ -526,14 +526,9 @@
     if(tag<albums.count) {
         //valid index
         BHAlbum *selectedOne = [albums objectAtIndex:tag];
-        albumView.title = selectedOne.name;
-        albumView.selectedAlbum = selectedOne;
+        albumViewController.title = selectedOne.name;
+        albumViewController.selectedAlbum = selectedOne;
         
-        
-        //[selectedOne.photos removeAllObjects]; //remove the 3 photos (or less) used only as cover
-        //[albumView.albums removeAllObjects]; //each photo of the selectedOne will be an album on its own, on the albumView
-        //[albumView.albums addObject:selectedOne];//just add this one
-        //albumView.title = selectedOne.name;
     }
     
     // Create the item to share (in this example, a url)
@@ -559,11 +554,12 @@
     //NSLog(@"album size at the end %d",album.photos.count);
     //albumView.album = album;
     
+    [albumViewController.albums addObjectsFromArray:albums];
     
     //remove the one on the left , leaving only the back button
-    albumView.navigationItem.leftBarButtonItem=nil;
-    [albumView readAlbumThumbnails];
-    [self.navigationController pushViewController: albumView animated:YES];
+    albumViewController.navigationItem.leftBarButtonItem=nil;
+    [albumViewController readAlbumThumbnails];
+    [self.navigationController pushViewController: albumViewController animated:YES];
   
     
     

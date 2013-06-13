@@ -21,7 +21,7 @@
 //@synthesize album;//the selected album
 //@synthesize albumPhotos;//the miniatures of the albums, which will be albums of just one pic
 @synthesize detailViewController;
-@synthesize listAlbums;
+@synthesize listAlbumsAvailableController;
 
 @synthesize selectedAlbum;
 
@@ -32,10 +32,10 @@
         // Custom initialization
         //albumPhotos = [[NSMutableArray alloc] init];
         detailViewController = [[PhotoDetailViewController alloc] initWithNibName:@"PhotoDetailViewController" bundle:nil];
-        listAlbums = [[AlbumsListViewController alloc] initWithNibName:@"AlbumsListViewController" bundle:nil];
+        
         
         //add the settings button
-        UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Options"
+        UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Actions"
                                                                            style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
         self.navigationItem.rightBarButtonItem = addAlbumButton;
         
@@ -127,7 +127,7 @@
 
 {
     //NSLog(@"Tryig to save with location data!");
-    [self saveImage:image withInfo:editingInfo];
+   // [self saveImage:image withInfo:editingInfo];
     
 
     
@@ -138,8 +138,31 @@
     
     //[[[[[UIApplication sharedApplication] delegate] window] rootViewController] presentModalViewController:listAlbums animated:YES];
     
-    [picker dismissModalViewControllerAnimated:NO];
+    [picker dismissViewControllerAnimated:NO
+                               completion: ^{[self showAlbumsList: image editingInfo:editingInfo];}];
 }
+
+- (void) showAlbumsList:(UIImage *)image editingInfo:(NSDictionary *)editingInfo {
+    
+    
+    
+    NSMutableArray *albumsAvailable = [[NSMutableArray alloc]init];
+    for(BHAlbum *album in self.albums) {
+        NSString *name = album.name;
+        [albumsAvailable addObject:name];
+    }
+
+    listAlbumsAvailableController =
+    [[AlbumsListViewController alloc] initWithNibName:@"AlbumsListViewController"
+                                               bundle:nil predefined:selectedAlbum.name available:albumsAvailable];
+    //pass the necessary info
+    listAlbumsAvailableController.imageToSave = image;
+    listAlbumsAvailableController.imageInfo = editingInfo;
+    listAlbumsAvailableController.photoLocation = self.location;
+    
+    [self.navigationController pushViewController:listAlbumsAvailableController animated:NO];
+}
+
 
 //save the image along with their metadata info
 - (void) saveImage:(UIImage *)imageToSave withInfo:(NSDictionary *)info

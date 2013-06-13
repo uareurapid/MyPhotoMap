@@ -24,7 +24,7 @@
     if (self) {
         // Custom initialization
         albumViewController = albumController;
-        self.title = @"Options";
+        self.title = @"Actions";
     }
     return self;
 }
@@ -80,7 +80,7 @@
 {
 #warning Incomplete method implementation.
     // Return the number of rows in the section.
-    return 2;
+    return 3;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -96,8 +96,11 @@
     if(row==0) {
         cell.textLabel.text = @"Edit album location";
     }
-    else {
+    else if(row==1) {
         cell.textLabel.text = @"Take photo";
+    }
+    else {
+        cell.textLabel.text = @"Delete album";
     }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
@@ -162,8 +165,11 @@
     if(row==0) {
         [albumViewController addLocation:self];
     }
-    else {
+    else if(row==1) {
         [albumViewController takePhoto:self];
+    }
+    else {
+        //delete album
     }
   
     

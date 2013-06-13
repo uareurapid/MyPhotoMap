@@ -24,11 +24,11 @@
     
     self.mapViewController = [[PhotosMapViewController alloc] initWithNibName:@"PhotosMapViewController" bundle:nil];
     self.collectionController = [[BHCollectionViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
-    self.collectionController.albumView  = [[MYAlbumViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
+    self.collectionController.albumViewController  = [[MYAlbumViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
  
     //add the map reference on both controllers
     self.collectionController.mapViewController = mapViewController;
-    self.collectionController.albumView.mapViewController = mapViewController;
+    self.collectionController.albumViewController.mapViewController = mapViewController;
     
     navController = [[UINavigationController alloc] init];
     [navController pushViewController: collectionController animated:NO];
@@ -94,14 +94,14 @@
     CLLocation *elem = [locations objectAtIndex:locations.count-1];
     location =  elem.coordinate;
     collectionController.location = elem;
-    collectionController.albumView.location = elem;
+    collectionController.albumViewController.location = elem;
    // NSLog(@"did update locations: %@",elem);
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     location =  newLocation.coordinate;
     collectionController.location = newLocation;
-    collectionController.albumView.location = newLocation;
+    collectionController.albumViewController.location = newLocation;
     //NSLog(@"did update didUpdateToLocation: %@",newLocation);
 }
 

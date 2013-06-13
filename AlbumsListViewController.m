@@ -7,6 +7,10 @@
 //
 
 #import "AlbumsListViewController.h"
+#import <ImageIO/CGImageSource.h>
+#import <ImageIO/CGImageProperties.h>
+#import <AVFoundation/AVFoundation.h>
+#import <CoreLocation/CoreLocation.h>
 
 @interface AlbumsListViewController ()
 
@@ -16,14 +20,39 @@
 
 @synthesize albumsNames;
 @synthesize library;
-
+@synthesize predefinedAlbum;
+@synthesize imageInfo,imageToSave,photoLocation;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        if(albumsNames==nil)
+            albumsNames = [[NSArray alloc] init];
         
+        library = [[ALAssetsLibrary alloc] init];
+        self.title=@"Save to...";
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil predefined: (NSString*) albumName
+{
+    self = [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        predefinedAlbum = albumName;
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil predefined: (NSString*) albumName available: (NSArray *)albums
+{
+    self = [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil predefined:albumName];
+    if (self) {
+        // Custom initialization
+        albumsNames = [[NSArray alloc] initWithArray:albums copyItems:YES];
     }
     return self;
 }
@@ -59,17 +88,18 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-#warning Potentially incomplete method implementation.
+
     // Return the number of sections.
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
+
     // Return the number of rows in the section.
-    return 0;
+      return albumsNames.count;
 }
+
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -78,11 +108,48 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
+ 
+    NSInteger row = indexPath.row;
     
-    // Configure the cell...
+    
+        if(row < albumsNames.count) {
+            NSString *name = [albumsNames objectAtIndex:row];
+            cell.textLabel.text = name;
+            if([name isEqualToString:predefinedAlbum]) { //by default save to selected
+                //[cell setHighlighted:YES];
+                cell.accessoryType = UITableViewCellAccessoryCheckmark;
+            }
+            else {
+                cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
+            }
+            
+        }
+  
     
     return cell;
 }
+
+-(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    return @"Available albums";
+}
+-(void) tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if(indexPath.row < albumsNames.count) {
+        predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
+        if(imageInfo!=nil && imageToSave!=nil) {
+            NSLog(@"saving image to %@",predefinedAlbum);
+            [self saveImageMetadata];
+            [self saveOnAlbum:imageToSave];
+        }
+        else {
+            NSLog(@"something is nil here img %@  info %@",imageToSave, imageInfo);
+        }
+    }
+
+    
+    
+}
+
 
 /*
 // Override to support conditional editing of the table view.
@@ -134,10 +201,17 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+    NSInteger section = indexPath.section;
+    if(section==0) {
+        if(indexPath.row < albumsNames.count) {
+            predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
+        }
+    }
 }
 
+//save on the album
 - (void)saveOnAlbum: (UIImage*)image{
-    [self saveImage:image toAlbum:@"Teste" withCompletionBlock:^(NSError *error) {
+    [self saveImage:image toAlbum:predefinedAlbum withCompletionBlock:^(NSError *error) {
         if (error!=nil) {
             NSLog(@"Big error: %@", [error description]);
         }
@@ -166,6 +240,34 @@
 
 -(void)addAssetURL:(NSURL*)assetURL toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock
 {
+    
+    /**
+     
+     // Get the image metadata (EXIF & TIFF)
+     NSMutableDictionary * imageMetadata = [[info objectForKey:UIImagePickerControllerMediaMetadata] mutableCopy];
+     
+     if(imageMetadata==nil){
+     //NSLog(@"this one is nil");
+     imageMetadata = [[NSMutableDictionary alloc]init];
+     }
+     // add GPS data
+     // need a location here
+     if ( self.location!=nil ) {
+     NSDictionary *locationInfo = [self getGPSDictionaryForLocation:self.location];
+     NSLog(@"Location dictionary is: %@",locationInfo);
+     [imageMetadata setObject:locationInfo forKey:(NSString*)kCGImagePropertyGPSDictionary];
+     }
+     // Get the assets library
+     ALAssetsLibraryWriteImageCompletionBlock imageWriteCompletionBlock =
+     ^(NSURL *newURL, NSError *error) {
+     if (error) {
+     NSLog( @"Error writing image with metadata to Photo Library: %@", error );
+     } else {
+     NSLog( @"Wrote image %@ with metadata %@ to Photo Library",newURL,imageMetadata);
+     }
+     };
+     
+     */
     __block BOOL albumWasFound = NO;
     
     //search all photo albums in the library
@@ -225,4 +327,93 @@
     
 }
 
+-(void) saveImageMetadata {
+    // Get the image metadata (EXIF & TIFF)
+    NSMutableDictionary * imageMetadata = [[imageInfo objectForKey:UIImagePickerControllerMediaMetadata] mutableCopy];
+    
+    if(imageMetadata==nil){
+        //NSLog(@"this one is nil");
+        imageMetadata = [[NSMutableDictionary alloc]init];
+    }
+    // add GPS data
+    // need a location here
+    if ( photoLocation!=nil ) {
+        NSDictionary *locationInfo = [self getGPSDictionaryForLocation:photoLocation];
+        NSLog(@"Location dictionary is: %@",locationInfo);
+        [imageMetadata setObject:locationInfo forKey:(NSString*)kCGImagePropertyGPSDictionary];
+    }
+    // Get the assets library
+    ALAssetsLibraryWriteImageCompletionBlock imageWriteCompletionBlock =
+    ^(NSURL *newURL, NSError *error) {
+        if (error) {
+            NSLog( @"Error writing image with metadata to Photo Library: %@", error );
+        } else {
+            NSLog( @"Wrote image %@ with metadata %@ to Photo Library",newURL,imageMetadata);
+        }
+    };
+}
+
+#pragma location dictionary
+//NSDictionary *metadata = asset.defaultRepresentation.metadata;
+- (NSDictionary *)getGPSDictionaryForLocation:(CLLocation *)location {
+    NSMutableDictionary *gps = [NSMutableDictionary dictionary];
+    
+    // GPS tag version
+    [gps setObject:@"2.2.0.0" forKey:(NSString *)kCGImagePropertyGPSVersion];
+    
+    // Time and date must be provided as strings, not as an NSDate object
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"HH:mm:ss.SSSSSS"];
+    [formatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+    [gps setObject:[formatter stringFromDate:location.timestamp] forKey:(NSString *)kCGImagePropertyGPSTimeStamp];
+    [formatter setDateFormat:@"yyyy:MM:dd"];
+    [gps setObject:[formatter stringFromDate:location.timestamp] forKey:(NSString *)kCGImagePropertyGPSDateStamp];
+    //[formatter release];
+    
+    // Latitude
+    CGFloat latitude = location.coordinate.latitude;
+    if (latitude < 0) {
+        latitude = -latitude;
+        [gps setObject:@"S" forKey:(NSString *)kCGImagePropertyGPSLatitudeRef];
+    } else {
+        [gps setObject:@"N" forKey:(NSString *)kCGImagePropertyGPSLatitudeRef];
+    }
+    [gps setObject:[NSNumber numberWithFloat:latitude] forKey:(NSString *)kCGImagePropertyGPSLatitude];
+    
+    // Longitude
+    CGFloat longitude = location.coordinate.longitude;
+    if (longitude < 0) {
+        longitude = -longitude;
+        [gps setObject:@"W" forKey:(NSString *)kCGImagePropertyGPSLongitudeRef];
+    } else {
+        [gps setObject:@"E" forKey:(NSString *)kCGImagePropertyGPSLongitudeRef];
+    }
+    [gps setObject:[NSNumber numberWithFloat:longitude] forKey:(NSString *)kCGImagePropertyGPSLongitude];
+    
+    // Altitude
+    CGFloat altitude = location.altitude;
+    if (!isnan(altitude)){
+        if (altitude < 0) {
+            altitude = -altitude;
+            [gps setObject:@"1" forKey:(NSString *)kCGImagePropertyGPSAltitudeRef];
+        } else {
+            [gps setObject:@"0" forKey:(NSString *)kCGImagePropertyGPSAltitudeRef];
+        }
+        [gps setObject:[NSNumber numberWithFloat:altitude] forKey:(NSString *)kCGImagePropertyGPSAltitude];
+    }
+    
+    // Speed, must be converted from m/s to km/h
+    if (location.speed >= 0){
+        [gps setObject:@"K" forKey:(NSString *)kCGImagePropertyGPSSpeedRef];
+        [gps setObject:[NSNumber numberWithFloat:location.speed*3.6] forKey:(NSString *)kCGImagePropertyGPSSpeed];
+    }
+    
+    // Heading
+    if (location.course >= 0){
+        [gps setObject:@"T" forKey:(NSString *)kCGImagePropertyGPSTrackRef];
+        [gps setObject:[NSNumber numberWithFloat:location.course] forKey:(NSString *)kCGImagePropertyGPSTrack];
+    }
+    
+    return gps;
+}
 @end
