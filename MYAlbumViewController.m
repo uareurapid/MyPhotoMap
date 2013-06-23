@@ -18,10 +18,10 @@
 
 @implementation MYAlbumViewController
 
-//@synthesize album;//the selected album
-//@synthesize albumPhotos;//the miniatures of the albums, which will be albums of just one pic
+
 @synthesize detailViewController;
 @synthesize listAlbumsAvailableController;
+@synthesize albumsNames;
 
 @synthesize selectedAlbum;
 
@@ -38,6 +38,7 @@
         UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Actions"
                                                                            style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
         self.navigationItem.rightBarButtonItem = addAlbumButton;
+        albumsNames = [[NSMutableArray alloc] init];
         
     }
     return self;
@@ -52,27 +53,13 @@
 
 -(void) viewWillAppear:(BOOL)animated {
     
-    NSLog(@"Album map is: %@",self.mapViewController);
-    
-    //self.navigationItem.rightBarButtonItem=nil;
-    
-    
-    //UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
-     //                                                 style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
-    
-    
-    //UIBarButtonItem *takePicture = [[UIBarButtonItem alloc] initWithTitle:@"Take photo"
-    //                                                                style:UIBarButtonItemStyleDone target:self action:@selector(takePhoto:)];
-    
-    
-    //self.navigationItem.rightBarButtonItem = takePicture;
-    
-    //self.navigationItem.rightBarButtonItem = addAlbumButton;
-    
-    
 }
 
-
+//add the "real" existing albums" names
+-(void) addAlbumsNamesFromArray: (NSMutableArray*) names {
+    [albumsNames removeAllObjects];
+    [albumsNames addObjectsFromArray:names];
+}
 
 
 - (void)didReceiveMemoryWarning
@@ -80,15 +67,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-/*
--(IBAction)editLocation:(id)sender {
-    SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
-    view.assetURL = assetURL; //set the asset url
-    view.image = thumbnail;
-    [self.navigationController pushViewController:view animated:YES];
-}*/
-
 
 -(IBAction)settingsClicked:(id) sender{
   //will show a lit with two options
@@ -126,17 +104,6 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
 
 {
-    //NSLog(@"Tryig to save with location data!");
-   // [self saveImage:image withInfo:editingInfo];
-    
-
-    
-    //listAlbums.albumsNames = [[NSArray alloc] initWithObjects:@"one",@"two", nil];
-    //[self.navigationController pushViewController:listAlbums animated:NO];
-    
-   // [self presentViewController:listAlbums animated:YES completion:^{[listAlbums saveOnAlbum:image];}];
-    
-    //[[[[[UIApplication sharedApplication] delegate] window] rootViewController] presentModalViewController:listAlbums animated:YES];
     
     [picker dismissViewControllerAnimated:NO
                                completion: ^{[self showAlbumsList: image editingInfo:editingInfo];}];
@@ -147,9 +114,8 @@
     
     
     NSMutableArray *albumsAvailable = [[NSMutableArray alloc]init];
-    for(BHAlbum *album in self.albums) {
-        NSString *name = album.name;
-        [albumsAvailable addObject:name];
+    for(NSString *albumName in albumsNames) {
+        [albumsAvailable addObject:albumName];
     }
 
     listAlbumsAvailableController =
@@ -228,8 +194,7 @@
             //save the URL of the asset Photo
             
             [self.albums addObject:albumSingle];
-            //__block NSURL *url = [myasset valueForProperty:ALAssetPropertyAssetURL];
-            //NSLog(@"Adding url : %@ on album with index: %d",url,self.albums.count);
+
             [albumSingle.photosURLs addObject: [myasset valueForProperty:ALAssetPropertyAssetURL]];
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -267,9 +232,7 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    //NSLog(@"Returning numberOfSectionsInCollectionView %d", album.photosURLs.count);
-    //BHAlbum *selected = [self.albums objectAtIndex:0];
-    NSLog(@"SIZE IS: %d",selectedAlbum.photosURLs.count);
+
     return selectedAlbum.photosURLs.count;
 }
 
@@ -362,6 +325,24 @@
     }
     
     return titleView;
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                duration:(NSTimeInterval)duration
+{
+    if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
+        self.photoAlbumLayout.numberOfColumns = 3;
+        
+        // handle insets for iPhone 4 or 5
+        CGFloat sideInset = [UIScreen mainScreen].preferredMode.size.width == 1136.0f ?
+        45.0f : 25.0f;
+        
+        self.photoAlbumLayout.itemInsets = UIEdgeInsetsMake(22.0f, sideInset, 13.0f, sideInset);
+        
+    } else {
+        self.photoAlbumLayout.numberOfColumns = 2;
+        self.photoAlbumLayout.itemInsets = UIEdgeInsetsMake(22.0f, 22.0f, 13.0f, 22.0f);
+    }
 }
 
 

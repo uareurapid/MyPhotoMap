@@ -11,6 +11,7 @@
 #import <ImageIO/CGImageProperties.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import "iToast.h"
 
 @interface AlbumsListViewController ()
 
@@ -76,6 +77,8 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+  
+   
 }
 
 - (void)didReceiveMemoryWarning
@@ -115,13 +118,7 @@
         if(row < albumsNames.count) {
             NSString *name = [albumsNames objectAtIndex:row];
             cell.textLabel.text = name;
-            if([name isEqualToString:predefinedAlbum]) { //by default save to selected
-                //[cell setHighlighted:YES];
-                cell.accessoryType = UITableViewCellAccessoryCheckmark;
-            }
-            else {
-                cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
-            }
+            cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton; 
             
         }
   
@@ -136,7 +133,7 @@
     
     if(indexPath.row < albumsNames.count) {
         predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
-        if(imageInfo!=nil && imageToSave!=nil) {
+        if(imageToSave!=nil) {
             NSLog(@"saving image to %@",predefinedAlbum);
             [self saveImageMetadata];
             [self saveOnAlbum:imageToSave];
@@ -201,12 +198,11 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
-    NSInteger section = indexPath.section;
-    if(section==0) {
+  
         if(indexPath.row < albumsNames.count) {
             predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
         }
-    }
+    
 }
 
 //save on the album
@@ -214,6 +210,11 @@
     [self saveImage:image toAlbum:predefinedAlbum withCompletionBlock:^(NSError *error) {
         if (error!=nil) {
             NSLog(@"Big error: %@", [error description]);
+        }
+        else {
+            [[[[iToast makeText:@"Successfully saved image!"]
+               setGravity:iToastGravityBottom] setDuration:3000] show];
+            [self.navigationController popToRootViewControllerAnimated:YES];
         }
     }];
 }
@@ -234,6 +235,9 @@
                               [self addAssetURL: assetURL
                                         toAlbum:albumName
                             withCompletionBlock:completionBlock];
+                              
+                              
+
                               
                           }];
 }
@@ -279,6 +283,7 @@
                                    
                                    //target album is found
                                    albumWasFound = YES;
+                                  
                                    
                                    //get a hold of the photo's asset instance
                                    [library assetForURL: assetURL
@@ -293,6 +298,9 @@
                                             } failureBlock: completionBlock];
                                    
                                    //album was found, bail out of the method
+                                   
+                                       
+                                                                          
                                    return;
                                }
                                
@@ -337,6 +345,7 @@
     }
     // add GPS data
     // need a location here
+    NSLog(@"saving location %@",photoLocation);
     if ( photoLocation!=nil ) {
         NSDictionary *locationInfo = [self getGPSDictionaryForLocation:photoLocation];
         NSLog(@"Location dictionary is: %@",locationInfo);

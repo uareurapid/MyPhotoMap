@@ -21,14 +21,17 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle;
 - (void) readCameraRoll;
--(void) readExistingAlbums;
--(void) initTextFieldNewAlbum;
+-(void) readNumberOfExistingAlbums;
 -(void) createNewAlbum: (NSString*) albumName;
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;
 
 @property (strong,nonatomic) MYAlbumViewController *albumViewController;
 @property (strong, nonatomic) PhotosMapViewController *mapViewController;
+
+@property (strong, nonatomic) NSMutableArray *databaseRecords;
+@property (strong, nonatomic) NSMutableArray *albumsYears;
+
 //was retain
 @property (strong,nonatomic) NSMutableArray *assetsURLs;
 @property (retain, nonatomic) UINavigationController *navController;
@@ -45,6 +48,8 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 @property (strong, nonatomic) IBOutlet UITextField *albumTextField;
 @property (strong,nonatomic) IBOutlet UIBarButtonItem *addAlbumButton;
+
+@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
 
 
 @end

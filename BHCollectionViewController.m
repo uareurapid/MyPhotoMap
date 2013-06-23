@@ -33,14 +33,18 @@
 @synthesize addAlbumButton,navController;
 @synthesize location;
 @synthesize mapViewController;
+@synthesize managedObjectContext;
+@synthesize databaseRecords;
+@synthesize albumsYears;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle {
     self = [super initWithNibName:nibName bundle:nibBundle];
     if(self) {
         albums = [NSMutableArray array];
         assetsURLs = [[NSMutableArray alloc] init];
+        albumsYears = [[NSMutableArray alloc] init];
+        
         self.title = @"Your Albums";
-        [self initTextFieldNewAlbum];
         
         addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
                           style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
@@ -56,7 +60,7 @@
         
         
         
-       
+        databaseRecords = [[NSMutableArray alloc] init];
         
         
        
@@ -67,9 +71,11 @@
 }
 //add the button
 -(void ) viewWillAppear:(BOOL)animated {
-    //self.navigationItem.rightBarButtonItem.enabled = YES;
-    //self.navigationItem.rightBarButtonItem.title = @"Settings";
-    NSLog(@"collectio map is: %@",mapViewController);
+    NSLog(@"will appear");
+    if(albums.count > 0) { //have been here already
+        
+        [self readCameraRoll];
+    }
 }
 
 //put the add album buttom again
@@ -99,10 +105,25 @@
     self.thumbnailQueue = [[NSOperationQueue alloc] init];
     self.thumbnailQueue.maxConcurrentOperationCount = 3;
     
-    [self readExistingAlbums];
+    
+    
+    //load existing data on database
+    [self fetchLocationRecords];
+    
+    
+    
+    [self readNumberOfExistingAlbums];
     [self readCameraRoll];
     
     
+    
+}
+
+//get all the records from db
+- (void) fetchLocationRecords{
+    [databaseRecords removeAllObjects];
+    databaseRecords = [CoreDataUtils fetchLocationRecordsFromDatabase];
+   
 }
 /*
  2013-06-05 16:53:06.517 CollectionViewTutorial[824:907] passed this
@@ -114,24 +135,8 @@
  
  */
 
-//the new Album text field name
--(void) initTextFieldNewAlbum {
-  /*
-    albumTextField = [[UITextField alloc] init];
-    [albumTextField setBackgroundColor:[UIColor whiteColor]];
-    albumTextField.delegate = self;
-    albumTextField.borderStyle = UITextBorderStyleLine;
-    albumTextField.frame = CGRectMake(15, 75, 255, 30);
-    albumTextField.font = [UIFont fontWithName:@"ArialMT" size:20];
-    albumTextField.placeholder = @"Album Name";
-    //textField.textAlignment = UITextAlignmentCenter; deprecated in ios 6
-    albumTextField.keyboardAppearance = UIKeyboardAppearanceAlert;
-    [albumTextField becomeFirstResponder];
-   */
-}
 
-
--(void) readExistingAlbums{
+-(void) readNumberOfExistingAlbums{
     
     ALAssetsLibrary *assetsLib = [[ALAssetsLibrary alloc] init];
     numExistingAlbums =0;
@@ -154,7 +159,7 @@
 }
 
 -(void) reloadAlbumsInfo {
-    [self readExistingAlbums];
+    [self readNumberOfExistingAlbums];
     [self.collectionView reloadData];
 }
 
@@ -262,25 +267,37 @@
      {
         
          NSString *name = [group valueForProperty:ALAssetsGroupPropertyName];
+         
          if(name!=nil) {
  
-             BHAlbum *album = [[BHAlbum alloc] init];
-             album.photosURLs = [[NSMutableArray alloc] init];
-             album.assetURL = [group valueForProperty:ALAssetsGroupPropertyURL];
-             album.name = name;
-             [self.albums addObject:album];
-   
-             //get only the first 3 images thumbnails to display
- 
+             BHAlbum *album = [self albumsContainsName:name];
              NSInteger numOfAssets = [group numberOfAssets];
-             album.photosCount = numOfAssets;
              
-             //album doesn´t have any photo
-             if(numOfAssets==0) {
-                 BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
-                 [album addPhoto:photo];
+             
+             if( album == nil) {
+                 
+                 album = [[BHAlbum alloc] init];
+                 album.photosURLs = [[NSMutableArray alloc] init];
+                 album.assetURL = [group valueForProperty:ALAssetsGroupPropertyURL];
+                 album.name = name;
+                 [self.albums addObject:album];
+                 
+                 //get only the first 3 images thumbnails to display
+                 
+                 
+                 album.photosCount = numOfAssets;
+                 
+                 //album doesn´t have any photo, add default empty one
+                 if(numOfAssets==0) {
+                     BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
+                     [album addPhoto:photo];
+                 }
+             
              }
-             //else
+      
+      
+             //à segunda
+             
              for(int i = 0; i < numOfAssets; i++) {//just grab the first image
                  
                  
@@ -297,38 +314,64 @@
                               if([type isEqualToString:ALAssetTypePhoto]) {
                                   
                                   //save the URL of the asset Photo
-                                  [album.photosURLs addObject: [result valueForProperty:ALAssetPropertyAssetURL]];
-                                  //get the thumbnail
-                                  __block UIImage *thumbnail = [UIImage imageWithCGImage:[result thumbnail]];
+                                  NSURL *url = [result valueForProperty:ALAssetPropertyAssetURL];
+                                  NSDate *theDate = [result valueForProperty:ALAssetPropertyDate];
+                                  NSString *_location = [result valueForProperty:ALAssetPropertyLocation];
+                                  NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:theDate];
                                   
-                                  //ONLY process maximum of 3 images per album
-                                  if(processedImages <  (maxNumPhotosPerAlbum * self.albums.count) ) {
-                                      processedImages = processedImages +1;
+                                  NSInteger year = components.year;
+                                  NSString *yearSTR = [NSString stringWithFormat:@"%d",year];
+                                  if(! [albumsYears containsObject:yearSTR]) {
                                       
-                                      dispatch_async(dispatch_get_main_queue(), ^{
-                                          BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                          [album addPhoto:photo];
-                                          [self.collectionView reloadData];
-                                          
-                                          
-                                          
-                                      });
-                                  }
-                                  //for all images
-                                  if(imageLocation!=nil) {
-                                      NSLog(@"Will ADD ONE WITH LOCATION %@ TO THE MAP NOW",imageLocation);
-                                      //if we have location data, add the annotation to the map
-                                      [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+                                      NSLog(@"adding year %@",yearSTR);
+                                      [albumsYears addObject: yearSTR];
+                                      
+                                      BHAlbum *albumYear = [[BHAlbum alloc] init];
+                                      albumYear.photosURLs = [[NSMutableArray alloc] init];
+                                      albumYear.assetURL = nil;
+                                      albumYear.name = yearSTR;
+                                      [self.albums addObject:album];
                                   }
                                   
+                                  NSLog(@"Location is: %@ with year: %d",_location,components.year);
                                   
-            
+                                  //check if this asset was already added
+                                  if( [self albumContainsAssetURL:album assetURL:url] == NO) {
+                                 
+                                      [album.photosURLs addObject: url];
+                                      //get the thumbnail
+                                      __block UIImage *thumbnail = [UIImage imageWithCGImage:[result thumbnail]];
+                                      
+                                      //ONLY process maximum of 3 images per album
+                                      if(processedImages <  (maxNumPhotosPerAlbum * self.albums.count) ) {
+                                          processedImages = processedImages +1;
+                                          
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                              
+                                              BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                              [album addPhoto:photo];
+                                              [self.collectionView reloadData];
+                                              
+                                              
+                                          });
+                                      }
+                                      //for all images
+                                      if(imageLocation!=nil) {
+                                          //if we have location data, add the annotation to the map
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+                                      }
+                                  }
+                                  //else already exists, skipp it 
+
                                   
                               }
                               
                               
                           }
                       
+                          //if(processedImages >=  (maxNumPhotosPerAlbum * self.albums.count) ) {
+                            //  return ; //already did all the job needed
+                          //}
                       
                       }];
                  
@@ -356,6 +399,26 @@
     // Dispose of any resources that can be recreated.
 }
 
+//check if album already exists
+- (BHAlbum *) albumsContainsName: (NSString *) name {
+    for(BHAlbum *album in albums) {
+        if([album.name isEqualToString:name]) {
+            return album;
+        }
+    }
+    return nil;
+}
+//check if the asset url is already there
+-(BOOL) albumContainsAssetURL: (BHAlbum *)album assetURL: (NSURL*) url {
+    for(NSURL * theURL in album.photosURLs) {
+        NSString *toString = [theURL absoluteString];
+        NSString *urlToString = [url absoluteString];
+        if([urlToString isEqualToString:toString]) {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 #pragma mark - View Rotation
 
@@ -381,21 +444,21 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    //NSLog(@"Returning numberOfSectionsInCollectionView %d", self.albums.count);
+    NSLog(@"sections %d",self.albums.count);
     return self.albums.count;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     BHAlbum *album = self.albums[section];
-    
-     //NSLog(@"Returning numberOfItemsInSection %d",album.photos.count);
+    NSLog(@"number items %d %d",section,album.photos.count);
     return album.photos.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
                   cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+   
     BHAlbumPhotoCell *photoCell =
         [collectionView dequeueReusableCellWithReuseIdentifier:PhotoCellIdentifier
                                                   forIndexPath:indexPath];
@@ -404,7 +467,7 @@
     NSInteger photoIndex = indexPath.item;
     
     if(row < self.albums.count) {
-        
+   
         BHAlbum *album = self.albums[row];
         NSInteger tag = row;
         
@@ -429,23 +492,9 @@
                         cell.imageView.image = image;
                         cell.imageView.userInteractionEnabled = YES;
                         cell.imageView.tag = tag;
-                        
-                       // if([album.name isEqualToString:@"Click + to add"]) {
-                            
-                            //show a new album dialog
-                         //   UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapEmptyAlbumWithGesture:)];
-                         //   [cell.imageView addGestureRecognizer:tapGesture];
-                            
-                       // }
-                       // else {
-                            //normal tap gesture
-                            UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapAlbumWithGesture:)];
-                            [cell.imageView addGestureRecognizer:tapGesture];
-                       // }
-                        
-                        
-                        
-                        
+                        UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapAlbumWithGesture:)];
+                        [cell.imageView addGestureRecognizer:tapGesture];
+  
                     }
                 });
             }];
@@ -522,7 +571,7 @@
     UIImageView *imageView = (UIImageView*)tapGesture.view;
     NSInteger tag = imageView.tag;
     
-    NSLog(@"selected album is %d",tag);
+    
     if(tag<albums.count) {
         //valid index
         BHAlbum *selectedOne = [albums objectAtIndex:tag];
@@ -554,7 +603,12 @@
     //NSLog(@"album size at the end %d",album.photos.count);
     //albumView.album = album;
     
-    [albumViewController.albums addObjectsFromArray:albums];
+    NSMutableArray *arrayOfNames = [[NSMutableArray alloc] init];
+    for(BHAlbum *album in albums) {
+        NSLog(@"adding ALBUM %@",album);
+        [arrayOfNames addObject:album.name];
+    }
+    [albumViewController addAlbumsNamesFromArray:arrayOfNames];
     
     //remove the one on the left , leaving only the back button
     albumViewController.navigationItem.leftBarButtonItem=nil;

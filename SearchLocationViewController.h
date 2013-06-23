@@ -37,8 +37,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (strong, nonatomic) UIImage *image;
 @property (copy, nonatomic) NSURL *assetURL;
 
-//The managed object context is the connection between your code and the data store. All of the operations you will execute for Core Data do so against the managed object context.
-@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+
 @property (nonatomic, retain) NSMutableArray *locationEntitiesArray;
 //further reading here: http://mobile.tutsplus.com/tutorials/iphone/iphone-core-data/
 

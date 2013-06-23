@@ -8,11 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "AlbumsListViewController.m"
-         timestampString = "392830909.525783"
+         timestampString = "392855431.093759"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "346"
-         endingLineNumber = "346"
+         startingLineNumber = "345"
+         endingLineNumber = "345"
          landmarkName = "-saveImageMetadata"
          landmarkType = "5">
       </FileBreakpoint>

@@ -30,15 +30,15 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (retain,nonatomic) AlbumsListViewController *listAlbumsAvailableController;//available for save
 
 //will actaully be abums of just one photo/thumbnail
-@property (strong, nonatomic) NSMutableArray *albumPhotos;
+
 
 @property (strong, nonatomic) BHAlbum *selectedAlbum;
 
-
+@property (nonatomic, strong) NSMutableArray *albumsNames;
 
 
 - (void)showDetailView: (NSString *) imgURL;
-
+-(void) addAlbumsNamesFromArray: (NSMutableArray*) names;
 - (void)readAlbumThumbnails;
 
 - (IBAction)takePhoto:(id)sender;

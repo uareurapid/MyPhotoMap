@@ -20,6 +20,8 @@
 //the annotations to plot
 @property (strong, nonatomic) NSMutableArray *annotationsArray;
 
+@property (strong, nonatomic) UIPopoverController *annotationsPopoverControl;
+
 //add the image with the location to the map, to create the annotation
 - (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title;
 
@@ -28,5 +30,9 @@
 - (void)repositionAnnotations:(NSMutableArray *)annotations toAvoidClashAtCoordination:(CLLocationCoordinate2D)coordinate;
 
 - (void) removeAnnotations;
+- (IBAction)terrainClicked:(id)sender;
+- (IBAction)satelliteClicked:(id)sender;
+- (IBAction)hybridClicked:(id)sender;
+
 
 @end

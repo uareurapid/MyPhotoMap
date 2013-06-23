@@ -19,7 +19,7 @@
 
 @synthesize searchBar,placesList, placesTableView;
 @synthesize assetURL,image;
-@synthesize managedObjectContext,locationEntitiesArray;
+@synthesize locationEntitiesArray;
 @synthesize mapView;
 
 
@@ -39,14 +39,6 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    
-    //Create ManagedObjectContext
-    if (managedObjectContext == nil)
-    {
-        managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-        //get a reference to map view too
-        mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
-    }
     
     //load existing data on database
     [self fetchLocationRecords];
@@ -281,30 +273,14 @@
     //NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(lastName like %@) AND (birthday > %@)", lastNameSearchString, birthdaySearchDate];
     //and then use: NSMutableArray *mutableFetchResults = [[managedObjectContext executeFetchRequest:request error:&error] mutableCopy];
     
-    // Define our table/entity to use
-    NSEntityDescription *entity = [NSEntityDescription entityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
-    // Setup the fetch request
-    NSFetchRequest *request = [[NSFetchRequest alloc] init];
-    [request setEntity:entity];
-    //this is equivalent to SELECT * FROM `LocationEntity` 
     
-    
-    // Define how we will sort the records
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"assetURL" ascending:NO];
-    NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-    [request setSortDescriptors:sortDescriptors];
-    //[sortDescriptor release];
-    // Fetch the records and handle an error
-    NSError *error;
-    NSMutableArray *mutableFetchResults = [[managedObjectContext executeFetchRequest:request error:&error] mutableCopy];
+    NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabase];
     if (!mutableFetchResults) {
         // Handle the error.
         // This is a serious error and should advise the user to restart the application
     }
     else {
-        NSLog(@"Got %d results from database",mutableFetchResults.count);
         for(LocationDataModel *entity in mutableFetchResults) {
-            NSLog(@"got result with assetURL: %@ and name: %@ and lg %@ and lat %@",entity.assetURL, entity.name, entity.longitude, entity.latitude);
             //load the thumbnail
             if(entity.assetURL!=nil) {
               [self loadAssetInfoFromDataModel:entity];
@@ -323,7 +299,9 @@
 
 //save the location record
 -(void)saveLocationRecord:(MyGPSPosition*)location {
-LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+    
+    NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
    //current date
    [locationObject setTimestamp: [NSDate date]];
     [locationObject setName:@"teste"];

@@ -17,7 +17,7 @@
 
 @property(strong,nonatomic) NSMutableArray *photosURLs;
 
-@property (nonatomic, strong) NSURL *assetURL;
+@property (nonatomic, strong) NSURL *assetURL;//if nil is a fake album
 
 - (void)addPhoto:(BHPhoto *)photo;
 - (BOOL)removePhoto:(BHPhoto *)photo;

@@ -125,6 +125,15 @@
 		724E90FB1768E3E7007E6939 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E90FA1768E3E7007E6939 /* MapKit.framework */; };
 		724E91011769245D007E6939 /* AlbumOptionsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */; };
 		724E91021769245D007E6939 /* AlbumOptionsTableViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */; };
+		72559FC6176A760A00D44435 /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 72559FC4176A760A00D44435 /* iToast.m */; };
+		726FAC77176B1A5200D19726 /* AnnotationCalloutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */; };
+		726FAC78176B1A5200D19726 /* AnnotationCalloutViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */; };
+		726FAC85176B3FBA00D19726 /* FPPopoverController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC80176B3FBA00D19726 /* FPPopoverController.m */; };
+		726FAC86176B3FBA00D19726 /* FPPopoverView.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC82176B3FBA00D19726 /* FPPopoverView.m */; };
+		726FAC87176B3FBA00D19726 /* FPTouchView.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC84176B3FBA00D19726 /* FPTouchView.m */; };
+		7278C826176C587700BA34E0 /* CoreDataUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7278C825176C587700BA34E0 /* CoreDataUtils.m */; };
+		72DFFCA5176B74A600648679 /* CallOutViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 72DFFCA3176B74A600648679 /* CallOutViewCell.m */; };
+		72DFFCA6176B74A600648679 /* CallOutViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 72DFFCA4176B74A600648679 /* CallOutViewCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -337,6 +346,23 @@
 		724E90FE1769245D007E6939 /* AlbumOptionsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlbumOptionsTableViewController.h; sourceTree = "<group>"; };
 		724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlbumOptionsTableViewController.m; sourceTree = "<group>"; };
 		724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AlbumOptionsTableViewController.xib; sourceTree = "<group>"; };
+		72559FC4176A760A00D44435 /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iToast.m; sourceTree = "<group>"; };
+		72559FC5176A760A00D44435 /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iToast.h; sourceTree = "<group>"; };
+		726FAC74176B1A5200D19726 /* AnnotationCalloutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnnotationCalloutViewController.h; sourceTree = "<group>"; };
+		726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnnotationCalloutViewController.m; sourceTree = "<group>"; };
+		726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AnnotationCalloutViewController.xib; sourceTree = "<group>"; };
+		726FAC7E176B3FBA00D19726 /* ARCMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARCMacros.h; sourceTree = "<group>"; };
+		726FAC7F176B3FBA00D19726 /* FPPopoverController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPopoverController.h; sourceTree = "<group>"; };
+		726FAC80176B3FBA00D19726 /* FPPopoverController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPopoverController.m; sourceTree = "<group>"; };
+		726FAC81176B3FBA00D19726 /* FPPopoverView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPopoverView.h; sourceTree = "<group>"; };
+		726FAC82176B3FBA00D19726 /* FPPopoverView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPopoverView.m; sourceTree = "<group>"; };
+		726FAC83176B3FBA00D19726 /* FPTouchView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPTouchView.h; sourceTree = "<group>"; };
+		726FAC84176B3FBA00D19726 /* FPTouchView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPTouchView.m; sourceTree = "<group>"; };
+		7278C824176C587700BA34E0 /* CoreDataUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataUtils.h; sourceTree = "<group>"; };
+		7278C825176C587700BA34E0 /* CoreDataUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataUtils.m; sourceTree = "<group>"; };
+		72DFFCA2176B74A600648679 /* CallOutViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallOutViewCell.h; sourceTree = "<group>"; };
+		72DFFCA3176B74A600648679 /* CallOutViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallOutViewCell.m; sourceTree = "<group>"; };
+		72DFFCA4176B74A600648679 /* CallOutViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallOutViewCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -420,6 +446,7 @@
 		724E8F881768E07E007E6939 /* MyPhotoMap */ = {
 			isa = PBXGroup;
 			children = (
+				72559FC7176A760E00D44435 /* TOAST */,
 				724E90FD1769221F007E6939 /* VIEW */,
 				724E90FC176921D2007E6939 /* PHOTOS */,
 				724E90E51768E18F007E6939 /* SEARCH */,
@@ -807,6 +834,8 @@
 		724E90E11768E100007E6939 /* MAP */ = {
 			isa = PBXGroup;
 			children = (
+				726FAC74176B1A5200D19726 /* AnnotationCalloutViewController.h */,
+				726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */,
 				724E8FB11768E0E6007E6939 /* MapViewAnnotationPoint.m */,
 				724E8FB21768E0E6007E6939 /* MapViewAnnotationPoint.h */,
 				724E8FA11768E0E6007E6939 /* PhotosMapViewController.m */,
@@ -820,6 +849,8 @@
 		724E90E21768E12A007E6939 /* ALBUM */ = {
 			isa = PBXGroup;
 			children = (
+				724E90FE1769245D007E6939 /* AlbumOptionsTableViewController.h */,
+				724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */,
 				724E8FB51768E0E6007E6939 /* BHCollectionViewController.h */,
 				724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */,
 				724E8FB41768E0E6007E6939 /* MYAlbumViewController.m */,
@@ -861,6 +892,8 @@
 				724E8FA71768E0E6007E6939 /* LocationDataModel.xcdatamodeld */,
 				724E8FA91768E0E6007E6939 /* LocationDataModel.h */,
 				724E8FAB1768E0E6007E6939 /* LocationDataModel.m */,
+				7278C824176C587700BA34E0 /* CoreDataUtils.h */,
+				7278C825176C587700BA34E0 /* CoreDataUtils.m */,
 			);
 			name = MODEL;
 			sourceTree = "<group>";
@@ -886,16 +919,42 @@
 		724E90FD1769221F007E6939 /* VIEW */ = {
 			isa = PBXGroup;
 			children = (
+				726FAC88176B3FBE00D19726 /* POPOVER */,
 				724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */,
 				724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */,
 				724E8FBB1768E0E6007E6939 /* SearchLocationViewController.xib */,
 				724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */,
 				724E905E1768E0E6007E6939 /* PhotoDetailViewController.xib */,
-				724E90FE1769245D007E6939 /* AlbumOptionsTableViewController.h */,
-				724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */,
 				724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */,
+				726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */,
+				72DFFCA2176B74A600648679 /* CallOutViewCell.h */,
+				72DFFCA3176B74A600648679 /* CallOutViewCell.m */,
+				72DFFCA4176B74A600648679 /* CallOutViewCell.xib */,
 			);
 			name = VIEW;
+			sourceTree = "<group>";
+		};
+		72559FC7176A760E00D44435 /* TOAST */ = {
+			isa = PBXGroup;
+			children = (
+				72559FC4176A760A00D44435 /* iToast.m */,
+				72559FC5176A760A00D44435 /* iToast.h */,
+			);
+			name = TOAST;
+			sourceTree = "<group>";
+		};
+		726FAC88176B3FBE00D19726 /* POPOVER */ = {
+			isa = PBXGroup;
+			children = (
+				726FAC7E176B3FBA00D19726 /* ARCMacros.h */,
+				726FAC7F176B3FBA00D19726 /* FPPopoverController.h */,
+				726FAC80176B3FBA00D19726 /* FPPopoverController.m */,
+				726FAC81176B3FBA00D19726 /* FPPopoverView.h */,
+				726FAC82176B3FBA00D19726 /* FPPopoverView.m */,
+				726FAC83176B3FBA00D19726 /* FPTouchView.h */,
+				726FAC84176B3FBA00D19726 /* FPTouchView.m */,
+			);
+			name = POPOVER;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -970,6 +1029,8 @@
 				724E90DB1768E0E6007E6939 /* Default@2x.png in Resources */,
 				724E90DC1768E0E6007E6939 /* list-add.png in Resources */,
 				724E91021769245D007E6939 /* AlbumOptionsTableViewController.xib in Resources */,
+				726FAC78176B1A5200D19726 /* AnnotationCalloutViewController.xib in Resources */,
+				72DFFCA6176B74A600648679 /* CallOutViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1065,6 +1126,13 @@
 				724E90DE1768E0E6007E6939 /* CustomCellBackground.m in Sources */,
 				724E90E01768E0E6007E6939 /* ALAssetsLibrary+CustomPhotoAlbum.m in Sources */,
 				724E91011769245D007E6939 /* AlbumOptionsTableViewController.m in Sources */,
+				72559FC6176A760A00D44435 /* iToast.m in Sources */,
+				726FAC77176B1A5200D19726 /* AnnotationCalloutViewController.m in Sources */,
+				726FAC85176B3FBA00D19726 /* FPPopoverController.m in Sources */,
+				726FAC86176B3FBA00D19726 /* FPPopoverView.m in Sources */,
+				726FAC87176B3FBA00D19726 /* FPTouchView.m in Sources */,
+				72DFFCA5176B74A600648679 /* CallOutViewCell.m in Sources */,
+				7278C826176C587700BA34E0 /* CoreDataUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

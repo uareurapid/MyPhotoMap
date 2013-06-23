@@ -7,6 +7,8 @@
 //
 
 #import "PhotosMapViewController.h"
+#import "AnnotationCalloutViewController.h"
+#import "FPPopoverController.h"
 
 @interface PhotosMapViewController ()
 
@@ -16,15 +18,16 @@
 
 @synthesize mapView;
 @synthesize annotationsArray;
+@synthesize annotationsPopoverControl;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        self.tabBarItem.title = @"Your Photos Map";
         self.title = @"Your Photos Map";
         annotationsArray = [[NSMutableArray alloc]init];
+   
     }
     return self;
 }
@@ -43,21 +46,37 @@
     // Dispose of any resources that can be recreated.
 }
 
+//change the map
+-(IBAction)terrainClicked:(id)sender {
+    mapView.mapType = MKMapTypeStandard;
+}
+
+- (IBAction)satelliteClicked:(id)sender {
+    mapView.mapType = MKMapTypeSatellite;
+}
+
+- (IBAction)hybridClicked:(id)sender {
+    mapView.mapType = MKMapTypeHybrid;
+}
+
+
+
 //clear stuff
 - (void) removeAnnotations {
     [annotationsArray removeAllObjects];
 }
 
+
 - (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title {
     
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
-    annotation.subtitle = @"";
+    annotation.subtitle = title;
     //don´t plot them until they are on the array
     [annotationsArray addObject:annotation];
     
    // NSArray *mkannotationArray = [[NSArray alloc]initWithArray:self.annotationsArray];
-    [self mutateCoordinatesOfClashingAnnotations:annotationsArray];
+   // [self mutateCoordinatesOfClashingAnnotations:annotationsArray];
  
     //[self.mapView addAnnotations:mkannotationArray];
     
@@ -66,11 +85,7 @@
     
 }
 
-//to handle annotation touch
-- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
-{
-    NSLog(@"I CLICKED ON THE ANNOTATION");
-}
+
 //sets view region and zoom level
 - (void) adjustViewRegion: (CLLocationCoordinate2D) zoomLocation {
     
@@ -190,7 +205,7 @@
     
     double distance = 60 * annotations.count / 2.0;
     double radiansBetweenAnnotations = (M_PI * 20) / annotations.count;
-    NSLog(@"COUNT IS : %d",annotations.count);
+
     for (int i = 0; i < annotations.count; i++) {
         
         double heading = radiansBetweenAnnotations * i;
@@ -217,46 +232,116 @@
     return result;
 }
 
-#pragma images stuff
+#pragma table stuff
 
+//to handle annotation touch
+- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
+{
+    //NSLog(@"I CLICKED ON THE ANNOTATION");
+}
 
 //This is where i set the image for the anottation passed by parameter
+
 - (MKAnnotationView *)mapView:(MKMapView *)theMapView viewForAnnotation:(id )annotation {
     
-    // NSLog(@"View for annotation called");
-    //MKAnnotationView *aView = [mapView dequeueReusableAnnotationViewWithIdentifier:@"MapVC"]; if(nil) create it
+   
     MKAnnotationView *annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil];
-    
     //need to do a cast to my custom annotation type
     if([annotation isKindOfClass: [MapViewAnnotationPoint class]])
     {
         MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)annotation;
-
-                UIImage *backImage = [self getBackgroundImage:nil];
-                
-                //GET THE IMAGE IN ANOTHER THREAD
-                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                    
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        // Update the UI
-                        UIImage *image = myAnnotation.image;
-                        if(image.size.width!=image.size.height) {
-                            //make it round square
-                            image = [self getResizedImage:image];
-                        }
-
-                        UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image];
-                        annotationView.image = overlayedImage;
-                    });
-               // });
         
+        
+        NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
+        int count = samePointAnnotations.count;
+        if(count > 1) {
+            //because it contains this
+            NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
+            [str appendString: [NSString stringWithFormat:@" and %d more",count - 1]];
+            myAnnotation.title = str;
+            
+        }
+        
+        
+        UIImage *backImage = [self getBackgroundImage:nil];
+        
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // Update the UI
+            
+            __block UIImage *image = myAnnotation.image;
+            if(image.size.width!=image.size.height) {
+                //make it round square
+                image = [self getResizedImage:image];
+            }
+            
+            UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image];
+            annotationView.image = overlayedImage;
+        });
+        
+        //set the callout button
+        UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        [disclosure setTitle:@"+" forState:UIControlStateNormal];
+        [annotationView setRightCalloutAccessoryView:disclosure];
+        
+        annotationView.canShowCallout = YES;
         
     }
-    
-    
+
+        
+
     return annotationView;
 }
+
+
+//the callout popup, find annotations within the same location of the tapped one
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control
+{
+    [self.mapView deselectAnnotation:view.annotation animated:YES];
+    
+    
+    MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)view.annotation;
+    //immediatelly start the array with this one;
+    NSMutableArray *annotsOnSameLocation = [self getAnnotationsOnSameLocation:myAnnotation];
+    
+    //initiate the controller (list)
+   //NSLog(@"creating custom callout view for %d annotations",annotsOnSameLocation.count);
+    
+    //the view controller you want to present as popover
+    AnnotationCalloutViewController *calloutController = [[AnnotationCalloutViewController alloc]
+      initWithNibName:@"AnnotationCalloutViewController" bundle:nil annotations:annotsOnSameLocation];
+    
+ 
+    
+    //our popover
+    FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
+    popover.delegate = calloutController;
+    
+    //the popover will be presented from the okButton view
+    [popover presentPopoverFromView:view];
+    
+
+                                       
+                                     
+}
+
+//get all the annotations that are in the same place
+-(NSMutableArray *) getAnnotationsOnSameLocation: (MapViewAnnotationPoint*) myAnnotation {
+    
+    NSMutableArray *annotsOnSameLocation = [[NSMutableArray alloc] initWithObjects:myAnnotation, nil];
+    
+    for (MapViewAnnotationPoint *annotation in annotationsArray) {
+        if(annotation.coordinate.latitude == myAnnotation.coordinate.latitude &&
+           annotation.coordinate.longitude == myAnnotation.coordinate.longitude &&
+           [annotation.assetURL isEqual:myAnnotation.assetURL]==NO) {
+           // NSLog(@"Found another annotation on the same place:");
+           // NSLog(@"First assetURL: %@ second assetURL: %@",annotation.assetURL, myAnnotation.assetURL);
+            [annotsOnSameLocation addObject:annotation];
+        }
+    }
+    return annotsOnSameLocation;
+}
+
 
 //returns squared image
 - (UIImage *) getResizedImage:(UIImage *) original {
