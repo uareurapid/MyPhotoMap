@@ -126,6 +126,7 @@
 		724E91011769245D007E6939 /* AlbumOptionsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 724E90FF1769245D007E6939 /* AlbumOptionsTableViewController.m */; };
 		724E91021769245D007E6939 /* AlbumOptionsTableViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */; };
 		72559FC6176A760A00D44435 /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 72559FC4176A760A00D44435 /* iToast.m */; };
+		726164BC1C4328E200381048 /* UIDeviceHardware.m in Sources */ = {isa = PBXBuildFile; fileRef = 726164BB1C4328E200381048 /* UIDeviceHardware.m */; };
 		726FAC77176B1A5200D19726 /* AnnotationCalloutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */; };
 		726FAC78176B1A5200D19726 /* AnnotationCalloutViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */; };
 		726FAC85176B3FBA00D19726 /* FPPopoverController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC80176B3FBA00D19726 /* FPPopoverController.m */; };
@@ -348,6 +349,8 @@
 		724E91001769245D007E6939 /* AlbumOptionsTableViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AlbumOptionsTableViewController.xib; sourceTree = "<group>"; };
 		72559FC4176A760A00D44435 /* iToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iToast.m; sourceTree = "<group>"; };
 		72559FC5176A760A00D44435 /* iToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iToast.h; sourceTree = "<group>"; };
+		726164BA1C4328E200381048 /* UIDeviceHardware.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIDeviceHardware.h; sourceTree = "<group>"; };
+		726164BB1C4328E200381048 /* UIDeviceHardware.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIDeviceHardware.m; sourceTree = "<group>"; };
 		726FAC74176B1A5200D19726 /* AnnotationCalloutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnnotationCalloutViewController.h; sourceTree = "<group>"; };
 		726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnnotationCalloutViewController.m; sourceTree = "<group>"; };
 		726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AnnotationCalloutViewController.xib; sourceTree = "<group>"; };
@@ -919,6 +922,8 @@
 		724E90FD1769221F007E6939 /* VIEW */ = {
 			isa = PBXGroup;
 			children = (
+				726164BA1C4328E200381048 /* UIDeviceHardware.h */,
+				726164BB1C4328E200381048 /* UIDeviceHardware.m */,
 				726FAC88176B3FBE00D19726 /* POPOVER */,
 				724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */,
 				724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */,
@@ -1050,6 +1055,7 @@
 				724E90841768E0E6007E6939 /* MyGPSPosition.m in Sources */,
 				724E90851768E0E6007E6939 /* LocationDataModel.m in Sources */,
 				724E90861768E0E6007E6939 /* BHCollectionViewController.m in Sources */,
+				726164BC1C4328E200381048 /* UIDeviceHardware.m in Sources */,
 				724E90881768E0E6007E6939 /* MapViewAnnotationPoint.m in Sources */,
 				724E908A1768E0E6007E6939 /* MYAlbumViewController.m in Sources */,
 				724E908D1768E0E6007E6939 /* SHKOAuthSharer.m in Sources */,
@@ -1221,7 +1227,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MyPhotoMap/MyPhotoMap-Prefix.pch";
 				INFOPLIST_FILE = "MyPhotoMap/MyPhotoMap-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1232,7 +1240,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MyPhotoMap/MyPhotoMap-Prefix.pch";
 				INFOPLIST_FILE = "MyPhotoMap/MyPhotoMap-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

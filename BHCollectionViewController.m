@@ -105,7 +105,24 @@
     self.thumbnailQueue = [[NSOperationQueue alloc] init];
     self.thumbnailQueue.maxConcurrentOperationCount = 3;
     
+    //The following code for example does nothing more than get the number of photos in the camera roll, but will be enough to trigger the permission prompt.
+    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+    [lib enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+        NSLog(@"%zd", [group numberOfAssets]);
+    } failureBlock:^(NSError *error) {
+        if (error.code == ALAssetsLibraryAccessUserDeniedError) {
+            NSLog(@"user denied access, code: %zd", error.code);
+        } else {
+            NSLog(@"Other error code: %zd", error.code);
+        }
+    }];
     
+    //check permissions
+    ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
+    if (status != ALAuthorizationStatusAuthorized) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
+        [alert show];
+    }
     
     //load existing data on database
     [self fetchLocationRecords];
@@ -113,6 +130,11 @@
     
     
     [self readNumberOfExistingAlbums];
+    
+    
+    
+    
+    
     [self readCameraRoll];
     
     
@@ -160,6 +182,7 @@
 
 -(void) reloadAlbumsInfo {
     [self readNumberOfExistingAlbums];
+    [self.collectionView.collectionViewLayout invalidateLayout];
     [self.collectionView reloadData];
 }
 
@@ -442,17 +465,22 @@
 
 #pragma mark - UICollectionViewDataSource
 
+
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    NSLog(@"sections %d",self.albums.count);
-    return self.albums.count;
+    NSLog(@"NUM sections %lu",(unsigned long)self.albums.count);
+    return self.albums.count > 0 ? self.albums.count : 1;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    BHAlbum *album = self.albums[section];
-    NSLog(@"number items %d %d",section,album.photos.count);
-    return album.photos.count;
+    if(self.albums.count >0) {
+        BHAlbum *album = self.albums[section];
+        NSLog(@"number items %ld %lu",(long)section,(unsigned long)album.photos.count);
+        return album.photos.count;
+    }
+    return 0;
+    
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView

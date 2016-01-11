@@ -123,7 +123,7 @@
         if([keyAsString isEqualToString:@"results"])
         {
             NSArray * components = (NSArray *) value;
-             NSLog(@"number of results in geocode requests is %d",components.count);
+             NSLog(@"number of results in geocode requests is %lu",(unsigned long)components.count);
             
             placemarks = [[NSMutableArray alloc] initWithCapacity:components.count];
             
@@ -232,6 +232,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    NSLog(@"places list count is: %lu",(unsigned long)placesList.count);
     return placesList.count;
 }
 

@@ -222,7 +222,7 @@
        [assetslibrary assetForURL:[selectedAlbum.photosURLs objectAtIndex:i] resultBlock:resultblock failureBlock:failureblock];
        
     }
-    
+    [self.collectionView.collectionViewLayout invalidateLayout];
     [self.collectionView reloadData];
     
     
@@ -230,10 +230,11 @@
 
 #pragma mark - UICollectionViewDataSource
 
+
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-
-    return selectedAlbum.photosURLs.count;
+    NSLog(@"NUM albums is %lu",selectedAlbum.photosURLs.count);
+    return selectedAlbum.photosURLs.count > 0 ? selectedAlbum.photosURLs.count : 1;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section

@@ -47,6 +47,8 @@
     
     locationManager = [[CLLocationManager alloc]init];
     [locationManager setDelegate:self];
+    //if ios > 8
+    [locationManager requestAlwaysAuthorization];
     [locationManager startMonitoringSignificantLocationChanges];
     [locationManager startUpdatingLocation];
     
@@ -98,12 +100,21 @@
    // NSLog(@"did update locations: %@",elem);
 }
 
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
-    location =  newLocation.coordinate;
-    collectionController.location = newLocation;
-    collectionController.albumViewController.location = newLocation;
+//- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+    //http://stackoverflow.com/questions/12602463/didupdatelocations-instead-of-didupdatetolocation
+  //  CLLocation *newLocation = (CLLocation *)[locations lastObject];
+  //  location = newLocation.coordinate;
+  //  collectionController.location = newLocation;
+  //  collectionController.albumViewController.location = newLocation;
+//}
+
+//deprecated;
+//- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+  //  location =  newLocation.coordinate;
+  //  collectionController.location = newLocation;
+  //  collectionController.albumViewController.location = newLocation;
     //NSLog(@"did update didUpdateToLocation: %@",newLocation);
-}
+//}
 
 #pragma mark -
 #pragma mark Core Data stack

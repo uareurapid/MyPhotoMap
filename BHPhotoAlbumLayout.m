@@ -8,6 +8,7 @@
 
 #import "BHPhotoAlbumLayout.h"
 #import "BHEmblemView.h"
+#import "UIDeviceHardware.h"
 
 static NSUInteger const RotationCount = 32;
 static NSUInteger const RotationStride = 3;
@@ -106,7 +107,8 @@ static NSString * const BHPhotoEmblemKind = @"Emblem";
     self.itemInsets = UIEdgeInsetsMake(22.0f, 22.0f, 13.0f, 22.0f);
     self.itemSize = CGSizeMake(125.0f, 125.0f);
     self.interItemSpacingY = 12.0f;
-    self.numberOfColumns = 2;
+    //3 collumns for ipad, 2 collumns for iphone
+    self.numberOfColumns = [[UIDeviceHardware platformString] containsString:@"iPad"] ? 3 : 2;
     self.titleHeight = 26.0f;
     
     // create rotations at load so that they are consistent during prepareLayout
