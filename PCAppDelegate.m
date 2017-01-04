@@ -37,6 +37,15 @@
     //init the tab bar
     UITabBarController * tabBarController = [[UITabBarController alloc ] init];
     [tabBarController setViewControllers: [NSArray arrayWithObjects:navController,mapViewController, nil] ];
+
+    for(UIViewController *tab in  tabBarController.viewControllers)
+    {
+        [tab.tabBarItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                           [UIColor blackColor], NSForegroundColorAttributeName,
+                                                           [UIFont fontWithName:@"AmericanTypewriter" size:30.0f], NSFontAttributeName,
+                                                           nil] forState:UIControlStateSelected];
+    }
+    
     
     
     //set the navigation controller as the root view

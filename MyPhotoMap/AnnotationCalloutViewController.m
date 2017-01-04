@@ -15,7 +15,7 @@
 
 @implementation AnnotationCalloutViewController
 
-@synthesize calloutAnnotations;
+@synthesize calloutAnnotations,imageView,nextPictureButton,previousPicButton;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle  {
     self = [super initWithNibName:nibName bundle:nibBundle];
@@ -34,14 +34,15 @@
         [calloutAnnotations addObjectsFromArray:annots];
         
         
-        [self.tableView registerClass:[CallOutViewCell class] forCellReuseIdentifier:@"myCalloutCell"];
+        //[self.tableView registerClass:[CallOutViewCell class] forCellReuseIdentifier:@"myCalloutCell"];
         
-        UINib *cellNib = [UINib nibWithNibName:@"CallOutViewCell" bundle:nil];
-        [self.tableView registerNib:cellNib forCellReuseIdentifier:@"myCalloutCell"];
+        //UINib *cellNib = [UINib nibWithNibName:@"CallOutViewCell" bundle:nil];
+        //[self.tableView registerNib:cellNib forCellReuseIdentifier:@"myCalloutCell"];
     }
     return self;
 }
 
+/*
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -49,7 +50,7 @@
         // Custom initialization
     }
     return self;
-}
+}*/
 
 - (id)initWithAnnotations:(NSMutableArray *)annotations
 {
@@ -67,13 +68,46 @@
     [super viewDidLoad];
     
     
- 
+    NSLog(@"Annotations size %d",calloutAnnotations.count);
+    
+    if(calloutAnnotations.count>0) {
+      
+        previousPicButton.hidden = nextPictureButton.hidden = (calloutAnnotations.count == 1);
+        
+      MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:0];
+      
+       //TODO check if a album or photo, if an album show all the other images on the same location
+        //from the asset url 
+      LocationDataModel *theModel = myAnnotation.dataModel;
+        
+      //this is the thumbnail image i think
+      UIImage *image = myAnnotation.image;
+      //  cell.imageName.text = myAnnotation.subtitle;
+        
+        
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // Update the UI
+            //but i also have the asset URL here, so maybe i´ll use that
+            imageView.image = image;
+            
+        });
+    }
+    else {
+        previousPicButton.hidden = true;
+        nextPictureButton.hidden = true;
+    }
+    
+    
+    
+    //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
+}
+
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-}
 
 
 - (void)viewWillAppear:(BOOL)animated
@@ -86,6 +120,7 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 #pragma mark - Table view data source
 
@@ -123,14 +158,15 @@
         //this is the thumbnail image i think
         UIImage *image = myAnnotation.image;
         cell.imageName.text = myAnnotation.subtitle;
-        cell.cellImageView.image = image;
         
         
-         /*   dispatch_async(dispatch_get_main_queue(), ^{
+        
+         dispatch_async(dispatch_get_main_queue(), ^{
                 // Update the UI
                 //but i also have the asset URL here, so maybe i´ll use that
+             cell.cellImageView.image = image;
                 
-            });*/
+         });
         //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     }
     
@@ -211,11 +247,16 @@
     [self dismissViewControllerAnimated:NO completion:nil];
 }
 
-- (void)presentedNewPopoverController:(FPPopoverController *)newPopoverController
-          shouldDismissVisiblePopover:(FPPopoverController*)visiblePopoverController
-{
-    [visiblePopoverController dismissPopoverAnimated:YES];
-    [self.tableView reloadData];
+//- (void)presentedNewPopoverController:(FPPopoverController *)newPopoverController
+  //        shouldDismissVisiblePopover:(FPPopoverController*)visiblePopoverController
+//{
+  //  [visiblePopoverController dismissPopoverAnimated:YES];
+    //[self.tableView reloadData];
+//}
+
+- (IBAction)nextButton:(id)sender {
 }
 
+- (IBAction)previousButton:(id)sender {
+}
 @end

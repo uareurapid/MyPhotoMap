@@ -170,6 +170,7 @@
     }
     else {
         //delete album
+        [albumViewController deleteAlbum:self];
     }
   
     

@@ -12,6 +12,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import "SearchLocationViewController.h"
+#import "BHAlbum.h"
 
 //need to put this just in one location
 
@@ -22,6 +23,8 @@
 
 @property (retain, nonatomic) IBOutlet UIImageView *photoView;
 @property (copy, nonatomic) NSURL *assetURL;
+@property (assign,nonatomic) NSInteger selectedIndex;
+@property (strong, nonatomic) BHAlbum *enclosingAlbum;
 
 @property (strong, nonatomic) UIImage *thumbnail;//to pass to the map
 

@@ -111,6 +111,7 @@ static NSString * const BHPhotoEmblemKind = @"Emblem";
     self.numberOfColumns = [[UIDeviceHardware platformString] containsString:@"iPad"] ? 3 : 2;
     self.titleHeight = 26.0f;
     
+    
     // create rotations at load so that they are consistent during prepareLayout
     NSMutableArray *rotations = [NSMutableArray arrayWithCapacity:RotationCount];
     

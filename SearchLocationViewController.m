@@ -30,6 +30,10 @@
     if (self) {
         // Custom initialization
         placesList = [[NSMutableArray  alloc] init];
+        self.searchDisplayController.searchBar.delegate = self;
+        self.placesTableView.delegate = self;
+        [self.searchDisplayController setActive:true];
+        self.searchBar.delegate = self;
         self.title = @"Edit location";
     }
     return self;
@@ -40,6 +44,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
+    self.mapView = ((PCAppDelegate *)[[UIApplication sharedApplication] delegate]).mapViewController;
     //load existing data on database
     [self fetchLocationRecords];
 }
@@ -60,6 +65,7 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText{
     
     //text changed
+    NSLog(@"searching for %@",searchText);
 }
 
 
@@ -141,18 +147,18 @@
                     if([keyAsString isEqualToString:GOOGLE_KEY_DATA_FORMATED_ADDRESS])
                     {
                         NSString *formatedAddress = [component objectForKey:innerKey];
-                        //NSLog(@"The formatedAddress is %@", formatedAddress);
+                        NSLog(@"The formatedAddress is %@", formatedAddress);
                         place.location = formatedAddress;
                     }
                     else if([keyAsString isEqualToString:GOOGLE_KEY_DATA_GEOMETRY])
                     {
                         NSDictionary *location = [component objectForKey:innerKey];
-                        //NSLog(@"The location object is %@", location);
+                        NSLog(@"The location object is %@", location);
                         
                         
                         NSDictionary *locationCoords = [location objectForKey:PARAMETER_LOCATION];
                         
-                        NSNumber *lat = [locationCoords objectForKey:PARAMETER_LONGITUDE];
+                        NSNumber *lat = [locationCoords objectForKey:PARAMETER_LATITUDE];
                         NSNumber *lg = [locationCoords objectForKey:PARAMETER_LONGITUDE];
                         
                         //need to convert them to NSSTring
@@ -279,15 +285,16 @@
     if (!mutableFetchResults) {
         // Handle the error.
         // This is a serious error and should advise the user to restart the application
+        return;
     }
-    else {
+    /*else {
         for(LocationDataModel *entity in mutableFetchResults) {
             //load the thumbnail
             if(entity.assetURL!=nil) {
               [self loadAssetInfoFromDataModel:entity];
             }
         }
-    }
+    }*/
  
     // Save our fetched data to an array
     [self setLocationEntitiesArray: mutableFetchResults];
@@ -331,11 +338,21 @@
    }
 
     [locationEntitiesArray insertObject:locationObject atIndex:0];
-    if(image!=nil && OK==YES) {
+    
+    
+    if(OK==YES) {
         NSLog(@"Adding to the map....");
-        [mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
+        [self loadAssetInfoFromDataModel: locationObject];
     }
+    
+    
+    //if(image!=nil && OK==YES) {
+        
+      //  [mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
+    //}
 }
+
+
 
 
 //will try to save the metadata, but of course it will not work
@@ -465,23 +482,18 @@
         CGImageRef thumb = [asset thumbnail];
         
         
-        //CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
-        //NSLog(@"asset location is %@",location);
-        //NSLog(@"asset metadata is %@",rep.metadata);
-        
         if(thumb!=nil) {
            
             __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
-            //image = imageThumb;
-            NSLog(@"HERE 1");
-            //alwyas update the UI in the main thread
+  
+            //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 image = imageThumb;
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
-                [mapView addLocation:locationCL withImage:image andTitle:@"other test"];
-                NSLog(@"HERE 2");
+                [mapView addLocation:locationCL withImage:image andTitle:@"other test" forModel:model ];
+                NSLog(@"Adding location to the map, read from database");
                 
             });
         }
@@ -490,7 +502,7 @@
     };
     
     ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
-        NSLog(@"Failed to get image!");
+        NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
         //failed to get image.
     };
     

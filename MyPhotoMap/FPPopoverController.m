@@ -247,7 +247,8 @@
             [_parentView addSubview:self.view];
             [_viewController viewDidAppear:YES];
         }
-        
+       /* 2017-01-02 22:00:16.914 MyPhotoMap[56527:476742] *** Terminating app due to uncaught exception 'NSUnknownKeyException', reason: '[<NSObject 0x7ea445d0> setValue:forUndefinedKey:]: this class is not key value coding-compliant for the key cellImageView.'
+        *** First throw call stack:*/
    }
     else
     {

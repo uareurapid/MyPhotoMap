@@ -27,6 +27,7 @@
         // Custom initialization
         self.title = @"Your Photos Map";
         annotationsArray = [[NSMutableArray alloc]init];
+        self.navigationController.toolbarHidden = NO;
    
     }
     return self;
@@ -38,6 +39,7 @@
     // Do any additional setup after loading the view from its nib.
     //this always places the map on the user location
     [self.mapView setShowsUserLocation:YES];
+    self.navigationController.toolbarHidden = NO; 
 }
 
 - (void)didReceiveMemoryWarning
@@ -67,11 +69,16 @@
 }
 
 
-- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title {
+- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model {
     
+    NSLog(@"Add location.....");
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
     annotation.subtitle = title;
+    
+    //we save the data mode to know if dealing with a single album or a photo
+    annotation.dataModel = model;
+    
     //don´t plot them until they are on the array
     [annotationsArray addObject:annotation];
     
@@ -311,18 +318,42 @@
     AnnotationCalloutViewController *calloutController = [[AnnotationCalloutViewController alloc]
       initWithNibName:@"AnnotationCalloutViewController" bundle:nil annotations:annotsOnSameLocation];
     
+    
+
+    /*calloutController.modalPresentationStyle = UIModalPresentationPopover; // 13
+    UIPopoverPresentationController *popPC = calloutController.popoverPresentationController; // 14
+    calloutController.popoverPresentationController.sourceRect = self.view.frame; // 15
+    calloutController.popoverPresentationController.sourceView = view; // 16
+    popPC.permittedArrowDirections = UIPopoverArrowDirectionAny; // 17
+    popPC.delegate = self; //18
+    [self presentViewController:calloutController animated:YES completion:nil]; // 19
+     
+    // https://www.invasivecode.com/weblog/uipopoverpresentationcontroller-uisearchcontroller
+    
+*/
  
     
     //our popover
     FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
     popover.delegate = calloutController;
     
-    //the popover will be presented from the okButton view
+    popover.contentSize = CGSizeMake(300,400);
+    
+    //the popover will be presented from the ok Button view
     [popover presentPopoverFromView:view];
     
 
                                        
                                      
+}
+
+- (UIModalPresentationStyle)adaptivePresentationStyleForPresentationController:(UIPresentationController *)controller traitCollection:(UITraitCollection *)traitCollection {
+    return UIModalPresentationPopover; // 20
+}
+
+- (UIViewController *)presentationController:(UIPresentationController *)controller viewControllerForAdaptivePresentationStyle:(UIModalPresentationStyle)style {
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller.presentedViewController];
+    return navController; // 21
 }
 
 //get all the annotations that are in the same place

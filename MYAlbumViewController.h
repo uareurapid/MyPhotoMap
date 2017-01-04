@@ -44,6 +44,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 - (IBAction)takePhoto:(id)sender;
 -(IBAction)settingsClicked:(id)sender;
 -(IBAction)addLocation:(id)sender;
+-(IBAction)deleteAlbum:(id)sender;
 
 
 

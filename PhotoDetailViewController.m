@@ -15,7 +15,7 @@
 
 @implementation PhotoDetailViewController
 
-@synthesize photoView,assetURL,thumbnail;
+@synthesize photoView,assetURL,thumbnail,enclosingAlbum,selectedIndex;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -25,6 +25,10 @@
         // Custom initialization
         [self.navigationItem setHidesBackButton:NO];
         
+        
+        UIBarButtonItem *editTitle = [[UIBarButtonItem alloc] initWithTitle:@"Edit Title"
+                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(editLocation:)];
+        
         //*************************************************************
         //O botao so aparece se a imagem seleccionada (ou o assetURL) não estiver nabd
         //ou theno uma flag, para alterar a localização
@@ -32,7 +36,7 @@
                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(editLocation:)];
         
         
-        self.navigationItem.rightBarButtonItem = editLocation;
+        self.navigationItem.rightBarButtonItems = @[editTitle, editLocation];
         
     }
     return self;
@@ -41,10 +45,60 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    selectedIndex = 0;
+    [photoView setUserInteractionEnabled:YES];
     // Do any additional setup after loading the view from its nib.
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    
+    // Setting the swipe direction.
+    [swipeLeft setDirection:UISwipeGestureRecognizerDirectionLeft];
+    [swipeRight setDirection:UISwipeGestureRecognizerDirectionRight];
+    
+    // Adding the swipe gesture on image view
+    [photoView addGestureRecognizer:swipeLeft];
+    [photoView addGestureRecognizer:swipeRight];
+}
+
+- (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
+    
+    NSInteger albumSize = enclosingAlbum.photosURLs.count;
+    //enclosingAlbum.photosURLs objectAtIndex:0];
+    if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
+        NSLog(@"Left Swipe");
+        if(selectedIndex > 0 && albumSize > 0) {
+            selectedIndex--;
+            if(selectedIndex < 0) {
+                selectedIndex = albumSize-1;
+            }
+        }
+        else {
+            selectedIndex = albumSize-1;
+        }
+        
+    }
+    
+    if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
+        NSLog(@"Right Swipe");
+        if(selectedIndex < (albumSize + 1) ) {
+            selectedIndex++;
+        }
+        else {
+            selectedIndex = 0;
+        }
+    }
+    
+    NSLog(@"selected index %ld and size is %ld",(long)selectedIndex,(long)albumSize);
+    
+    assetURL = [enclosingAlbum.photosURLs objectAtIndex:selectedIndex];
+    [self readFullSizeImageAndThumbnail];
+    
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated {
+    selectedIndex =0;
     //NSLog(@" i have %d url: %@",self.navigationItem.leftBarButtonItems.count,assetURL);
     [self readFullSizeImageAndThumbnail];
 }

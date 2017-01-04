@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <MapKit/MapKit.h>
 #import "MapViewAnnotationPoint.h"
+#import "LocationDataModel.h"
 
 
 #define METERS_PER_MILE 1609.344
@@ -23,7 +24,7 @@
 @property (strong, nonatomic) UIPopoverController *annotationsPopoverControl;
 
 //add the image with the location to the map, to create the annotation
-- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title;
+- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model;
 
 - (void)mutateCoordinatesOfClashingAnnotations:(NSArray *)annotations;
 - (NSDictionary *)groupAnnotationsByLocationValue:(NSArray *)annotations;

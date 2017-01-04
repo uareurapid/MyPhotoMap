@@ -9,6 +9,7 @@
 #import "MYAlbumViewController.h"
 
 #import "AlbumOptionsTableViewController.h"
+#import "PCAppDelegate.h"
 
 @interface MYAlbumViewController ()
 
@@ -91,12 +92,27 @@
     view.navigationItem.rightBarButtonItem = nil;
     view.navigationItem.leftBarButtonItem = nil;
     view.assetURL = selectedAlbum.assetURL; //set the asset url
+    view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
     if(selectedAlbum.photos.count>0) {
         BHPhoto *photo = [selectedAlbum.photos objectAtIndex:0];
         view.image = photo.image;
     }
     
     [self.navigationController pushViewController:view animated:YES];
+}
+
+- (IBAction)deleteAlbum:(id)sender {
+    
+    if(selectedAlbum!=nil) {
+        NSLog(@"DELETE ALBUM %@",selectedAlbum.name);
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"You can only delete the album from the photos app"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+        [self.navigationController popToRootViewControllerAnimated:TRUE];
+    }
 }
 
 
@@ -356,17 +372,20 @@
     UIImageView *imageView = (UIImageView*)tapGesture.view;
     NSInteger tag = imageView.tag;
     
-    NSLog(@"selected image/album is %d",tag);
+    NSLog(@"selected image/album is %ld",(long)tag);
     
     
     if(tag < self.albums.count) {
         
        
+        //represents here an album with just one image
         BHAlbum *albumTap= [self.albums objectAtIndex:tag];
         
         detailViewController.title = albumTap.name;
         NSURL *assetURL = [albumTap.photosURLs objectAtIndex:0];
         NSLog(@"The url here is : %@",assetURL);
+        detailViewController.enclosingAlbum = selectedAlbum;
+        //the albumTap has just one image
         detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
         NSLog(@"pushing now: with assetURL %@",detailViewController.assetURL);
         [self.navigationController pushViewController:detailViewController animated:NO];

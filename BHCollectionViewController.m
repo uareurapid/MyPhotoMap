@@ -124,6 +124,9 @@
         [alert show];
     }
     
+    //clear annotations
+    [mapViewController removeAnnotations];
+    
     //load existing data on database
     [self fetchLocationRecords];
     
@@ -145,8 +148,63 @@
 - (void) fetchLocationRecords{
     [databaseRecords removeAllObjects];
     databaseRecords = [CoreDataUtils fetchLocationRecordsFromDatabase];
+    
+    if (!databaseRecords) {
+        // Handle the error.
+        // This is a serious error and should advise the user to restart the application
+    }
+    else {
+        NSLog(@"LOADED %ld RECorDS FroM DB",databaseRecords.count);
+        for(LocationDataModel *entity in databaseRecords) {
+            //load the thumbnail
+            if(entity.assetURL!=nil) {
+                [self loadAssetInfoFromDataModel:entity];
+            }
+        }
+    }
+    
+
    
 }
+
+#pragma asset stuff
+-(void) loadAssetInfoFromDataModel:(LocationDataModel*)model {
+    NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
+    //do the assets enumeration
+    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
+        
+        CGImageRef thumb = [asset thumbnail];
+        
+        
+        if(thumb!=nil) {
+            
+            __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
+            
+            //alwyas update the UI in the main thread
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                UIImage *image = imageThumb;
+                CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
+                                                                    longitude:[model.longitude doubleValue]];
+                [mapViewController addLocation:locationCL withImage:image andTitle:@"other test"];
+                NSLog(@"Adding location to the map, read from database");
+                
+            });
+        }
+        
+        
+    };
+    
+    ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
+        NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
+        //failed to get image.
+    };
+    
+    ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+    [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+}
+
+
 /*
  2013-06-05 16:53:06.517 CollectionViewTutorial[824:907] passed this
  2013-06-05 16:53:06.853 CollectionViewTutorial[824:907] Adding album : Teste
@@ -171,6 +229,7 @@
             }
         }
     
+        NSLog(@"num existing albums %ld",numExistingAlbums);
      }
      
           failureBlock:^(NSError *error)  {
@@ -280,9 +339,7 @@
     //this is the max thumbnails i will read here, but i will grab all the thumbnails
     NSInteger maxNumPhotosPerAlbum = 3;
     __block NSInteger processedImages = 0;
-    
-    //clear annotations
-    [mapViewController removeAnnotations];
+    __block NSInteger processedImagesInYearlyAlbum = 0;
     
     [assetsLib enumerateGroupsWithTypes:ALAssetsGroupAll
      
@@ -294,6 +351,7 @@
          if(name!=nil) {
  
              BHAlbum *album = [self albumsContainsName:name];
+             //get the number of pictures inside each album
              NSInteger numOfAssets = [group numberOfAssets];
              
              
@@ -310,7 +368,7 @@
                  
                  album.photosCount = numOfAssets;
                  
-                 //album doesn´t have any photo, add default empty one
+                 //album doesn´t have any photo, add a default empty one
                  if(numOfAssets==0) {
                      BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
                      [album addPhoto:photo];
@@ -324,16 +382,18 @@
              for(int i = 0; i < numOfAssets; i++) {//just grab the first image
                  
                  
-                 
+                     //start sorting the image assets
                      [group enumerateAssetsAtIndexes:[NSIndexSet indexSetWithIndex:i] options:0 usingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop)
                       {
                           if (result != nil) {
+                              
+                              BHAlbum *auxiliar;
                               
                               
                               NSString *type = [result valueForProperty:ALAssetPropertyType];//only images for now
                               CLLocation *imageLocation = [result valueForProperty:ALAssetPropertyLocation];
                               
-                              
+                              //it is a photo (we are only interested in photos, not other objects)
                               if([type isEqualToString:ALAssetTypePhoto]) {
                                   
                                   //save the URL of the asset Photo
@@ -343,8 +403,11 @@
                                   NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:theDate];
                                   
                                   NSInteger year = components.year;
-                                  NSString *yearSTR = [NSString stringWithFormat:@"%d",year];
-                                  if(! [albumsYears containsObject:yearSTR]) {
+                                  NSString *yearSTR = [NSString stringWithFormat:@"%ld",(long)year];
+                                  
+                                  BHAlbum *aux = [self albumsContainsName:yearSTR];
+                                  //these are FAKE yearly albums, not on the device itself
+                                  if(! [albumsYears containsObject:yearSTR] && aux==nil) {
                                       
                                       NSLog(@"adding year %@",yearSTR);
                                       [albumsYears addObject: yearSTR];
@@ -353,12 +416,30 @@
                                       albumYear.photosURLs = [[NSMutableArray alloc] init];
                                       albumYear.assetURL = nil;
                                       albumYear.name = yearSTR;
-                                      [self.albums addObject:album];
+                                      
+                                      
+                                      //check if we have an album on our collection with the same title (year)
+                                      //if not we add this fake album now
+                                      NSLog(@"adding album for year %ld",(long)components.year);
+                                      [self.albums addObject:albumYear]; //was album
+                                      //save the reference to it
+                                      auxiliar = albumYear;
+                                  
+                                      
+                                  }
+                                  else if(aux!=nil) {
+                                      NSLog(@"album year already exists");
+                                      //already exists this FAKE album
+                                      auxiliar = aux;
                                   }
                                   
-                                  NSLog(@"Location is: %@ with year: %d",_location,components.year);
+                                  //NSLog(@"Location is: %@ with year: %ld",_location,(long)components.year);
                                   
-                                  //check if this asset was already added
+                                  //------------------------------ TODO check repetitive code -----------------------------------------------
+                                  //check if this asset/image was already added to the current album (NOTE: this is not not counting the yearly album here)
+                                  
+                                  //INSERT THE PICTURE INTO THE NORMAL ALBUM
+                                  //NSLog(@"INSERT THE PICTURE INTO THE NORMAL ALBUM : %@",album.name);
                                   if( [self albumContainsAssetURL:album assetURL:url] == NO) {
                                  
                                       [album.photosURLs addObject: url];
@@ -384,6 +465,36 @@
                                           [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
                                       }
                                   }
+                                  //----------------------------------------------------------------------------------
+                                  //INSERT THE PICTURE INTO THE AUXILIAR ALBUM
+                                  //NSLog(@"INSERT THE PICTURE INTO THE AUXILIAR/YEARLY ALBUM : %@",auxiliar.name);
+                                  if( auxiliar!=nil && [self albumContainsAssetURL:auxiliar assetURL:url] == NO) {
+                                      
+                                      [auxiliar.photosURLs addObject: url];
+                                      //get the thumbnail
+                                      __block UIImage *thumbnail = [UIImage imageWithCGImage:[result thumbnail]];
+                                      
+                                      //ONLY process maximum of 3 images per album
+                                      if(processedImagesInYearlyAlbum <  (maxNumPhotosPerAlbum * self.albums.count) ) {
+                                          processedImagesInYearlyAlbum = processedImagesInYearlyAlbum +1;
+                                          
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                              
+                                              BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                              [auxiliar addPhoto:photo];
+                                              [self.collectionView reloadData];
+                                              
+                                              
+                                          });
+                                      }
+                                      //for all images
+                                      if(imageLocation!=nil) {
+                                          //if we have location data, add the annotation to the map
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+                                      }
+                                  }
+                                  //------------------------------------------------------------------------------------
+                                  
                                   //else already exists, skipp it 
 
                                   
@@ -416,6 +527,35 @@
 
     
 }
+
+/*-(void) insertPictureOnAlbum: (BHAlbum *) album withURL:(NSURL *)url andThumbnail: (CGImageRef thumbnail) {
+    
+    if( [self albumContainsAssetURL:album assetURL:url] == NO) {
+        
+        [album.photosURLs addObject: url];
+        //get the thumbnail
+        __block UIImage *thumbnail = [UIImage imageWithCGImage: thumbnail];
+        
+        //ONLY process maximum of 3 images per album
+        if(processedImages <  (maxNumPhotosPerAlbum * self.albums.count) ) {
+            processedImages = processedImages +1;
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                [album addPhoto:photo];
+                [self.collectionView reloadData];
+                
+                
+            });
+        }
+        //for all images
+        if(imageLocation!=nil) {
+            //if we have location data, add the annotation to the map
+            [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+        }
+    }
+}*/
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
