@@ -18,7 +18,7 @@
 @implementation SearchLocationViewController
 
 @synthesize searchBar,placesList, placesTableView;
-@synthesize assetURL,image;
+@synthesize assetURL,image, selectedAlbum,thumbnailURL;
 @synthesize locationEntitiesArray;
 @synthesize mapView;
 
@@ -304,7 +304,6 @@
     //[mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
 }
 
-
 //save the location record
 -(void)saveLocationRecord:(MyGPSPosition*)location {
     
@@ -316,16 +315,23 @@
     locationObject.latitude = location.latitude;
     locationObject.longitude= location.longitude;
     
+    bool isAlbumType = false;
+    
     if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
     {
       //it is an image
         locationObject.type = TYPE_PHOTO;
+        isAlbumType = false;
     }
     else {
+        //TODO if it is an album, i need to show it on that location
         locationObject.type = TYPE_ALBUM;
+        isAlbumType = true;
     }
     
     locationObject.assetURL = [assetURL absoluteString];
+    locationObject.thumbnailURL = [thumbnailURL absoluteString];//need to save it as a string
+    
 
    BOOL OK = YES;
    NSError *error;
@@ -342,7 +348,7 @@
     
     if(OK==YES) {
         NSLog(@"Adding to the map....");
-        [self loadAssetInfoFromDataModel: locationObject];
+        [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
     }
     
     
@@ -474,39 +480,66 @@
 }
 
 #pragma asset stuff
--(void) loadAssetInfoFromDataModel:(LocationDataModel*)model {
+-(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) album {
+    
     NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
-    //do the assets enumeration
-    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
+    
+    if(model.assetURL!=nil && image == nil) {
         
-        CGImageRef thumb = [asset thumbnail];
-        
-        
-        if(thumb!=nil) {
-           
-            __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
-  
-            //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
-            dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"TRYING TO LOAD IMAGE");
+        //as usual. do the assets enumeration
+        ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
+            
+            CGImageRef thumb = [asset thumbnail];
+            
+            
+            if(thumb!=nil) {
                 
-                image = imageThumb;
-                CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
-                                                                    longitude:[model.longitude doubleValue]];
-                [mapView addLocation:locationCL withImage:image andTitle:@"other test" forModel:model ];
-                NSLog(@"Adding location to the map, read from database");
-                
-            });
+                //TODO if it is of album type, it has no thumbnail (either select the first image or the default blank thumbnail)
+                image = [UIImage imageWithCGImage:thumb];
+                //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
+                [self addLocationWithThumbnail:model];
+            }
+            else {
+                //should never happen
+                image = [UIImage imageNamed:@"concrete"];
+                [self addLocationWithThumbnail:model];
+            }
+            
+        };
+        
+        ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
+            NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
+            //failed to get image.
+        };
+        
+        ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+        [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+        
+    }
+    else {
+        if(image == nil) {
+            image = [UIImage imageNamed:@"concrete"];
         }
-        
-        
-    };
+        [self addLocationWithThumbnail:model];
+    }
     
-    ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
-        NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
-        //failed to get image.
-    };
     
-    ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
-    [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+    
+    
 }
+
+
+-(void) addLocationWithThumbnail:(LocationDataModel *)model  {
+    //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
+                                                            longitude:[model.longitude doubleValue]];
+        [mapView addLocation:locationCL withImage:image andTitle:@"other test" forModel:model ];
+        NSLog(@"Adding location to the map, read from database");
+        
+    });
+}
+
 @end

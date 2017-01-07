@@ -20,6 +20,7 @@
 @property (nonatomic, retain) NSString * description; //description of pic or album
 @property (nonatomic, retain) NSString * longitude;
 @property (nonatomic, retain) NSString * assetURL; //if asset URL is nil than is a "fake" album
+@property (nonatomic, retain) NSString * thumbnailURL; //either an url to an image or NIL (use default concrete image)
 @property (nonatomic, retain) NSString * type; //TYPE_ALBUM, etc..
 @property (nonatomic, retain) NSDate * timestamp;
 

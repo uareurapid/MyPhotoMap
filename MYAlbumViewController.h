@@ -24,7 +24,6 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @interface MYAlbumViewController : BHCollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate>
 
-
 @property (retain,nonatomic) PhotoDetailViewController *detailViewController;
 
 @property (retain,nonatomic) AlbumsListViewController *listAlbumsAvailableController;//available for save
@@ -33,6 +32,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 
 @property (strong, nonatomic) BHAlbum *selectedAlbum;
+@property (assign, nonatomic) NSUInteger selectedAlbumIndex;
 
 @property (nonatomic, strong) NSMutableArray *albumsNames;
 

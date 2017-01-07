@@ -23,7 +23,7 @@
 @synthesize detailViewController;
 @synthesize listAlbumsAvailableController;
 @synthesize albumsNames;
-
+@synthesize selectedAlbumIndex;
 @synthesize selectedAlbum;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -33,7 +33,6 @@
         // Custom initialization
         //albumPhotos = [[NSMutableArray alloc] init];
         detailViewController = [[PhotoDetailViewController alloc] initWithNibName:@"PhotoDetailViewController" bundle:nil];
-        
         
         //add the settings button
         UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Actions"
@@ -88,17 +87,35 @@
 }
 
 -(IBAction)addLocation:(id)sender {
-    SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
+    
+    SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
+    
     view.navigationItem.rightBarButtonItem = nil;
     view.navigationItem.leftBarButtonItem = nil;
-    view.assetURL = selectedAlbum.assetURL; //set the asset url
-    view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
-    if(selectedAlbum.photos.count>0) {
-        BHPhoto *photo = [selectedAlbum.photos objectAtIndex:0];
+    
+    NSLog(@"selected album index: %d",selectedAlbumIndex);
+    
+    //OK I HAVE THE SELECTED ALBUM
+    BHAlbum *theSelectedAlbum = [self.albums objectAtIndex:selectedAlbumIndex];
+    view.selectedAlbum = theSelectedAlbum;
+    view.assetURL = theSelectedAlbum.assetURL; //set the asset url
+    
+    //assign the correct photo
+    if(theSelectedAlbum.photos.count>0) {
+        BHPhoto *photo = [theSelectedAlbum.photos objectAtIndex:0];
         view.image = photo.image;
+        //we save the thumbnail URL on the LocationDataModel
+        view.thumbnailURL = photo.imageURL;
+    }
+    else {
+        view.image = [UIImage imageNamed:@"concrete"];
+        view.thumbnailURL = nil;
     }
     
-    [self.navigationController pushViewController:view animated:YES];
+    view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
+    
+    
+    [self.navigationController pushViewController:view animated:NO];
 }
 
 - (IBAction)deleteAlbum:(id)sender {
@@ -249,7 +266,7 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    NSLog(@"NUM albums is %lu",selectedAlbum.photosURLs.count);
+    NSLog(@"NUM photos in album is %lu",selectedAlbum.photosURLs.count);
     return selectedAlbum.photosURLs.count > 0 ? selectedAlbum.photosURLs.count : 1;
 }
 

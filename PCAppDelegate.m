@@ -10,6 +10,7 @@
 #import "PhotosMapViewController.h"
 #import "BHCollectionViewController.h"
 #import "MYAlbumViewController.h"
+#import "SearchLocationViewController.h"
 
 @implementation PCAppDelegate
 
@@ -25,6 +26,9 @@
     self.mapViewController = [[PhotosMapViewController alloc] initWithNibName:@"PhotosMapViewController" bundle:nil];
     self.collectionController = [[BHCollectionViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
     self.collectionController.albumViewController  = [[MYAlbumViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
+    
+    self.searchController = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
+
  
     //add the map reference on both controllers
     self.collectionController.mapViewController = mapViewController;

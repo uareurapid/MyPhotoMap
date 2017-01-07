@@ -18,7 +18,7 @@
 @property (nonatomic,copy) NSString *subtitle;
 @property (nonatomic,copy) NSURL *assetURL;
 @property (nonatomic,copy) UIImage *image;
-@property (nonatomic,copy) LocationDataModel *dataModel;
+@property (nonatomic,assign) LocationDataModel *dataModel;
 
 
 //@property (assign,nonatomic) BOOL usingAPIMarker;//are we using the api marker or the image one??

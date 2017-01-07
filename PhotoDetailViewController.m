@@ -15,7 +15,7 @@
 
 @implementation PhotoDetailViewController
 
-@synthesize photoView,assetURL,thumbnail,enclosingAlbum,selectedIndex;
+@synthesize photoView,assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -27,7 +27,7 @@
         
         
         UIBarButtonItem *editTitle = [[UIBarButtonItem alloc] initWithTitle:@"Edit Title"
-                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(editLocation:)];
+                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(addLabelClicked:)];
         
         //*************************************************************
         //O botao so aparece se a imagem seleccionada (ou o assetURL) não estiver nabd
@@ -59,6 +59,12 @@
     // Adding the swipe gesture on image view
     [photoView addGestureRecognizer:swipeLeft];
     [photoView addGestureRecognizer:swipeRight];
+    
+    locationEntitiesArray = [[NSMutableArray alloc] init];
+    
+    if(self.assetURL!=nil) {
+        self.dataModel = [self fetchLocationModelWithAssetURL:[self.assetURL absoluteString]];
+    }
 }
 
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
@@ -115,10 +121,103 @@
 
 //edit photo location
 -(IBAction)editLocation:(id)sender {
-    SearchLocationViewController *view = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
+    SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
     view.assetURL = assetURL; //set the asset url
     view.image = thumbnail;
     [self.navigationController pushViewController:view animated:YES];
+}
+
+#pragma add title description
+
+- (IBAction)addLabelClicked:(id)sender{
+    
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New label..." message:@"Enter the photo label" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
+    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    [alert show];
+}
+
+//the delegate for the new Album
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if(buttonIndex==1) { //0 - cancel, 1 - save
+        NSString *label = [alertView textFieldAtIndex:0].text;
+        //check if this label already exists in some model (must have same url)
+        [self fetchLocationRecords:label];
+    }
+    
+}
+
+//gte this photo/album location model
+- (LocationDataModel *)fetchLocationModelWithAssetURL: (NSString *) assetURL {
+    
+    NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: assetURL];
+    if (!mutableFetchResults) {
+        //ERROR
+        return nil;
+    }
+    else if(mutableFetchResults.count==1) {
+        //OK
+        return [mutableFetchResults objectAtIndex:0];
+    }
+    return nil;
+}
+
+#pragma save locations core data
+//fetch all the records from the database
+- (void)fetchLocationRecords: (NSString *) descriptionString {
+    
+    //do nothing if it doesn´t exist
+    if(self.dataModel==nil) {
+        NSLog(@"don´t found any model");
+        //TODO create one now
+        return;
+    }
+    
+    //TODO, improve method to include assetURL in the query predicate as well
+    NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabaseWithDescription: descriptionString];
+    if (!mutableFetchResults) {
+        //ERROR
+        return;
+    }
+    else if(mutableFetchResults.count==0) {
+     //OK
+    }
+    else {
+        //TODO alert because the label already exists
+        BOOL found = false;
+        LocationDataModel *locationObject = nil;
+        for(LocationDataModel *entity in mutableFetchResults) {
+            //load the thumbnail
+            if(entity.assetURL!=nil && [entity.assetURL isEqualToString: [self.assetURL absoluteString]]) {
+                //found it
+                found = true;
+                locationObject = entity;
+                break;
+            }
+        }
+        if(!found) {
+            //OK
+            NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+           
+            //update the description and save the context/model
+            dataModel.description = descriptionString;
+            NSError *error;
+            if (![managedObjectContext save:&error]) {
+                NSLog(@"Whoops, unable to save");
+            }
+        
+        }
+        else {
+            //NOK, already exists
+        }
+    }
+    
+    // Save our fetched data to an array
+    //[self setLocationEntitiesArray: mutableFetchResults];
+    
+    //if(image!=nil && OK==YES) {
+    //NSLog(@"Adding to the map....");
+    //[mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
 }
 
 - (void)readFullSizeImageAndThumbnail {

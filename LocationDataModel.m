@@ -17,5 +17,6 @@
 @dynamic assetURL;
 @dynamic type;
 @dynamic timestamp;
+@dynamic thumbnailURL;
 
 @end

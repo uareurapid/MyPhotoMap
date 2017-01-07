@@ -11,7 +11,7 @@
 #import <CoreData/CoreData.h>
 
 
-
+@class SearchLocationViewController;
 @class BHCollectionViewController;
 @class PhotosMapViewController;
 
@@ -24,6 +24,8 @@
 
 @property (strong, nonatomic) BHCollectionViewController *collectionController;
 @property (strong, nonatomic) PhotosMapViewController *mapViewController;
+
+@property (strong, nonatomic) SearchLocationViewController *searchController;
 
 @property (strong,nonatomic) CLLocationManager *locationManager;
 @property (assign,nonatomic)CLLocationCoordinate2D location;

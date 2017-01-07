@@ -186,7 +186,7 @@
                 UIImage *image = imageThumb;
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
-                [mapViewController addLocation:locationCL withImage:image andTitle:@"other test"];
+                [mapViewController addLocation:locationCL withImage:image andTitle:@"other test" forModel:model];
                 NSLog(@"Adding location to the map, read from database");
                 
             });
@@ -287,6 +287,7 @@
                                       album.name = albumName;
                                       
                                       BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
+                                      photo.imageURL = nil;
                                       [album addPhoto:photo];
                                       [self.albums addObject:album];
                                       
@@ -371,6 +372,7 @@
                  //album doesn´t have any photo, add a default empty one
                  if(numOfAssets==0) {
                      BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
+                     photo.imageURL = nil;
                      [album addPhoto:photo];
                  }
              
@@ -453,6 +455,7 @@
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               
                                               BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                              photo.imageURL = url;
                                               [album addPhoto:photo];
                                               [self.collectionView reloadData];
                                               
@@ -462,7 +465,7 @@
                                       //for all images
                                       if(imageLocation!=nil) {
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil];
                                       }
                                   }
                                   //----------------------------------------------------------------------------------
@@ -481,6 +484,7 @@
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               
                                               BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                              photo.imageURL = url;
                                               [auxiliar addPhoto:photo];
                                               [self.collectionView reloadData];
                                               
@@ -490,7 +494,7 @@
                                       //for all images
                                       if(imageLocation!=nil) {
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil];
                                       }
                                   }
                                   //------------------------------------------------------------------------------------
@@ -745,6 +749,7 @@
         BHAlbum *selectedOne = [albums objectAtIndex:tag];
         albumViewController.title = selectedOne.name;
         albumViewController.selectedAlbum = selectedOne;
+        albumViewController.selectedAlbumIndex = tag;
         
     }
     

@@ -13,6 +13,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "SearchLocationViewController.h"
 #import "BHAlbum.h"
+#import "LocationDataModel.h"
 
 //need to put this just in one location
 
@@ -25,6 +26,10 @@
 @property (copy, nonatomic) NSURL *assetURL;
 @property (assign,nonatomic) NSInteger selectedIndex;
 @property (strong, nonatomic) BHAlbum *enclosingAlbum;
+
+@property (nonatomic, retain) NSMutableArray *locationEntitiesArray;
+
+@property (strong, nonatomic) LocationDataModel *dataModel;
 
 @property (strong, nonatomic) UIImage *thumbnail;//to pass to the map
 

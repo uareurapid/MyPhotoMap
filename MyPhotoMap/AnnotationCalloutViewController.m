@@ -68,7 +68,7 @@
     [super viewDidLoad];
     
     
-    NSLog(@"Annotations size %d",calloutAnnotations.count);
+    NSLog(@"Annotations size %lu",(unsigned long)calloutAnnotations.count);
     
     if(calloutAnnotations.count>0) {
       

@@ -11,6 +11,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <AssetsLibrary/ALAssetRepresentation.h>
 #import "LocationDataModel.h"
+#import "BHAlbum.h"
 
 #define GOOGLE_KEY_DATA_FORMATED_ADDRESS  @"formatted_address"
 #define GOOGLE_KEY_DATA_GEOMETRY          @"geometry"
@@ -35,7 +36,13 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 //the selected image
 @property (strong, nonatomic) UIImage *image;
-@property (copy, nonatomic) NSURL *assetURL;
+@property (strong, nonatomic) NSURL *assetURL;
+
+//the associated thumbnail (could use BHPhoto only)
+@property (copy, nonatomic) NSURL *thumbnailURL;
+
+//the selected album if any
+@property (strong, nonatomic) BHAlbum *selectedAlbum;
 
 
 @property (nonatomic, retain) NSMutableArray *locationEntitiesArray;
@@ -45,6 +52,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 -(void)saveLocationRecord:(MyGPSPosition*)location;
 - (void)fetchLocationRecords;
--(void) loadAssetInfoFromDataModel:(LocationDataModel*)model;
+-(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) album;
+
 
 @end

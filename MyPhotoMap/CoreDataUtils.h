@@ -14,4 +14,6 @@
 
 
 + (NSMutableArray *)fetchLocationRecordsFromDatabase;
++ (NSMutableArray *)fetchLocationRecordsFromDatabaseWithDescription: (NSString *) description;
++ (NSMutableArray *)fetchLocationRecordsFromDatabaseWithAssetURL: (NSString *) assetURL;
 @end
