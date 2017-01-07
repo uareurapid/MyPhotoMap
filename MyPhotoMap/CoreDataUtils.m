@@ -78,7 +78,7 @@
     [request setEntity:entity];
     //this is equivalent to SELECT * FROM `LocationEntity`
     
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(description = %@)",description];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(desc = %@)",description];
     
     [request setPredicate:predicate];
     

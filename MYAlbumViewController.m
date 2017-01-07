@@ -223,7 +223,28 @@
             
             BHAlbum *albumSingle = [[BHAlbum alloc] init];
             albumSingle.photosURLs = [[NSMutableArray alloc] init];
-            albumSingle.name = [NSString stringWithFormat:@"%d",self.albums.count ];
+            
+            //if the record exists on DB, try get the title name from the album/pic description
+            NSString *theURL = [selectedAlbum.assetURL absoluteString];
+            if(theURL!=nil) {
+                NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theURL];
+                if(records!=nil && records.count==1) {
+                    LocationDataModel *model = [records objectAtIndex:0];
+                    if(![model.desc isEqualToString:@"NA"]) {
+                        albumSingle.name = model.desc;
+                    }
+                }
+                else {
+                    //DEFAULT
+                     albumSingle.name = [NSString stringWithFormat:@"%d",self.albums.count ];
+                }
+            }
+            else {
+                 //DEFAULT
+                 albumSingle.name = [NSString stringWithFormat:@"%d",self.albums.count ];
+            }
+            
+           
             //save the URL of the asset Photo
             
             [self.albums addObject:albumSingle];

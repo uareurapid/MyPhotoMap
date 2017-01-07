@@ -49,7 +49,7 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 @property (strong, nonatomic) IBOutlet UITextField *albumTextField;
 @property (strong,nonatomic) IBOutlet UIBarButtonItem *addAlbumButton;
 
-@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+//@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
 
 
 @end

@@ -307,11 +307,36 @@
 //save the location record
 -(void)saveLocationRecord:(MyGPSPosition*)location {
     
+    LocationDataModel *locationObject = nil;
+    //FIRST check if already exists the model on database
+    NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[assetURL absoluteString]];
+    if(records==nil || (records!=nil && records.count > 1 )) {
+        //OOPS, something is very wrong
+        NSLog(@"something is very wrong");
+        return;
+    }
+    
     NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-    LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+    
+    BOOL isUpdate = false;
+    
+    if(records.count==1) {
+        //already exists, just update it
+        isUpdate = true;
+        locationObject = [records objectAtIndex:0];
+    }
+    else {
+        //does not exist yet, create one new
+        locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+    }
+    
+    
+    
    //current date
-   [locationObject setTimestamp: [NSDate date]];
-    [locationObject setName:@"teste"];
+    //[locationObject setTimestamp: [NSDate date]];
+    
+    //I AM OVERWIRITING ALL THIS STUFF (WARN USER!!!!)
+    [locationObject setName: [assetURL absoluteString]];
     locationObject.latitude = location.latitude;
     locationObject.longitude= location.longitude;
     
@@ -343,7 +368,11 @@
     //try again or restart the application.
    }
 
-    [locationEntitiesArray insertObject:locationObject atIndex:0];
+    //is a new one, add to the list
+    if(!isUpdate) {
+       [locationEntitiesArray insertObject:locationObject atIndex:0]; 
+    }
+    
     
     
     if(OK==YES) {
@@ -536,7 +565,7 @@
         
         CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                             longitude:[model.longitude doubleValue]];
-        [mapView addLocation:locationCL withImage:image andTitle:@"other test" forModel:model ];
+        [mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model ];
         NSLog(@"Adding location to the map, read from database");
         
     });

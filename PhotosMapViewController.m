@@ -27,7 +27,7 @@
         // Custom initialization
         self.title = @"Your Photos Map";
         annotationsArray = [[NSMutableArray alloc]init];
-        self.navigationController.toolbarHidden = NO;
+        self.tabBarItem.image = [UIImage imageNamed:@"map.png"];
    
     }
     return self;
@@ -39,7 +39,7 @@
     // Do any additional setup after loading the view from its nib.
     //this always places the map on the user location
     [self.mapView setShowsUserLocation:YES];
-    self.navigationController.toolbarHidden = NO; 
+    
 }
 
 - (void)didReceiveMemoryWarning

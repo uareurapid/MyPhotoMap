@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MYAlbumViewController.m"
-            timestampString = "505266842.479134"
+            timestampString = "505485605.591393"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "258"
-            endingLineNumber = "258"
+            startingLineNumber = "279"
+            endingLineNumber = "279"
             landmarkName = "-readAlbumThumbnails"
             landmarkType = "7">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "131"
-            endingLineNumber = "131"
+            startingLineNumber = "124"
+            endingLineNumber = "124"
             landmarkName = "-viewDidLoad"
             landmarkType = "7">
          </BreakpointContent>
@@ -74,43 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "137"
-            endingLineNumber = "137"
-            landmarkName = "-viewDidLoad"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BHCollectionViewController.m"
-            timestampString = "474162141.408485"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "122"
-            endingLineNumber = "122"
-            landmarkName = "-viewDidLoad"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "336"
-            endingLineNumber = "336"
+            startingLineNumber = "415"
+            endingLineNumber = "415"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -122,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "337"
-            endingLineNumber = "337"
+            startingLineNumber = "416"
+            endingLineNumber = "416"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -138,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "384"
-            endingLineNumber = "384"
+            startingLineNumber = "466"
+            endingLineNumber = "466"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -154,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "622"
-            endingLineNumber = "622"
+            startingLineNumber = "709"
+            endingLineNumber = "709"
             landmarkName = "-collectionView:numberOfItemsInSection:"
             landmarkType = "7">
          </BreakpointContent>
@@ -170,11 +138,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "350"
-            endingLineNumber = "350"
+            startingLineNumber = "429"
+            endingLineNumber = "429"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -186,11 +154,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "345"
-            endingLineNumber = "345"
+            startingLineNumber = "424"
+            endingLineNumber = "424"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -202,11 +170,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "243"
-            endingLineNumber = "243"
+            startingLineNumber = "241"
+            endingLineNumber = "241"
             landmarkName = "-reloadAlbumsInfo"
             landmarkType = "7">
          </BreakpointContent>
@@ -218,27 +186,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "138"
-            endingLineNumber = "138"
-            landmarkName = "-viewDidLoad"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "616"
-            endingLineNumber = "616"
+            startingLineNumber = "703"
+            endingLineNumber = "703"
             landmarkName = "-numberOfSectionsInCollectionView:"
             landmarkType = "7">
          </BreakpointContent>
@@ -330,11 +282,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "747"
-            endingLineNumber = "747"
+            startingLineNumber = "834"
+            endingLineNumber = "834"
             landmarkName = "-didTapAlbumWithGesture:"
             landmarkType = "7">
          </BreakpointContent>
@@ -346,11 +298,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505266491.751243"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "751"
-            endingLineNumber = "751"
+            startingLineNumber = "838"
+            endingLineNumber = "838"
             landmarkName = "-didTapAlbumWithGesture:"
             landmarkType = "7">
          </BreakpointContent>
@@ -362,11 +314,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MYAlbumViewController.m"
-            timestampString = "505266842.479134"
+            timestampString = "505485605.591393"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "404"
-            endingLineNumber = "404"
+            startingLineNumber = "425"
+            endingLineNumber = "425"
             landmarkName = "-didTapImageWithGesture:"
             landmarkType = "7">
          </BreakpointContent>
@@ -378,11 +330,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "151"
-            endingLineNumber = "151"
+            startingLineNumber = "149"
+            endingLineNumber = "149"
             landmarkName = "-fetchLocationRecords"
             landmarkType = "7">
          </BreakpointContent>
@@ -394,11 +346,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167"
+            startingLineNumber = "165"
+            endingLineNumber = "165"
             landmarkName = "-fetchLocationRecords"
             landmarkType = "7">
          </BreakpointContent>
@@ -426,11 +378,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "228"
-            endingLineNumber = "228"
+            startingLineNumber = "226"
+            endingLineNumber = "226"
             landmarkName = "-readNumberOfExistingAlbums"
             landmarkType = "7">
          </BreakpointContent>
@@ -442,11 +394,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505076173.005934"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "227"
-            endingLineNumber = "227"
+            startingLineNumber = "225"
+            endingLineNumber = "225"
             landmarkName = "-readNumberOfExistingAlbums"
             landmarkType = "7">
          </BreakpointContent>
@@ -458,11 +410,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505251132.099381"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "354"
-            endingLineNumber = "354"
+            startingLineNumber = "433"
+            endingLineNumber = "433"
             landmarkName = "-readCameraRoll"
             landmarkType = "7">
          </BreakpointContent>
@@ -618,11 +570,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
+            startingLineNumber = "364"
+            endingLineNumber = "364"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -634,11 +586,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "356"
-            endingLineNumber = "356"
+            startingLineNumber = "385"
+            endingLineNumber = "385"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -666,11 +618,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "323"
-            endingLineNumber = "323"
+            startingLineNumber = "348"
+            endingLineNumber = "348"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -682,11 +634,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "328"
-            endingLineNumber = "328"
+            startingLineNumber = "353"
+            endingLineNumber = "353"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -714,11 +666,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "332"
-            endingLineNumber = "332"
+            startingLineNumber = "357"
+            endingLineNumber = "357"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -730,7 +682,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
@@ -746,7 +698,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "79"
@@ -762,7 +714,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "127"
@@ -778,7 +730,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "125"
@@ -794,7 +746,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "108"
@@ -810,7 +762,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "130"
@@ -826,7 +778,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "145"
@@ -842,7 +794,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "149"
@@ -858,7 +810,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "147"
@@ -874,7 +826,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "129"
@@ -890,7 +842,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076544.698331"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "29"
@@ -906,7 +858,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "41"
@@ -922,7 +874,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "260"
@@ -970,11 +922,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "356"
-            endingLineNumber = "356"
+            startingLineNumber = "385"
+            endingLineNumber = "385"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -986,11 +938,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "357"
-            endingLineNumber = "357"
+            startingLineNumber = "386"
+            endingLineNumber = "386"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1034,7 +986,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "155"
@@ -1050,7 +1002,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505076631.888873"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "122"
@@ -1130,7 +1082,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505087060.997102"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "314"
@@ -1146,7 +1098,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505178883.422632"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "339"
@@ -1162,7 +1114,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotosMapViewController.m"
-            timestampString = "505177253.389187"
+            timestampString = "505494675.580147"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "333"
@@ -1290,11 +1242,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MYAlbumViewController.m"
-            timestampString = "505266842.479134"
+            timestampString = "505485605.591393"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "407"
-            endingLineNumber = "407"
+            startingLineNumber = "428"
+            endingLineNumber = "428"
             landmarkName = "-didTapImageWithGesture:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1354,11 +1306,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264642.939986"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "351"
-            endingLineNumber = "351"
+            startingLineNumber = "380"
+            endingLineNumber = "380"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1385,28 +1337,12 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PhotoDetailViewController.m"
-            timestampString = "505440043.123068"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "127"
-            endingLineNumber = "127"
-            landmarkName = "-editLocation:"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505264597.549639"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "310"
-            endingLineNumber = "310"
+            startingLineNumber = "333"
+            endingLineNumber = "333"
             landmarkName = "-saveLocationRecord:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1418,11 +1354,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "BHCollectionViewController.m"
-            timestampString = "505266360.887925"
+            timestampString = "505494106.695053"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "749"
-            endingLineNumber = "749"
+            startingLineNumber = "836"
+            endingLineNumber = "836"
             landmarkName = "-didTapAlbumWithGesture:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1466,11 +1402,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505268159.514023"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "488"
-            endingLineNumber = "488"
+            startingLineNumber = "517"
+            endingLineNumber = "517"
             landmarkName = "-loadAssetInfoFromDataModel:isAlbum:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1482,11 +1418,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SearchLocationViewController.m"
-            timestampString = "505268149.040959"
+            timestampString = "505484191.454763"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "521"
-            endingLineNumber = "521"
+            startingLineNumber = "550"
+            endingLineNumber = "550"
             landmarkName = "-loadAssetInfoFromDataModel:isAlbum:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1494,15 +1430,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotoDetailViewController.m"
-            timestampString = "505440008.596009"
+            timestampString = "505496755.236149"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "160"
-            endingLineNumber = "160"
+            startingLineNumber = "198"
+            endingLineNumber = "198"
             landmarkName = "-fetchLocationModelWithAssetURL:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1510,15 +1446,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotoDetailViewController.m"
-            timestampString = "505440013.083566"
+            timestampString = "505496755.236149"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "171"
-            endingLineNumber = "171"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "-fetchLocationRecords:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1530,11 +1466,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "PhotoDetailViewController.m"
-            timestampString = "505440025.77141"
+            timestampString = "505496755.236149"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "200"
-            endingLineNumber = "200"
+            startingLineNumber = "240"
+            endingLineNumber = "240"
             landmarkName = "-fetchLocationRecords:"
             landmarkType = "7">
          </BreakpointContent>
@@ -1542,7 +1478,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MyPhotoMap/CoreDataUtils.m"
@@ -1558,7 +1494,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MyPhotoMap/CoreDataUtils.m"
@@ -1574,7 +1510,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MyPhotoMap/CoreDataUtils.m"
@@ -1590,7 +1526,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MyPhotoMap/CoreDataUtils.m"
@@ -1600,6 +1536,86 @@
             startingLineNumber = "95"
             endingLineNumber = "95"
             landmarkName = "+fetchLocationRecordsFromDatabaseWithDescription:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoDetailViewController.m"
+            timestampString = "505496755.236149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "183"
+            endingLineNumber = "183"
+            landmarkName = "-alertView:clickedButtonAtIndex:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoDetailViewController.m"
+            timestampString = "505496755.236149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "180"
+            endingLineNumber = "180"
+            landmarkName = "-alertView:clickedButtonAtIndex:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoDetailViewController.m"
+            timestampString = "505496755.236149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "208"
+            endingLineNumber = "208"
+            landmarkName = "-fetchLocationRecords:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoDetailViewController.m"
+            timestampString = "505496755.236149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
+            landmarkName = "-fetchLocationRecords:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoDetailViewController.m"
+            timestampString = "505496755.236149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
+            landmarkName = "-fetchLocationRecords:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

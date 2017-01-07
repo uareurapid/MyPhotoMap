@@ -18,5 +18,6 @@
 @dynamic type;
 @dynamic timestamp;
 @dynamic thumbnailURL;
+@dynamic desc;
 
 @end

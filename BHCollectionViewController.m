@@ -33,7 +33,7 @@
 @synthesize addAlbumButton,navController;
 @synthesize location;
 @synthesize mapViewController;
-@synthesize managedObjectContext;
+//@synthesize managedObjectContext;
 @synthesize databaseRecords;
 @synthesize albumsYears;
 
@@ -61,6 +61,8 @@
         
         
         databaseRecords = [[NSMutableArray alloc] init];
+        
+        self.tabBarItem.image = [UIImage imageNamed:@"photos.png"];
         
         
        
@@ -127,18 +129,14 @@
     //clear annotations
     [mapViewController removeAnnotations];
     
-    //load existing data on database
-    [self fetchLocationRecords];
-    
-    
     
     [self readNumberOfExistingAlbums];
-    
-    
-    
-    
-    
+
+    //first get all the stuff on the device
     [self readCameraRoll];
+    
+    //and now load all existing data from database
+    [self fetchLocationRecords];
     
     
     
@@ -329,6 +327,87 @@
   ];//end albums enumeration
 }
 
+//----------------------------------------
+
+#pragma SAVE RECORD
+
+-(void)saveLocationRecord:(NSURL*)assetURL withDate:(NSDate*) date andLocation:(CLLocation*) imageLocation {
+    
+    NSMutableArray *results = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[assetURL absoluteString]];
+    //check if a record with this assetURL already exists on DB
+    if(results!=nil && results.count>0) {
+        NSLog(@"AVOID adding %@ , it already exists....",[assetURL absoluteString]);
+        return;
+    }
+    
+    NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+    //current date
+    if(date!=nil) {
+      [locationObject setTimestamp: date];
+    }
+    else {
+        [locationObject setTimestamp: [NSDate date]];
+    }
+    
+    [locationObject setName: [assetURL absoluteString]];
+    [locationObject setDesc:@"NA"];
+    
+    if(imageLocation!=nil) {
+        CLLocationCoordinate2D coordinate = imageLocation.coordinate;
+        locationObject.latitude = [[NSString alloc] initWithFormat:@"%f", coordinate.latitude];
+        locationObject.longitude= [[NSString alloc] initWithFormat:@"%f", coordinate.longitude];
+    }
+    else {
+        locationObject.latitude = @"0000";
+        locationObject.longitude= @"0000";
+    }
+    
+    
+    
+    bool isAlbumType = false;
+    
+    if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
+    {
+        //it is an image
+        locationObject.type = TYPE_PHOTO;
+        isAlbumType = false;
+    }
+    else {
+        //TODO if it is an album, i need to show it on that location
+        locationObject.type = TYPE_ALBUM;
+        isAlbumType = true;
+    }
+    
+    locationObject.assetURL = [assetURL absoluteString];
+    locationObject.thumbnailURL = [assetURL absoluteString];//need to save it as a string
+    
+    
+    BOOL OK = YES;
+    NSError *error;
+    if(![managedObjectContext save:&error]){
+        NSLog(@"Unable to save object error is: %@",error.description);
+        OK= NO;
+        //This is a serious error saying the record
+        //could not be saved. Advise the user to
+        //try again or restart the application.
+    }
+    
+    //[locationEntitiesArray insertObject:locationObject atIndex:0];
+    
+    
+    if(OK==YES) {
+       NSLog(@"#####Added record %@, to data model",[assetURL absoluteString]);
+    //    [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
+    }
+    
+    
+}
+
+//----------------------------------------
+
+
+
 //will read all the albums on th card and their contents
 - (void) readCameraRoll {
     
@@ -355,7 +434,7 @@
              //get the number of pictures inside each album
              NSInteger numOfAssets = [group numberOfAssets];
              
-             
+             //ALBUM DOES NOT EXIST YET!!
              if( album == nil) {
                  
                  album = [[BHAlbum alloc] init];
@@ -375,6 +454,9 @@
                      photo.imageURL = nil;
                      [album addPhoto:photo];
                  }
+                 
+                 //SAVE THE MODEL
+                 [self saveLocationRecord:album.assetURL withDate:nil andLocation:nil];
              
              }
       
@@ -403,6 +485,10 @@
                                   NSDate *theDate = [result valueForProperty:ALAssetPropertyDate];
                                   NSString *_location = [result valueForProperty:ALAssetPropertyLocation];
                                   NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:theDate];
+                                  
+                                  
+                                  //SAVE THE RECORD (not saving any images or pics)
+                                  [self saveLocationRecord:url withDate:theDate andLocation:imageLocation];
                                   
                                   NSInteger year = components.year;
                                   NSString *yearSTR = [NSString stringWithFormat:@"%ld",(long)year];
@@ -464,6 +550,7 @@
                                       }
                                       //for all images
                                       if(imageLocation!=nil) {
+                                          //There is an exif cordinate???
                                           //if we have location data, add the annotation to the map
                                           [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil];
                                       }

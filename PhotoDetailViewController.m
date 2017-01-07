@@ -26,17 +26,17 @@
         [self.navigationItem setHidesBackButton:NO];
         
         
-        UIBarButtonItem *editTitle = [[UIBarButtonItem alloc] initWithTitle:@"Edit Title"
-                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(addLabelClicked:)];
+        /*UIBarButtonItem *editTitle = [[UIBarButtonItem alloc] initWithTitle:@"Edit Title"
+                                                                         style:UIBarButtonItemStyleDone target:self action:@selector(addLabelClicked:)];*/
         
         //*************************************************************
         //O botao so aparece se a imagem seleccionada (ou o assetURL) não estiver nabd
         //ou theno uma flag, para alterar a localização
-        UIBarButtonItem *editLocation = [[UIBarButtonItem alloc] initWithTitle:@"Edit location"
-                                                                        style:UIBarButtonItemStyleDone target:self action:@selector(editLocation:)];
+        UIBarButtonItem *editSettings = [[UIBarButtonItem alloc] initWithTitle:@"Edit..."
+                                                                        style:UIBarButtonItemStyleDone target:self action:@selector(editSettings:)];
         
         
-        self.navigationItem.rightBarButtonItems = @[editTitle, editLocation];
+        self.navigationItem.rightBarButtonItem = editSettings;
         
     }
     return self;
@@ -62,9 +62,7 @@
     
     locationEntitiesArray = [[NSMutableArray alloc] init];
     
-    if(self.assetURL!=nil) {
-        self.dataModel = [self fetchLocationModelWithAssetURL:[self.assetURL absoluteString]];
-    }
+    [self updateTitle];
 }
 
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
@@ -103,10 +101,21 @@
     
 }
 
+-(void) updateTitle {
+    
+    if(self.assetURL!=nil) {
+        self.dataModel = [self fetchLocationModelWithAssetURL:[self.assetURL absoluteString]];
+        if(self.dataModel!=nil && self.dataModel.desc!=nil){
+            self.title = self.dataModel.desc;
+        }
+    }
+}
+
 -(void) viewWillAppear:(BOOL)animated {
     selectedIndex =0;
     //NSLog(@" i have %d url: %@",self.navigationItem.leftBarButtonItems.count,assetURL);
     [self readFullSizeImageAndThumbnail];
+    [self updateTitle];
 }
 
 - (void)didReceiveMemoryWarning
@@ -120,19 +129,48 @@
 }
 
 //edit photo location
--(IBAction)editLocation:(id)sender {
+-(IBAction)editSettings:(id)sender {
+    
+    //instead show an alert view with actions
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Edit photo"
+                                                                   message:@"Where was the photo taken? What´s represented?"
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Edit Location" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {
+                                                          
+                                                              [self openLocationView];
+                                                          }];
+    
+    UIAlertAction* editTitleAction = [UIAlertAction actionWithTitle:@"Edit Title" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {
+                                                          
+                                                              [self changeLabel];
+                                                          }];
+    
+    [alert addAction:defaultAction];
+    [alert addAction:editTitleAction];
+    [self presentViewController:alert animated:YES completion:nil];
+    
+}
+
+
+-(void) openLocationView{
     SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
     view.assetURL = assetURL; //set the asset url
     view.image = thumbnail;
     [self.navigationController pushViewController:view animated:YES];
 }
 
+
 #pragma add title description
 
-- (IBAction)addLabelClicked:(id)sender{
+- (void)changeLabel{
     
     UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New label..." message:@"Enter the photo label" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
     alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    UITextField *textField = [alert textFieldAtIndex:0];
+    textField.text = self.title;
     [alert show];
 }
 
@@ -173,6 +211,7 @@
         return;
     }
     
+    BOOL canUpdate = false;
     //TODO, improve method to include assetURL in the query predicate as well
     NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabaseWithDescription: descriptionString];
     if (!mutableFetchResults) {
@@ -181,6 +220,7 @@
     }
     else if(mutableFetchResults.count==0) {
      //OK
+        canUpdate = true;
     }
     else {
         //TODO alert because the label already exists
@@ -196,21 +236,31 @@
             }
         }
         if(!found) {
+            canUpdate = true;
             //OK
-            NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-           
-            //update the description and save the context/model
-            dataModel.description = descriptionString;
-            NSError *error;
-            if (![managedObjectContext save:&error]) {
-                NSLog(@"Whoops, unable to save");
-            }
         
         }
         else {
             //NOK, already exists
         }
     }
+    
+    if(canUpdate) {
+        NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+        
+        //update the description and save the context/model
+        dataModel.desc= descriptionString;
+        NSError *error;
+        if (![managedObjectContext save:&error]) {
+            NSLog(@"Whoops, unable to save");
+        }
+        else{
+            //save ok
+            self.title = self.dataModel.desc;
+        }  
+    }
+    
+    
     
     // Save our fetched data to an array
     //[self setLocationEntitiesArray: mutableFetchResults];
