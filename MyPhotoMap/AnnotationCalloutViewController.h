@@ -14,6 +14,7 @@
 
 //it appears as a list of 1-n images
 @property (strong,nonatomic) NSMutableArray *calloutAnnotations;
+
 - (IBAction)nextButton:(id)sender;
 
 @property (weak, nonatomic) IBOutlet UIButton *previousPicButton;

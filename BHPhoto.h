@@ -13,6 +13,7 @@
 
 @property (nonatomic, strong) NSURL *imageURL;
 @property (nonatomic, strong) UIImage *image;
+@property (nonatomic, assign) BOOL isSelected;
 
 @property (nonatomic, strong) ALAssetRepresentation* rawImage;
 

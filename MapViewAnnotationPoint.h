@@ -20,6 +20,9 @@
 @property (nonatomic,copy) UIImage *image;
 @property (nonatomic,assign) LocationDataModel *dataModel;
 
+//in case the annotation is from an album we add here the album.photoURLS
+@property (strong,nonatomic) NSMutableArray *albumPhotos;
+
 
 //@property (assign,nonatomic) BOOL usingAPIMarker;//are we using the api marker or the image one??
 

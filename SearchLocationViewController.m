@@ -357,6 +357,22 @@
     locationObject.assetURL = [assetURL absoluteString];
     locationObject.thumbnailURL = [thumbnailURL absoluteString];//need to save it as a string
     
+    if(isAlbumType && [locationObject.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]] ) {
+        //selectedAlbum
+        if(selectedAlbum.photosCount > 0) {
+            for(NSURL *photoURL in selectedAlbum.photosURLs) {
+                //update also the model for these photos
+                //TODO add also annotations for individual photos or not???
+                NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[photoURL absoluteString]];
+                if(photoModels!=nil && photoModels.count==1) {
+                    LocationDataModel *model = [photoModels objectAtIndex:0];
+                    model.latitude = locationObject.latitude;
+                    model.longitude= locationObject.longitude;
+                }
+            }
+        }
+    }
+    
 
    BOOL OK = YES;
    NSError *error;
@@ -376,15 +392,10 @@
     
     
     if(OK==YES) {
-        NSLog(@"Adding to the map....");
+        NSLog(@"Adding location object to the map....");
         [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
     }
     
-    
-    //if(image!=nil && OK==YES) {
-        
-      //  [mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
-    //}
 }
 
 
@@ -560,12 +571,23 @@
 
 
 -(void) addLocationWithThumbnail:(LocationDataModel *)model  {
-    //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
+    //always update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
     dispatch_async(dispatch_get_main_queue(), ^{
         
         CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                             longitude:[model.longitude doubleValue]];
-        [mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model ];
+        
+        //if it is an album wer add all the other photos in it, to the annotation
+        NSMutableArray *otherPhotos = nil;
+        if([model.type isEqualToString: TYPE_ALBUM] && [model.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]] ) {
+            //selectedAlbum
+            if(selectedAlbum.photosCount > 0) {
+                otherPhotos = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
+                [otherPhotos addObjectsFromArray:selectedAlbum.photosURLs];
+            }
+        }
+        
+        [mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model containingURLS:otherPhotos ];
         NSLog(@"Adding location to the map, read from database");
         
     });

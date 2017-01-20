@@ -168,6 +168,20 @@
 #pragma asset stuff
 -(void) loadAssetInfoFromDataModel:(LocationDataModel*)model {
     NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
+    
+    //if it is an album found the match in the complete array, and get the list of photos
+    NSMutableArray *photos = nil;
+    if([model.type isEqualToString:TYPE_ALBUM]) {
+        for(BHAlbum *album in self.albums) {
+            if([[album.assetURL absoluteString] isEqualToString:model.assetURL]) {
+                photos = [[NSMutableArray alloc] initWithCapacity:album.photosCount];
+                [photos addObjectsFromArray:album.photosURLs];
+            }
+        }
+    }
+    
+    
+    
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
         
@@ -184,7 +198,8 @@
                 UIImage *image = imageThumb;
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
-                [mapViewController addLocation:locationCL withImage:image andTitle:@"other test" forModel:model];
+                
+                [mapViewController addLocation:locationCL withImage:image andTitle:@"other test" forModel:model containingURLS:photos];
                 NSLog(@"Adding location to the map, read from database");
                 
             });
@@ -552,7 +567,7 @@
                                       if(imageLocation!=nil) {
                                           //There is an exif cordinate???
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil];
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:nil];
                                       }
                                   }
                                   //----------------------------------------------------------------------------------
@@ -581,7 +596,7 @@
                                       //for all images
                                       if(imageLocation!=nil) {
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil];
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:nil];
                                       }
                                   }
                                   //------------------------------------------------------------------------------------
@@ -834,6 +849,8 @@
     if(tag<albums.count) {
         //valid index
         BHAlbum *selectedOne = [albums objectAtIndex:tag];
+        
+        //TODO IT IS HERE (i am not copying everything??)
         albumViewController.title = selectedOne.name;
         albumViewController.selectedAlbum = selectedOne;
         albumViewController.selectedAlbumIndex = tag;
@@ -872,8 +889,8 @@
     
     //remove the one on the left , leaving only the back button
     albumViewController.navigationItem.leftBarButtonItem=nil;
-    [albumViewController readAlbumThumbnails];
-    [self.navigationController pushViewController: albumViewController animated:YES];
+    //[albumViewController readAlbumThumbnails]; on viewWillAppear
+    [self.navigationController pushViewController: albumViewController animated:NO];
   
     
     

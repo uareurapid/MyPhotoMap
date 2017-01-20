@@ -34,6 +34,7 @@
         [calloutAnnotations addObjectsFromArray:annots];
         
         
+        
         //[self.tableView registerClass:[CallOutViewCell class] forCellReuseIdentifier:@"myCalloutCell"];
         
         //UINib *cellNib = [UINib nibWithNibName:@"CallOutViewCell" bundle:nil];
@@ -72,12 +73,12 @@
     
     if(calloutAnnotations.count>0) {
       
-        previousPicButton.hidden = nextPictureButton.hidden = (calloutAnnotations.count == 1);
+      previousPicButton.hidden = nextPictureButton.hidden = (calloutAnnotations.count == 1);
         
       MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:0];
       
        //TODO check if a album or photo, if an album show all the other images on the same location
-        //from the asset url 
+      //from the asset url 
       LocationDataModel *theModel = myAnnotation.dataModel;
         
       //this is the thumbnail image i think
@@ -98,17 +99,37 @@
         nextPictureButton.hidden = true;
     }
     
+    //SWIP BETWEEN IMAGES IN ANOTTATIONS
+    [imageView setUserInteractionEnabled:YES];
+    // Do any additional setup after loading the view from its nib.
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    
+    // Setting the swipe direction.
+    [swipeLeft setDirection:UISwipeGestureRecognizerDirectionLeft];
+    [swipeRight setDirection:UISwipeGestureRecognizerDirectionRight];
+    
+    // Adding the swipe gesture on image view
+    [imageView addGestureRecognizer:swipeLeft];
+    [imageView addGestureRecognizer:swipeRight];
+    
     
     
     //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 }
 
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-
+- (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
+    
+    //NSInteger albumSize = enclosingAlbum.photosURLs.count;
+    //enclosingAlbum.photosURLs objectAtIndex:0];
+    if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
+        NSLog(@"Left Swipe");
+        
+    }
+    else if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
+        NSLog(@"swipe right....");
+    }
+}
 
 - (void)viewWillAppear:(BOOL)animated
 {

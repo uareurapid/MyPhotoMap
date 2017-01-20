@@ -129,6 +129,7 @@
 		72559FC6176A760A00D44435 /* iToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 72559FC4176A760A00D44435 /* iToast.m */; };
 		7255C8071E15D24200D24BC3 /* finalFlag.png in Resources */ = {isa = PBXBuildFile; fileRef = 7255C8061E15D24200D24BC3 /* finalFlag.png */; };
 		726164BC1C4328E200381048 /* UIDeviceHardware.m in Sources */ = {isa = PBXBuildFile; fileRef = 726164BB1C4328E200381048 /* UIDeviceHardware.m */; };
+		7263D2C11E2D56140045196C /* BHPhotoAlbumView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7263D2C01E2D56140045196C /* BHPhotoAlbumView.m */; };
 		726FAC77176B1A5200D19726 /* AnnotationCalloutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */; };
 		726FAC78176B1A5200D19726 /* AnnotationCalloutViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */; };
 		726FAC85176B3FBA00D19726 /* FPPopoverController.m in Sources */ = {isa = PBXBuildFile; fileRef = 726FAC80176B3FBA00D19726 /* FPPopoverController.m */; };
@@ -137,6 +138,8 @@
 		7278C826176C587700BA34E0 /* CoreDataUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7278C825176C587700BA34E0 /* CoreDataUtils.m */; };
 		728F42891E214211007EAE79 /* photos.png in Resources */ = {isa = PBXBuildFile; fileRef = 728F42871E214211007EAE79 /* photos.png */; };
 		728F428A1E214211007EAE79 /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = 728F42881E214211007EAE79 /* map.png */; };
+		729AC1D11E23017400D9715F /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = 729AC1CF1E23017400D9715F /* right.png */; };
+		729AC1D21E23017400D9715F /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = 729AC1D01E23017400D9715F /* left.png */; };
 		72DFFCA5176B74A600648679 /* CallOutViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 72DFFCA3176B74A600648679 /* CallOutViewCell.m */; };
 		72DFFCA6176B74A600648679 /* CallOutViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 72DFFCA4176B74A600648679 /* CallOutViewCell.xib */; };
 /* End PBXBuildFile section */
@@ -357,6 +360,8 @@
 		7255C8061E15D24200D24BC3 /* finalFlag.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = finalFlag.png; sourceTree = "<group>"; };
 		726164BA1C4328E200381048 /* UIDeviceHardware.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIDeviceHardware.h; sourceTree = "<group>"; };
 		726164BB1C4328E200381048 /* UIDeviceHardware.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIDeviceHardware.m; sourceTree = "<group>"; };
+		7263D2BF1E2D56140045196C /* BHPhotoAlbumView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BHPhotoAlbumView.h; sourceTree = "<group>"; };
+		7263D2C01E2D56140045196C /* BHPhotoAlbumView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BHPhotoAlbumView.m; sourceTree = "<group>"; };
 		726FAC74176B1A5200D19726 /* AnnotationCalloutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnnotationCalloutViewController.h; sourceTree = "<group>"; };
 		726FAC75176B1A5200D19726 /* AnnotationCalloutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnnotationCalloutViewController.m; sourceTree = "<group>"; };
 		726FAC76176B1A5200D19726 /* AnnotationCalloutViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AnnotationCalloutViewController.xib; sourceTree = "<group>"; };
@@ -371,6 +376,8 @@
 		7278C825176C587700BA34E0 /* CoreDataUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataUtils.m; sourceTree = "<group>"; };
 		728F42871E214211007EAE79 /* photos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = photos.png; sourceTree = "<group>"; };
 		728F42881E214211007EAE79 /* map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map.png; sourceTree = "<group>"; };
+		729AC1CF1E23017400D9715F /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
+		729AC1D01E23017400D9715F /* left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = left.png; sourceTree = "<group>"; };
 		72DFFCA2176B74A600648679 /* CallOutViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallOutViewCell.h; sourceTree = "<group>"; };
 		72DFFCA3176B74A600648679 /* CallOutViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallOutViewCell.m; sourceTree = "<group>"; };
 		72DFFCA4176B74A600648679 /* CallOutViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallOutViewCell.xib; sourceTree = "<group>"; };
@@ -476,6 +483,8 @@
 				728F42871E214211007EAE79 /* photos.png */,
 				728F42881E214211007EAE79 /* map.png */,
 				723389E11E1AC6EF00A07EEA /* placeholder.png */,
+				729AC1CF1E23017400D9715F /* right.png */,
+				729AC1D01E23017400D9715F /* left.png */,
 				7255C8061E15D24200D24BC3 /* finalFlag.png */,
 				724E8F8A1768E07E007E6939 /* MyPhotoMap-Info.plist */,
 				724E8F8B1768E07E007E6939 /* InfoPlist.strings */,
@@ -888,6 +897,8 @@
 				724E90761768E0E6007E6939 /* Cell.m */,
 				724E90771768E0E6007E6939 /* CustomCellBackground.h */,
 				724E90781768E0E6007E6939 /* CustomCellBackground.m */,
+				7263D2BF1E2D56140045196C /* BHPhotoAlbumView.h */,
+				7263D2C01E2D56140045196C /* BHPhotoAlbumView.m */,
 			);
 			name = ALBUM;
 			sourceTree = "<group>";
@@ -1032,7 +1043,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				729AC1D11E23017400D9715F /* right.png in Resources */,
 				724E8F8D1768E07E007E6939 /* InfoPlist.strings in Resources */,
+				729AC1D21E23017400D9715F /* left.png in Resources */,
 				724E8F951768E07E007E6939 /* Default.png in Resources */,
 				724E8F971768E07E007E6939 /* Default@2x.png in Resources */,
 				724E8F991768E07E007E6939 /* Default-568h@2x.png in Resources */,
@@ -1074,6 +1087,7 @@
 				724E90821768E0E6007E6939 /* PCAppDelegate.m in Sources */,
 				724E90831768E0E6007E6939 /* LocationDataModel.xcdatamodeld in Sources */,
 				724E90841768E0E6007E6939 /* MyGPSPosition.m in Sources */,
+				7263D2C11E2D56140045196C /* BHPhotoAlbumView.m in Sources */,
 				724E90851768E0E6007E6939 /* LocationDataModel.m in Sources */,
 				724E90861768E0E6007E6939 /* BHCollectionViewController.m in Sources */,
 				726164BC1C4328E200381048 /* UIDeviceHardware.m in Sources */,

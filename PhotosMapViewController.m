@@ -69,7 +69,7 @@
 }
 
 
-- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model {
+- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model containingURLS: (NSMutableArray *)photosURLS; {
     
     NSLog(@"Add location.....");
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
@@ -79,15 +79,16 @@
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
     
+    if(photosURLS!=nil && photosURLS.count>0) {
+        NSLog(@"this annotation is for an album with %d pictures",photosURLS.count);
+        annotation.albumPhotos = photosURLS;
+    }
+    
+    
     //don´t plot them until they are on the array
     [annotationsArray addObject:annotation];
     
-   // NSArray *mkannotationArray = [[NSArray alloc]initWithArray:self.annotationsArray];
-   // [self mutateCoordinatesOfClashingAnnotations:annotationsArray];
- 
-    //[self.mapView addAnnotations:mkannotationArray];
-    
-    
+    //plot them inside the visible view
     [self plotMapAnnotationsInsideView];
     
 }

@@ -15,7 +15,7 @@
 
 @implementation BHPhoto
 
-@synthesize image,rawImage;
+@synthesize image,rawImage,isSelected;
 
 #pragma mark - Properties
 
@@ -46,6 +46,7 @@
     self = [super init];
     if (self) {
         self.image = imageData;
+        self.isSelected = false;
     }
     return self;
 }
@@ -55,6 +56,7 @@
     self = [super init];
     if (self) {
         self.imageURL = imageURL;
+        self.isSelected = false;
     }
     return self;
 }

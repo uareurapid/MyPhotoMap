@@ -80,7 +80,7 @@
 {
 #warning Incomplete method implementation.
     // Return the number of rows in the section.
-    return 3;
+    return 4;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -99,8 +99,11 @@
     else if(row==1) {
         cell.textLabel.text = @"Take photo";
     }
-    else {
+    else if(row==2) {
         cell.textLabel.text = @"Delete album";
+    }
+    else {
+        cell.textLabel.text = @"Add photos to album";
     }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
@@ -168,9 +171,16 @@
     else if(row==1) {
         [albumViewController takePhoto:self];
     }
-    else {
+    else if(row==2) {
         //delete album
         [albumViewController deleteAlbum:self];
+    }
+    else {
+        //TODO code me
+        //GO TO ALBUM SELECTION (back)
+        //ALLOW SELECT PHOTOS, and add them to this album (on DB of course)
+        [self.navigationController popViewControllerAnimated:YES];
+        [albumViewController addPhotosToCurrentAlbum: self];
     }
   
     

@@ -14,6 +14,7 @@
 #import "SearchLocationViewController.h"
 #import "BHAlbum.h"
 #import "LocationDataModel.h"
+#import "BHPhotoAlbumView.h"
 
 //need to put this just in one location
 
@@ -22,7 +23,9 @@
 @interface PhotoDetailViewController : UIViewController
 
 
-@property (retain, nonatomic) IBOutlet UIImageView *photoView;
+
+@property (retain, nonatomic) IBOutlet BHPhotoAlbumView *photoCellView;
+
 @property (copy, nonatomic) NSURL *assetURL;
 @property (assign,nonatomic) NSInteger selectedIndex;
 @property (strong, nonatomic) BHAlbum *enclosingAlbum;

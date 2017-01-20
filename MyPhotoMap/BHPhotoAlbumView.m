@@ -1,21 +1,19 @@
 //
-//  BHAlbumPhotoCell.m
-//  CollectionViewTutorial
+//  BHPhotoAlbumView.m
+//  MyPhotoMap
 //
-//  Created by Bryan Hansen on 11/3/12.
-//  Copyright (c) 2012 Bryan Hansen. All rights reserved.
+//  Created by PC Dreams on 16/01/2017.
+//  Copyright © 2017 Paulo Cristo. All rights reserved.
 //
 
-#import "BHAlbumPhotoCell.h"
-#import <QuartzCore/QuartzCore.h>
+#import "BHPhotoAlbumView.h"
 
-@interface BHAlbumPhotoCell ()
+@interface BHPhotoAlbumView ()
 
-@property (nonatomic, strong, readwrite) UIImageView *imageView;
 
 @end
 
-@implementation BHAlbumPhotoCell
+@implementation BHPhotoAlbumView
 
 #pragma mark - Lifecycle
 
@@ -24,6 +22,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor colorWithWhite:0.85f alpha:1.0f];
+        self.superview.backgroundColor = (__bridge UIColor * _Nullable)([UIColor blackColor].CGColor);
         
         self.layer.borderColor = [UIColor whiteColor].CGColor;
         self.layer.borderWidth = 3.0f;
@@ -35,32 +34,17 @@
         self.layer.rasterizationScale = [UIScreen mainScreen].scale;
         self.layer.shouldRasterize = YES;
         
-        self.imageView = [[UIImageView alloc] initWithFrame:self.bounds];
+        CGRect rect = CGRectMake(frame.origin.x-20, frame.origin.y-20, frame.size.width, frame.size.height-20);
+        
+        self.imageView = [[UIImageView alloc] initWithFrame: rect];
+        self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.clipsToBounds = YES;
         
-        [self.contentView addSubview:self.imageView];
+        [self addSubview:self.imageView];
     }
-
+    
     return self;
 }
-
-- (void)prepareForReuse
-{
-    [super prepareForReuse];
-    
-    self.imageView.image = nil;
-}
-
--(void) setPhotoSelected:(BOOL)selected {
-    [self setSelected:selected];
-    if(selected) {
-       self.layer.borderColor = [UIColor blueColor].CGColor;
-    }
-    else {
-       self.layer.borderColor = [UIColor whiteColor].CGColor;
-    }
-}
-
 
 @end

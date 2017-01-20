@@ -15,7 +15,7 @@
 
 @implementation PhotoDetailViewController
 
-@synthesize photoView,assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel;
+@synthesize assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel,photoCellView;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -47,7 +47,22 @@
     [super viewDidLoad];
     
     selectedIndex = 0;
-    [photoView setUserInteractionEnabled:YES];
+    //[photoView setUserInteractionEnabled:YES];
+    
+    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
+    photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
+    photoCellView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    photoCellView.imageView.userInteractionEnabled = YES;
+    
+    //initWithFrame:CGRectMake(-10, 70, 320, 480)];
+    
+    [self.view addSubview:photoCellView];
+    
+    [self.view bringSubviewToFront:photoCellView];
+    
+    //UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageThumbnailWithGesture:)];
+    //[photoCellView.imageView addGestureRecognizer:tapGesture];
+    
     // Do any additional setup after loading the view from its nib.
     UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
     UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -56,13 +71,20 @@
     [swipeLeft setDirection:UISwipeGestureRecognizerDirectionLeft];
     [swipeRight setDirection:UISwipeGestureRecognizerDirectionRight];
     
+    [photoCellView.imageView addGestureRecognizer:swipeLeft];
+    [photoCellView.imageView addGestureRecognizer:swipeRight];
+    
     // Adding the swipe gesture on image view
-    [photoView addGestureRecognizer:swipeLeft];
-    [photoView addGestureRecognizer:swipeRight];
+    //[photoView addGestureRecognizer:swipeLeft];
+    //[photoView addGestureRecognizer:swipeRight];
     
     locationEntitiesArray = [[NSMutableArray alloc] init];
     
     [self updateTitle];
+}
+
+- (void)didTapImageThumbnailWithGesture:(UITapGestureRecognizer *)tapGesture{
+    NSLog(@"image was clicked");
 }
 
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
@@ -85,7 +107,7 @@
     
     if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         NSLog(@"Right Swipe");
-        if(selectedIndex < (albumSize + 1) ) {
+        if(selectedIndex < (albumSize-1) ) {
             selectedIndex++;
         }
         else {
@@ -95,11 +117,19 @@
     
     NSLog(@"selected index %ld and size is %ld",(long)selectedIndex,(long)albumSize);
     
+    //Curl Animation!!!
     assetURL = [enclosingAlbum.photosURLs objectAtIndex:selectedIndex];
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:photoCellView.imageView cache:YES];
+    [UIView setAnimationDuration:1.5];
+    /// ----> [YourView CodeTo Be Done];
+    [UIView commitAnimations];
+    
     [self readFullSizeImageAndThumbnail];
     
     
 }
+
 
 -(void) updateTitle {
     
@@ -296,7 +326,8 @@
             //alwyas update the UI in the main thread
             dispatch_async(dispatch_get_main_queue(), ^{
                 
-                photoView.image = image;
+                photoCellView.imageView.image = image;
+                //photoView.image = image;
                 
             });
         }

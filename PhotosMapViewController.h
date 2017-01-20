@@ -24,7 +24,7 @@
 @property (strong, nonatomic) UIPopoverController *annotationsPopoverControl;
 
 //add the image with the location to the map, to create the annotation
-- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model;
+- (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model containingURLS: (NSMutableArray *)photosURLS;
 
 - (void)mutateCoordinatesOfClashingAnnotations:(NSArray *)annotations;
 - (NSDictionary *)groupAnnotationsByLocationValue:(NSArray *)annotations;

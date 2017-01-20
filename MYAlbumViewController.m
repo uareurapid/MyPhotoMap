@@ -11,6 +11,10 @@
 #import "AlbumOptionsTableViewController.h"
 #import "PCAppDelegate.h"
 
+#define ACTIONS_TAG 0
+#define SELECT_ALL_TAG 1
+#define UNSELECT_ALL_TAG 2
+
 @interface MYAlbumViewController ()
 
 @end
@@ -37,6 +41,7 @@
         //add the settings button
         UIBarButtonItem *addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Actions"
                                                                            style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
+        addAlbumButton.tag = ACTIONS_TAG;//to know the function of the button
         self.navigationItem.rightBarButtonItem = addAlbumButton;
         albumsNames = [[NSMutableArray alloc] init];
         
@@ -52,7 +57,7 @@
 }
 
 -(void) viewWillAppear:(BOOL)animated {
-    
+    [self readAlbumThumbnails];
 }
 
 //add the "real" existing albums" names
@@ -69,12 +74,36 @@
 }
 
 -(IBAction)settingsClicked:(id) sender{
-  //will show a lit with two options
-    //edit location and take photo
-    AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
-    [self.navigationController pushViewController:optionsController animated:YES];
+    
+    NSInteger tag = self.navigationItem.rightBarButtonItem.tag;
+    if(tag == ACTIONS_TAG) {
+        //will show a lit with two options
+        //edit location and take photo
+        AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
+        [self.navigationController pushViewController:optionsController animated:YES];
+    }
+    else if(tag == SELECT_ALL_TAG) {
+        [self selectAllAlbumThumbnails: true];
+        self.navigationItem.rightBarButtonItem.tag = UNSELECT_ALL_TAG;
+        self.navigationItem.rightBarButtonItem.title = @"UnSelect All";
+    }
+    else {
+        //unselect all
+        [self selectAllAlbumThumbnails: false];
+        self.navigationItem.rightBarButtonItem.tag = ACTIONS_TAG;
+        self.navigationItem.rightBarButtonItem.title = @"Actions";
+    }
+    
+  
 }
 
+-(IBAction)addPhotosToCurrentAlbum:(id)sender {
+    NSLog(@"start selecting photos");
+    //TODO disable the button or change it´s label to select
+    //add another one to select all
+    self.navigationItem.rightBarButtonItem.tag = SELECT_ALL_TAG;
+    self.navigationItem.rightBarButtonItem.title = @"Select All";
+}
 
 #pragma take photo selector
 - (IBAction)takePhoto:(id)sender {
@@ -93,15 +122,20 @@
     view.navigationItem.rightBarButtonItem = nil;
     view.navigationItem.leftBarButtonItem = nil;
     
-    NSLog(@"selected album index: %d",selectedAlbumIndex);
+    NSLog(@"selected album index: %lu",(unsigned long)selectedAlbumIndex);
     
     //OK I HAVE THE SELECTED ALBUM
     BHAlbum *theSelectedAlbum = [self.albums objectAtIndex:selectedAlbumIndex];
     view.selectedAlbum = theSelectedAlbum;
-    view.assetURL = theSelectedAlbum.assetURL; //set the asset url
+    view.assetURL = theSelectedAlbum.assetURL; //set the asset url (nil if a yealy album)
+    theSelectedAlbum.photosURLs = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
+    [theSelectedAlbum.photosURLs addObjectsFromArray:[selectedAlbum photosURLs]];
+    
+    //this has the ciorrect value: selectedAlbum.photosURLs.count
     
     //assign the correct photo
-    if(theSelectedAlbum.photos.count>0) {
+    if(theSelectedAlbum.photosURLs.count>0) {
+        //TODO this photos is not being added 
         BHPhoto *photo = [theSelectedAlbum.photos objectAtIndex:0];
         view.image = photo.image;
         //we save the thumbnail URL on the LocationDataModel
@@ -225,7 +259,7 @@
             albumSingle.photosURLs = [[NSMutableArray alloc] init];
             
             //if the record exists on DB, try get the title name from the album/pic description
-            NSString *theURL = [selectedAlbum.assetURL absoluteString];
+            NSString *theURL = [[myasset valueForProperty:ALAssetPropertyAssetURL] absoluteString];
             if(theURL!=nil) {
                 NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theURL];
                 if(records!=nil && records.count==1) {
@@ -233,15 +267,16 @@
                     if(![model.desc isEqualToString:@"NA"]) {
                         albumSingle.name = model.desc;
                     }
+                    else {
+                        //DEFAULT
+                        albumSingle.name = [NSString stringWithFormat:@"%lu",(unsigned long)self.albums.count ];
+                    }
                 }
-                else {
-                    //DEFAULT
-                     albumSingle.name = [NSString stringWithFormat:@"%d",self.albums.count ];
-                }
+                
             }
             else {
                  //DEFAULT
-                 albumSingle.name = [NSString stringWithFormat:@"%d",self.albums.count ];
+                 albumSingle.name = [NSString stringWithFormat:@"%lu",(unsigned long)self.albums.count ];
             }
             
            
@@ -270,17 +305,31 @@
     
     ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
     
-    //BHAlbum *selected = [self.albums objectAtIndex:0];
+    //pass each assetUrl at the time
     for(int i=0; i < selectedAlbum.photosURLs.count; i++) {
-       //NSLog(@"Checking %@ which is %d of %d",[selectedAlbum.photosURLs objectAtIndex:i],i,selectedAlbum.photosURLs.count);
        [assetslibrary assetForURL:[selectedAlbum.photosURLs objectAtIndex:i] resultBlock:resultblock failureBlock:failureblock];
-       
     }
     [self.collectionView.collectionViewLayout invalidateLayout];
     [self.collectionView reloadData];
     
     
 }
+
+- (void)selectAllAlbumThumbnails: (BOOL) select {
+    
+    //set them as selected
+    for(BHAlbum *album in self.albums) {
+        BHPhoto *photo = [album.photos objectAtIndex:0];
+        photo.isSelected = select;
+    }
+    
+    //make the table refresh
+    [self.collectionView.collectionViewLayout invalidateLayout];
+    [self.collectionView reloadData];
+    
+    
+}
+
 
 #pragma mark - UICollectionViewDataSource
 
@@ -297,6 +346,24 @@
     return 1; 
 }
 
+//TODO implement this instead of the tap gesture
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
+    BHAlbumPhotoCell *photoCell =
+    [collectionView dequeueReusableCellWithReuseIdentifier:PhotoCellIdentifier
+                                              forIndexPath:indexPath];
+    [photoCell setPhotoSelected:true];
+    
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath{
+    BHAlbumPhotoCell *photoCell =
+    [collectionView dequeueReusableCellWithReuseIdentifier:PhotoCellIdentifier
+                                              forIndexPath:indexPath];
+    [photoCell setPhotoSelected:false];
+    
+}
+
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
                   cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -311,13 +378,12 @@
     
     if(row < self.albums.count) {
         BHAlbum *albumSelected =self.albums[row];
-        //NSLog(@"entering code %d %d", photoIndex,albumSelected.photos.count);
         
         NSInteger tag = row;
         
         if(albumSelected.photos!=nil && albumSelected.photos.count > photoIndex) {
             BHPhoto *photo = albumSelected.photos[photoIndex];//which should only be 1indexPath.item
-            
+            BOOL isSelected = photo.isSelected;
             // load photo images in the background
             __weak BHCollectionViewController *weakSelf = self;
             NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
@@ -334,6 +400,8 @@
                         
                         cell.imageView.image = photo.image;
                         cell.imageView.userInteractionEnabled = YES;
+                        [cell setPhotoSelected:isSelected];
+                        //TODO do i need to have this alos on the main thread?? probably just update the image no???
                         cell.imageView.tag = tag;
                         UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithGesture:)];
                          [cell.imageView addGestureRecognizer:tapGesture];
@@ -346,11 +414,6 @@
             
             [self.thumbnailQueue addOperation:operation];
         }
-        else {
-            //NSLog(@"NILZING!");
-            //photoCell.imageView.image =nil;
-        }
-        
         
     }
     
@@ -376,7 +439,7 @@
         titleView.titleLabel.text = albumSelected.name;
     }
     else {
-        titleView.titleLabel.text = [NSString stringWithFormat:@"%d",row];
+        titleView.titleLabel.text = [NSString stringWithFormat:@"%ld",(long)row];
     }
     
     return titleView;

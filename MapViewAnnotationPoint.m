@@ -10,7 +10,7 @@
 
 @implementation MapViewAnnotationPoint
 
-@synthesize coordinate,title,subtitle,assetURL,image,dataModel;
+@synthesize coordinate,title,subtitle,assetURL,image,dataModel,albumPhotos;
 
 
 - (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title
@@ -21,6 +21,7 @@
         //NSLog(@"title is %@",t);
         coordinate = cord;
         self.title = title;
+        albumPhotos = [[NSMutableArray alloc] init];
     
     }
     return self;
@@ -31,6 +32,7 @@
     {
         self.assetURL = url;
         self.image = nil;
+        albumPhotos = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -41,6 +43,7 @@
     {
         self.assetURL = nil;
         self.image = image;
+        albumPhotos = [[NSMutableArray alloc] init];
     }
     return self;
 }
