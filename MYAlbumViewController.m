@@ -15,6 +15,11 @@
 #define SELECT_ALL_TAG 1
 #define UNSELECT_ALL_TAG 2
 
+#define ACTION_DELETE_ALBUM 3
+#define ACTION_TAKE_PHOTO 4
+#define ACTION_ADD_LOCATION 5
+#define ACTION_ADD_TO_ALBUM 6
+
 @interface MYAlbumViewController ()
 
 @end
@@ -28,7 +33,7 @@
 @synthesize listAlbumsAvailableController;
 @synthesize albumsNames;
 @synthesize selectedAlbumIndex;
-@synthesize selectedAlbum;
+@synthesize selectedAlbum,selectedPhoto,selectedAction,selectedItems;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -52,11 +57,14 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    selectedItems = 0;
 	// Do any additional setup after loading the view.
     
 }
 
 -(void) viewWillAppear:(BOOL)animated {
+    self.selectedAction = 0;
+    [self.collectionView reloadData];
     [self readAlbumThumbnails];
 }
 
@@ -79,13 +87,54 @@
     if(tag == ACTIONS_TAG) {
         //will show a lit with two options
         //edit location and take photo
-        AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
-        [self.navigationController pushViewController:optionsController animated:YES];
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Album actions"
+                                                                       message:@"Select one option:"
+                                                                preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        
+        UIAlertAction *editAlbumAction = [UIAlertAction actionWithTitle:@"Edit album location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            // this block runs when the driving option is selected
+            self.selectedAction = ACTION_ADD_LOCATION;
+            [self addLocation:nil];
+        }];
+        UIAlertAction *takePhotoAction = [UIAlertAction actionWithTitle:@"Take photo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            // this block runs when the walking option is selected
+            self.selectedAction = ACTION_ADD_LOCATION;
+            [self takePhoto:nil];
+        }];
+        UIAlertAction *deleteAlbumAction = [UIAlertAction actionWithTitle:@"Delete album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            self.selectedAction = ACTION_DELETE_ALBUM;
+            [self deleteAlbum:nil];
+        }];
+        
+        UIAlertAction *addPhotosAction = [UIAlertAction actionWithTitle:@"Add photos to album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            self.selectedAction = ACTION_ADD_TO_ALBUM;
+            [self addPhotosToCurrentAlbum:nil];
+        }];
+        
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+        
+        [alert addAction:editAlbumAction];
+        [alert addAction:takePhotoAction];
+        [alert addAction:deleteAlbumAction];
+        [alert addAction:addPhotosAction];
+        [alert addAction:cancelAction];
+        
+        alert.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
+        [self presentViewController:alert animated:YES completion:nil];
+        
+        /*AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
+        [self.navigationController pushViewController:optionsController animated:YES];*/
     }
     else if(tag == SELECT_ALL_TAG) {
         [self selectAllAlbumThumbnails: true];
         self.navigationItem.rightBarButtonItem.tag = UNSELECT_ALL_TAG;
         self.navigationItem.rightBarButtonItem.title = @"UnSelect All";
+    }
+    else if(tag == ACTION_ADD_TO_ALBUM && selectedPhoto!=nil && selectedItems>0) {
+        [self addPhotosToCurrentAlbum:nil];
+        [self selectAllAlbumThumbnails:false];
     }
     else {
         //unselect all
@@ -98,12 +147,43 @@
 }
 
 -(IBAction)addPhotosToCurrentAlbum:(id)sender {
+    //TODO actual theyr are already in this album, so need to ask for other or create a new one!!!
     NSLog(@"start selecting photos");
     //TODO disable the button or change it´s label to select
     //add another one to select all
     self.navigationItem.rightBarButtonItem.tag = SELECT_ALL_TAG;
     self.navigationItem.rightBarButtonItem.title = @"Select All";
 }
+/*
+ - (IBAction)addAlbumClicked:(id)sender{
+ 
+ UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New album..." message:@"Enter the album name" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
+ alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+ [alert show];
+ }
+ 
+ - (IBAction)settingsClicked:(id)sender{
+ 
+ UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+ message:@"Will show a listview here"
+ delegate:nil
+ cancelButtonTitle:@"OK"
+ otherButtonTitles:nil];
+ [alert show];
+ 
+ }
+ 
+ //the delegate for the new Album
+ - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+ 
+ if(buttonIndex==1) { //0 - cancel, 1 - save
+ NSString *albumName = [alertView textFieldAtIndex:0].text;
+ [self createNewAlbum:albumName];
+ }
+ 
+ }
+
+*/
 
 #pragma take photo selector
 - (IBAction)takePhoto:(id)sender {
@@ -322,11 +402,45 @@
         BHPhoto *photo = [album.photos objectAtIndex:0];
         photo.isSelected = select;
     }
+    selectedItems = select ? self.albums.count : 0;
     
     //make the table refresh
     [self.collectionView.collectionViewLayout invalidateLayout];
     [self.collectionView reloadData];
     
+    
+}
+
+-(void)selectAlbumPhoto: (BOOL) select atIndex:(NSInteger) index {
+
+    if(index < self.albums.count) {
+        
+        self.selectedPhoto  = [self.albums objectAtIndex:index];
+        
+        if(select) {
+            
+            BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
+            photo.isSelected = select;
+            //TODO the button should not be called select all anymore
+            self.selectedAction = ACTION_ADD_TO_ALBUM;
+            self.navigationItem.rightBarButtonItem.tag = ACTION_ADD_TO_ALBUM;
+            self.navigationItem.rightBarButtonItem.title = @"Add to album";
+            selectedItems+=1;
+        }
+        else {
+            BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
+            photo.isSelected = select;
+            self.selectedPhoto = nil;
+            selectedItems-=1;
+            if(selectedItems < 0) {
+               selectedItems = 0;
+            }
+        }
+        
+        //make the table refresh
+        [self.collectionView.collectionViewLayout invalidateLayout];
+        [self.collectionView reloadData];
+    }
     
 }
 
@@ -346,21 +460,24 @@
     return 1; 
 }
 
+//TODO i just changed the animation on the push, and the title, don´t know why i got the ghost albums at 1st run..
+//I SHOULD JUST MOVE TO NEXT PAGE(details) ON DOUBLE TAP (or button labeled GO)
+//OTHERWISE IT SHOULD JUST SELECT
+
 //TODO implement this instead of the tap gesture
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
     BHAlbumPhotoCell *photoCell =
     [collectionView dequeueReusableCellWithReuseIdentifier:PhotoCellIdentifier
                                               forIndexPath:indexPath];
-    [photoCell setPhotoSelected:true];
     
-}
-
-- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath{
-    BHAlbumPhotoCell *photoCell =
-    [collectionView dequeueReusableCellWithReuseIdentifier:PhotoCellIdentifier
-                                              forIndexPath:indexPath];
-    [photoCell setPhotoSelected:false];
+    NSInteger row = indexPath.section;
+    NSInteger photoIndex = indexPath.item;
+    
+    if(row < self.albums.count) {
+        self.selectedPhoto = self.albums[row];
+    }
+    [photoCell setPhotoSelected:true];
     
 }
 
@@ -466,9 +583,6 @@
 
 //the user tapped on the image
 - (void)didTapImageWithGesture:(UITapGestureRecognizer *)tapGesture{
-    NSLog(@"image was clicked");
-    
-    
     
     UIImageView *imageView = (UIImageView*)tapGesture.view;
     NSInteger tag = imageView.tag;
@@ -477,40 +591,41 @@
     
     
     if(tag < self.albums.count) {
-        
        
         //represents here an album with just one image
-        BHAlbum *albumTap= [self.albums objectAtIndex:tag];
+        BHAlbum *albumTap = [self.albums objectAtIndex:tag];
+        BHPhoto *photo = [albumTap.photos objectAtIndex:0];
         
-        detailViewController.title = albumTap.name;
-        NSURL *assetURL = [albumTap.photosURLs objectAtIndex:0];
-        NSLog(@"The url here is : %@",assetURL);
-        detailViewController.enclosingAlbum = selectedAlbum;
-        //the albumTap has just one image
-        detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
-        NSLog(@"pushing now: with assetURL %@",detailViewController.assetURL);
-        [self.navigationController pushViewController:detailViewController animated:NO];
-        
-        
-        //NSString *url =@"";
-        //[self showDetailView:[albumTap.photosURLs objectAtIndex:0]];
+        //nothing selected yet, select it now
+        if(self.selectedAction==ACTION_ADD_TO_ALBUM) {
+            
+            
+            if(!photo.isSelected) {
+                
+                [self selectAlbumPhoto:YES atIndex:tag];
+                NSLog(@"select now at position %ld",(long)tag);
+            }
+            else {
+                [self selectAlbumPhoto:NO atIndex:tag];
+                NSLog(@"Unselect now at position %ld",(long)tag);
+            }
+            
+
+        }
+        else {
+            //JUST SHOW DETAIL
+            detailViewController.title = albumTap.name;
+            NSURL *assetURL = [albumTap.photosURLs objectAtIndex:0];
+            NSLog(@"The url here is : %@",assetURL);
+            detailViewController.enclosingAlbum = selectedAlbum;
+            //the albumTap has just one image
+            detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
+            NSLog(@"pushing now: with assetURL %@",detailViewController.assetURL);
+            [self.navigationController pushViewController:detailViewController animated:NO];
+        }
         
     }
     
-        /*
-        //valid index
-        // Create the item to share (in this example, a url)
-               
-         NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
-         SHKItem *item = [SHKItem URL:url title:@"ShareKit //is Awesome!"];
-         
-         // Get the ShareKit action sheet
-         SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
-         
-         // Display the action sheet
-         [actionSheet showInView:imageView];
-        
-    }*/
       
     
 }

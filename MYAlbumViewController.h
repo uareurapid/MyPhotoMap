@@ -30,11 +30,16 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 //will actaully be abums of just one photo/thumbnail
 
+//@property (assign, nonatomic) BHAlbumPhotoCell *selectedPhotoCell;
 
 @property (strong, nonatomic) BHAlbum *selectedAlbum;
+@property (strong, nonatomic) BHAlbum *selectedPhoto;
 @property (assign, nonatomic) NSUInteger selectedAlbumIndex;
 
 @property (nonatomic, strong) NSMutableArray *albumsNames;
+
+@property (assign, nonatomic) NSInteger selectedAction;
+@property (assign, nonatomic) NSInteger selectedItems;
 
 
 - (void)showDetailView: (NSString *) imgURL;
