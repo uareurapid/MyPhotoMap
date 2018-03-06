@@ -17,7 +17,8 @@
 @property (nonatomic,copy) NSString *title;
 @property (nonatomic,copy) NSString *subtitle;
 @property (nonatomic,copy) NSURL *assetURL;
-@property (nonatomic,copy) UIImage *image;
+@property (nonatomic,copy) UIImage *image;//this is actually the thumbnail only
+@property (nonatomic,copy) UIImage *imageFullScreen;
 @property (nonatomic,assign) LocationDataModel *dataModel;
 
 //in case the annotation is from an album we add here the album.photoURLS

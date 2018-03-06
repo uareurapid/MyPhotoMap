@@ -9,6 +9,7 @@
 #import "PhotosMapViewController.h"
 #import "AnnotationCalloutViewController.h"
 #import "FPPopoverController.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface PhotosMapViewController ()
 
@@ -71,13 +72,18 @@
 
 - (void) addLocation:(CLLocation*) imageLocation withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model containingURLS: (NSMutableArray *)photosURLS; {
     
-    NSLog(@"Add location.....");
+    //NSLog(@"Add location.....");
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
     annotation.subtitle = title;
+    //if(model != nil && model.assetURL!=nil) {
+    //     annotation.assetURL = NSU model.assetURL;
+    //}
+   
     
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
+    //[self getFullScreenImage: annotation];
     
     if(photosURLS!=nil && photosURLS.count>0) {
         NSLog(@"this annotation is for an album with %d pictures",photosURLS.count);
@@ -91,6 +97,67 @@
     //plot them inside the visible view
     [self plotMapAnnotationsInsideView];
     
+}
+
+//TODO CHECK THIS ONE
+- (void) addLocation:(CLLocation*) imageLocation withThumbnail: (UIImage*) thumb withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model containingURLS: (NSMutableArray *)photosURLS {
+    
+    CLLocationCoordinate2D coordinate = imageLocation.coordinate;
+    MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
+    annotation.subtitle = title;
+    //annotation.imageFullScreen = image;
+    //annotation.image = thumb;
+    //if(model != nil && model.assetURL!=nil) {
+    //     annotation.assetURL = NSU model.assetURL;
+    //}
+    
+    
+    //we save the data mode to know if dealing with a single album or a photo
+    annotation.dataModel = model;
+    annotation.imageFullScreen = image;
+    
+    if(photosURLS!=nil && photosURLS.count>0) {
+        NSLog(@"this annotation is for an album with %d pictures",photosURLS.count);
+        annotation.albumPhotos = photosURLS;
+    }
+    
+    
+    //don´t plot them until they are on the array
+    [annotationsArray addObject:annotation];
+    
+    //plot them inside the visible view
+    [self plotMapAnnotationsInsideView];
+}
+
+//TODO do this when we add the annotation
+-(void) getFullScreenImage:(MapViewAnnotationPoint *) annotation {
+    
+    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
+        
+        __block UIImage *image = [self imageFromAsset:asset];
+        if(image!=nil) {
+           annotation.imageFullScreen = image;
+        }
+        
+        
+    };
+    
+    ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
+        NSLog(@"Failed to get image for assetURL %@: ",annotation.dataModel.assetURL);
+        //failed to get image.
+    };
+    
+    ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+    [assetslibrary assetForURL: [NSURL URLWithString: annotation.dataModel.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+}
+
+//get the full screen image representation
+-(UIImage *)imageFromAsset:(ALAsset *)asset
+{
+    ALAssetRepresentation *representation = [asset defaultRepresentation];
+    return [UIImage imageWithCGImage:representation.fullResolutionImage
+                               scale:[representation scale]
+                         orientation:(UIImageOrientation)[representation orientation]];
 }
 
 
@@ -245,7 +312,7 @@
 //to handle annotation touch
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
-    //NSLog(@"I CLICKED ON THE ANNOTATION");
+    NSLog(@"I CLICKED ON THE ANNOTATION");
 }
 
 //This is where i set the image for the anottation passed by parameter
@@ -363,9 +430,9 @@
     NSMutableArray *annotsOnSameLocation = [[NSMutableArray alloc] initWithObjects:myAnnotation, nil];
     
     for (MapViewAnnotationPoint *annotation in annotationsArray) {
-        if(annotation.coordinate.latitude == myAnnotation.coordinate.latitude &&
-           annotation.coordinate.longitude == myAnnotation.coordinate.longitude &&
-           [annotation.assetURL isEqual:myAnnotation.assetURL]==NO) {
+        if( (annotation.coordinate.latitude == myAnnotation.coordinate.latitude) &&
+            (annotation.coordinate.longitude == myAnnotation.coordinate.longitude) &&
+           ![self isSameAnnotationModel:annotation andSecondAnnotation:myAnnotation]) {
            // NSLog(@"Found another annotation on the same place:");
            // NSLog(@"First assetURL: %@ second assetURL: %@",annotation.assetURL, myAnnotation.assetURL);
             [annotsOnSameLocation addObject:annotation];
@@ -374,6 +441,18 @@
     return annotsOnSameLocation;
 }
 
+//check if they represent the same object or not
+-(BOOL) isSameAnnotationModel:(MapViewAnnotationPoint*) anotOne andSecondAnnotation: (MapViewAnnotationPoint*) anotTwo {
+    
+    if(anotOne.assetURL !=nil && [anotOne.assetURL.absoluteString isEqualToString:anotTwo.assetURL.absoluteString]) {
+        return true;
+    }
+    else if(anotOne.dataModel!=nil && anotTwo.dataModel!=nil) {
+        return [anotOne.dataModel.assetURL isEqualToString:anotTwo.dataModel.assetURL];
+    }
+    
+    return false;
+}
 
 //returns squared image
 - (UIImage *) getResizedImage:(UIImage *) original {

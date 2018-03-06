@@ -15,12 +15,17 @@
 
 @implementation BHPhotoAlbumView
 
+CGFloat firstX;
+CGFloat firstY;
+CGFloat lastRotation;
+
 #pragma mark - Lifecycle
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
+        //lastRotation = 0.0;
         self.backgroundColor = [UIColor colorWithWhite:0.85f alpha:1.0f];
         self.superview.backgroundColor = (__bridge UIColor * _Nullable)([UIColor blackColor].CGColor);
         
@@ -42,9 +47,58 @@
         self.imageView.clipsToBounds = YES;
         
         [self addSubview:self.imageView];
+        
     }
+    
+    /**
+    UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(move:)];
+    [panRecognizer setMinimumNumberOfTouches:1];
+    [panRecognizer setMaximumNumberOfTouches:1];
+    [panRecognizer setDelegate:self];
+    [self.imageView addGestureRecognizer:panRecognizer];
+    
+    UIRotationGestureRecognizer* rotationRecognizer = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(rotate:)];
+    [rotationRecognizer setDelegate:self];
+    [self addGestureRecognizer:rotationRecognizer];*/
     
     return self;
 }
+/**
 
+-(void)move:(id)sender {
+    [self bringSubviewToFront:[(UIPanGestureRecognizer*)sender view]];
+    CGPoint translatedPoint = [(UIPanGestureRecognizer*)sender translationInView:self];
+    
+    if([(UIPanGestureRecognizer*)sender state] == UIGestureRecognizerStateBegan) {
+        firstX = [[sender view] center].x;
+        firstY = [[sender view] center].y;
+    }
+    translatedPoint = CGPointMake(firstX+translatedPoint.x, firstY+translatedPoint.y);
+    
+    [[sender view] setCenter:translatedPoint];
+    
+    if([(UIPanGestureRecognizer*)sender state] == UIGestureRecognizerStateEnded) {
+        
+        CGFloat finalX = translatedPoint.x + (0*[(UIPanGestureRecognizer*)sender velocityInView:self.imageView].x);
+        CGFloat finalY = translatedPoint.y + (0*[(UIPanGestureRecognizer*)sender velocityInView:self.imageView].y);
+        
+        [[sender view] setCenter:CGPointMake(finalX, finalY)];
+    }
+}
+
+-(void)rotate:(id)sender {
+    
+    if([(UIRotationGestureRecognizer*)sender state] == UIGestureRecognizerStateEnded) {
+        lastRotation = 0.0;
+        return;
+    }
+    
+    CGFloat rotation = 0.0 - (lastRotation - [(UIRotationGestureRecognizer*)sender rotation]);
+    
+    CGAffineTransform currentTransform = self.imageView.transform;
+    CGAffineTransform newTransform = CGAffineTransformRotate(currentTransform,rotation);
+    
+    [self.imageView setTransform:newTransform];
+    lastRotation = [(UIRotationGestureRecognizer*)sender rotation];
+}*/
 @end

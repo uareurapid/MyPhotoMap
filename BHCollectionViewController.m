@@ -142,6 +142,10 @@
     
 }
 
+-(void) viewDidAppear:(BOOL)animated{
+    NSLog(@"apperead");
+}
+
 //get all the records from db
 - (void) fetchLocationRecords{
     [databaseRecords removeAllObjects];
@@ -187,8 +191,13 @@
         
         CGImageRef thumb = [asset thumbnail];
         
+        /*ALAssetRepresentation *representation = [asset defaultRepresentation];
+        __block UIImage *imageFull = [UIImage imageWithCGImage:representation.fullScreenImage
+                                   scale:[representation scale]
+                             orientation:(UIImageOrientation)[representation orientation]];
+        */
         
-        if(thumb!=nil) {
+        if(thumb!=nil /*&& imageFull!=nil*/) {
             
             __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
             
@@ -196,11 +205,15 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 UIImage *image = imageThumb;
+                //UIImage *imageFinal = imageFull;
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
                 
+                //TODO add the full size here:
                 [mapViewController addLocation:locationCL withImage:image andTitle:@"other test" forModel:model containingURLS:photos];
-                NSLog(@"Adding location to the map, read from database");
+                
+                //[mapViewController addLocation:locationCL withThumbnail:image withImage:imageFinal andTitle:@"other test" forModel:model containingURLS:photos];
+                //NSLog(@"Adding location to the map, read from database");
                 
             });
         }
@@ -216,7 +229,6 @@
     ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
     [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
 }
-
 
 /*
  2013-06-05 16:53:06.517 CollectionViewTutorial[824:907] passed this

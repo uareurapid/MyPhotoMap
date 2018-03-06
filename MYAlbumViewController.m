@@ -389,8 +389,8 @@
     for(int i=0; i < selectedAlbum.photosURLs.count; i++) {
        [assetslibrary assetForURL:[selectedAlbum.photosURLs objectAtIndex:i] resultBlock:resultblock failureBlock:failureblock];
     }
-    [self.collectionView.collectionViewLayout invalidateLayout];
-    [self.collectionView reloadData];
+    //[self.collectionView.collectionViewLayout invalidateLayout];
+    //[self.collectionView reloadData];
     
     
 }
@@ -507,22 +507,25 @@
                 
                 //UIImage *image = [UIImage imageWithCGImage:[photo.rawImage fullScreenImage]];
                 //UIImage *image = [photo image];
-                
+                //TODO readme https://stackoverflow.com/questions/42845357/ios-fix-cellforitematindexpath-image-loading-issue
                 dispatch_async(dispatch_get_main_queue(), ^{
                     // then set them via the main queue if the cell is still visible.
-                    if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
-                        BHAlbumPhotoCell *cell =
-                        (BHAlbumPhotoCell *)[weakSelf.collectionView cellForItemAtIndexPath:indexPath];
+                    //if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
+                        //BHAlbumPhotoCell *cell =
+                        //(BHAlbumPhotoCell *)[weakSelf.collectionView cellForItemAtIndexPath:indexPath];
                         //NSLog(@"adding it here2");
                         
-                        cell.imageView.image = photo.image;
-                        cell.imageView.userInteractionEnabled = YES;
-                        [cell setPhotoSelected:isSelected];
+                        photoCell.imageView.image = photo.image;
+                        photoCell.imageView.userInteractionEnabled = YES;
+                        [photoCell setPhotoSelected:isSelected];
                         //TODO do i need to have this alos on the main thread?? probably just update the image no???
-                        cell.imageView.tag = tag;
+                        photoCell.imageView.tag = tag;
                         UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithGesture:)];
-                         [cell.imageView addGestureRecognizer:tapGesture];
-                    }
+                         [photoCell.imageView addGestureRecognizer:tapGesture];
+                        
+                        // fix two: don't get the cell.  we know the index path, reload it!
+                        //[collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                   // }
                 });
             }];
             

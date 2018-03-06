@@ -82,8 +82,10 @@
       LocationDataModel *theModel = myAnnotation.dataModel;
         
       //this is the thumbnail image i think
-      UIImage *image = myAnnotation.image;
-      //  cell.imageName.text = myAnnotation.subtitle;
+      UIImage *image = myAnnotation.image; //TODO WAS OK
+        
+      //  UIImage *image = myAnnotation.imageFullScreen;
+        //cell.imageName.text = myAnnotation.subtitle;
         
         
         
@@ -180,12 +182,13 @@
         UIImage *image = myAnnotation.image;
         cell.imageName.text = myAnnotation.subtitle;
         
-        
-        
+        //TODO, this operation must be done somewhere else
+        //cell = [self getFullScreenImage: myAnnotation.dataModel forCell:cell];
+
          dispatch_async(dispatch_get_main_queue(), ^{
                 // Update the UI
                 //but i also have the asset URL here, so maybe i´ll use that
-             cell.cellImageView.image = image;
+             cell.cellImageView.image = image; // [self getResizedImage:image];
                 
          });
         //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
@@ -193,8 +196,9 @@
     
     return cell;
 }
+
 //returns squared image
-/*
+
 - (UIImage *) getResizedImage:(UIImage *) original {
     CGSize newSize = newSize = CGSizeMake(67, 66);
     
@@ -211,7 +215,7 @@
     UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return resizedImage;
-}*/
+}
 
 /*
 // Override to support conditional editing of the table view.
@@ -276,8 +280,10 @@
 //}
 
 - (IBAction)nextButton:(id)sender {
+    NSLog(@"next button");
 }
 
 - (IBAction)previousButton:(id)sender {
+    NSLog(@"previous button");
 }
 @end

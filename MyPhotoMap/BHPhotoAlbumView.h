@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface BHPhotoAlbumView : UIView
+@interface BHPhotoAlbumView : UIView <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong, readwrite) UIImageView *imageView;
 

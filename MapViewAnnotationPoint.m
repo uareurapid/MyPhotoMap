@@ -10,9 +10,9 @@
 
 @implementation MapViewAnnotationPoint
 
-@synthesize coordinate,title,subtitle,assetURL,image,dataModel,albumPhotos;
+@synthesize coordinate,title,subtitle,assetURL,image,dataModel,albumPhotos,imageFullScreen;
 
-
+//TODO update this
 - (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title
 {
     self = [super init];
