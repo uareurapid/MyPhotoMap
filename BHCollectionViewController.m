@@ -74,10 +74,10 @@
 //add the button
 -(void ) viewWillAppear:(BOOL)animated {
     NSLog(@"will appear");
-    if(albums.count > 0) { //have been here already
+    //if(albums.count > 0) { //have been here already
         
-        [self readCameraRoll];
-    }
+    //    [self readCameraRoll];
+    //}
 }
 
 //put the add album buttom again
@@ -362,71 +362,71 @@
     
     NSMutableArray *results = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[assetURL absoluteString]];
     //check if a record with this assetURL already exists on DB
-    if(results!=nil && results.count>0) {
-        NSLog(@"AVOID adding %@ , it already exists....",[assetURL absoluteString]);
-        return;
+    if(results==nil || results.count == 0) {
+        //we only add the ones that do not exist
+        NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+        LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+        //current date
+        if(date!=nil) {
+            [locationObject setTimestamp: date];
+        }
+        else {
+            [locationObject setTimestamp: [NSDate date]];
+        }
+        
+        [locationObject setName: [assetURL absoluteString]];
+        [locationObject setDesc:@"NA"];
+        
+        if(imageLocation!=nil) {
+            CLLocationCoordinate2D coordinate = imageLocation.coordinate;
+            locationObject.latitude = [[NSString alloc] initWithFormat:@"%f", coordinate.latitude];
+            locationObject.longitude= [[NSString alloc] initWithFormat:@"%f", coordinate.longitude];
+        }
+        else {
+            locationObject.latitude = @"0000";
+            locationObject.longitude= @"0000";
+        }
+        
+        
+        
+        bool isAlbumType = false;
+        
+        if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
+        {
+            //it is an image
+            locationObject.type = TYPE_PHOTO;
+            isAlbumType = false;
+        }
+        else {
+            //TODO if it is an album, i need to show it on that location
+            locationObject.type = TYPE_ALBUM;
+            isAlbumType = true;
+        }
+        
+        locationObject.assetURL = [assetURL absoluteString];
+        locationObject.thumbnailURL = [assetURL absoluteString];//need to save it as a string
+        
+        
+        BOOL OK = YES;
+        NSError *error;
+        if(![managedObjectContext save:&error]){
+            NSLog(@"Unable to save object error is: %@",error.description);
+            OK= NO;
+            //This is a serious error saying the record
+            //could not be saved. Advise the user to
+            //try again or restart the application.
+        }
+        
+        //[locationEntitiesArray insertObject:locationObject atIndex:0];
+        
+        
+        if(OK==YES) {
+            NSLog(@"#####Added record %@, to data model",[assetURL absoluteString]);
+            //    [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
+        }
     }
     
-    NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-    LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
-    //current date
-    if(date!=nil) {
-      [locationObject setTimestamp: date];
-    }
-    else {
-        [locationObject setTimestamp: [NSDate date]];
-    }
     
-    [locationObject setName: [assetURL absoluteString]];
-    [locationObject setDesc:@"NA"];
-    
-    if(imageLocation!=nil) {
-        CLLocationCoordinate2D coordinate = imageLocation.coordinate;
-        locationObject.latitude = [[NSString alloc] initWithFormat:@"%f", coordinate.latitude];
-        locationObject.longitude= [[NSString alloc] initWithFormat:@"%f", coordinate.longitude];
-    }
-    else {
-        locationObject.latitude = @"0000";
-        locationObject.longitude= @"0000";
-    }
-    
-    
-    
-    bool isAlbumType = false;
-    
-    if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
-    {
-        //it is an image
-        locationObject.type = TYPE_PHOTO;
-        isAlbumType = false;
-    }
-    else {
-        //TODO if it is an album, i need to show it on that location
-        locationObject.type = TYPE_ALBUM;
-        isAlbumType = true;
-    }
-    
-    locationObject.assetURL = [assetURL absoluteString];
-    locationObject.thumbnailURL = [assetURL absoluteString];//need to save it as a string
-    
-    
-    BOOL OK = YES;
-    NSError *error;
-    if(![managedObjectContext save:&error]){
-        NSLog(@"Unable to save object error is: %@",error.description);
-        OK= NO;
-        //This is a serious error saying the record
-        //could not be saved. Advise the user to
-        //try again or restart the application.
-    }
-    
-    //[locationEntitiesArray insertObject:locationObject atIndex:0];
-    
-    
-    if(OK==YES) {
-       NSLog(@"#####Added record %@, to data model",[assetURL absoluteString]);
-    //    [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
-    }
     
     
 }
@@ -456,6 +456,9 @@
          NSString *name = [group valueForProperty:ALAssetsGroupPropertyName];
          
          if(name!=nil) {
+             
+             
+             __block NSInteger albumProcessedImages = 0;
  
              BHAlbum *album = [self albumsContainsName:name];
              //get the number of pictures inside each album
@@ -508,23 +511,25 @@
                               if([type isEqualToString:ALAssetTypePhoto]) {
                                   
                                   //save the URL of the asset Photo
-                                  NSURL *url = [result valueForProperty:ALAssetPropertyAssetURL];
+                                  NSURL *assetPhotoURL = [result valueForProperty:ALAssetPropertyAssetURL];
                                   NSDate *theDate = [result valueForProperty:ALAssetPropertyDate];
                                   NSString *_location = [result valueForProperty:ALAssetPropertyLocation];
                                   NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:theDate];
                                   
                                   
                                   //SAVE THE RECORD (not saving any images or pics)
-                                  [self saveLocationRecord:url withDate:theDate andLocation:imageLocation];
+                                  [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation];
                                   
                                   NSInteger year = components.year;
                                   NSString *yearSTR = [NSString stringWithFormat:@"%ld",(long)year];
                                   
+                                  //check if the existing list of albums contains the year of this photo?
                                   BHAlbum *aux = [self albumsContainsName:yearSTR];
+                                  
                                   //these are FAKE yearly albums, not on the device itself
                                   if(! [albumsYears containsObject:yearSTR] && aux==nil) {
                                       
-                                      NSLog(@"adding year %@",yearSTR);
+                                      NSLog(@"adding album for year %@",yearSTR);
                                       [albumsYears addObject: yearSTR];
                                       
                                       BHAlbum *albumYear = [[BHAlbum alloc] init];
@@ -535,15 +540,16 @@
                                       
                                       //check if we have an album on our collection with the same title (year)
                                       //if not we add this fake album now
-                                      NSLog(@"adding album for year %ld",(long)components.year);
+                                      //NSLog(@"adding album for year %ld",(long)components.year);
                                       [self.albums addObject:albumYear]; //was album
+                                      
                                       //save the reference to it
                                       auxiliar = albumYear;
                                   
                                       
                                   }
                                   else if(aux!=nil) {
-                                      NSLog(@"album year already exists");
+                                      //NSLog(@"album year already exists");
                                       //already exists this FAKE album
                                       auxiliar = aux;
                                   }
@@ -555,20 +561,21 @@
                                   
                                   //INSERT THE PICTURE INTO THE NORMAL ALBUM
                                   //NSLog(@"INSERT THE PICTURE INTO THE NORMAL ALBUM : %@",album.name);
-                                  if( [self albumContainsAssetURL:album assetURL:url] == NO) {
+                                  if( [self albumContainsAssetURL:album assetURL:assetPhotoURL] == NO) {
                                  
-                                      [album.photosURLs addObject: url];
+                                      [album.photosURLs addObject: assetPhotoURL];
                                       //get the thumbnail
                                       __block UIImage *thumbnail = [UIImage imageWithCGImage:[result thumbnail]];
                                       
                                       //ONLY process maximum of 3 images per album
-                                      if(processedImages <  (maxNumPhotosPerAlbum * self.albums.count) ) {
-                                          processedImages = processedImages +1;
+                                      if(albumProcessedImages < maxNumPhotosPerAlbum) {
+                                          albumProcessedImages = albumProcessedImages +1;
+                                          NSLog(@"Processed image %ld for album name: %@", albumProcessedImages, name);
                                           
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               
                                               BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                              photo.imageURL = url;
+                                              photo.imageURL = assetPhotoURL;
                                               [album addPhoto:photo];
                                               [self.collectionView reloadData];
                                               
@@ -585,9 +592,9 @@
                                   //----------------------------------------------------------------------------------
                                   //INSERT THE PICTURE INTO THE AUXILIAR ALBUM
                                   //NSLog(@"INSERT THE PICTURE INTO THE AUXILIAR/YEARLY ALBUM : %@",auxiliar.name);
-                                  if( auxiliar!=nil && [self albumContainsAssetURL:auxiliar assetURL:url] == NO) {
+                                  if( auxiliar!=nil && [self albumContainsAssetURL:auxiliar assetURL:assetPhotoURL] == NO) {
                                       
-                                      [auxiliar.photosURLs addObject: url];
+                                      [auxiliar.photosURLs addObject: assetPhotoURL];
                                       //get the thumbnail
                                       __block UIImage *thumbnail = [UIImage imageWithCGImage:[result thumbnail]];
                                       
@@ -598,7 +605,7 @@
                                           dispatch_async(dispatch_get_main_queue(), ^{
                                               
                                               BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                              photo.imageURL = url;
+                                              photo.imageURL = assetPhotoURL;
                                               [auxiliar addPhoto:photo];
                                               [self.collectionView reloadData];
                                               
@@ -723,10 +730,10 @@
 
 #pragma mark - UICollectionViewDataSource
 
-
+//is the number of albums
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    NSLog(@"NUM sections %lu",(unsigned long)self.albums.count);
+    //NSLog(@"NUM sections %lu",(unsigned long)self.albums.count);
     return self.albums.count > 0 ? self.albums.count : 1;
 }
 
@@ -734,7 +741,7 @@
 {
     if(self.albums.count >0) {
         BHAlbum *album = self.albums[section];
-        NSLog(@"number items %ld %lu",(long)section,(unsigned long)album.photos.count);
+        NSLog(@"number of items for album %@ is  %ld",album.name, (unsigned long)album.photos.count);
         return album.photos.count;
     }
     return 0;
@@ -758,37 +765,37 @@
         NSInteger tag = row;
         
         if(photoIndex < album.photos.count) {
-            //gives me the album
+            //photoIndex gives me the album
             BHPhoto *photo = album.photos[photoIndex];
             
             // load photo images in the background
-            __weak BHCollectionViewController *weakSelf = self;
-            NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
+            //__weak BHCollectionViewController *weakSelf = self;
+            //NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
                 
                 //UIImage *image = [UIImage imageWithCGImage:[photo.rawImage fullScreenImage]];
                 UIImage *image = [photo image];
                 
-                dispatch_async(dispatch_get_main_queue(), ^{
+                //dispatch_async(dispatch_get_main_queue(), ^{
                     // then set them via the main queue if the cell is still visible.
-                    if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
+                    //if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
                         
-                        BHAlbumPhotoCell *cell =
-                        (BHAlbumPhotoCell *)[weakSelf.collectionView cellForItemAtIndexPath:indexPath];
+                        //BHAlbumPhotoCell *cell =
+                        //(BHAlbumPhotoCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
                
-                        cell.imageView.image = image;
-                        cell.imageView.userInteractionEnabled = YES;
-                        cell.imageView.tag = tag;
+                        photoCell.imageView.image = image;
+                        photoCell.imageView.userInteractionEnabled = YES;
+                        photoCell.imageView.tag = tag;
                         UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapAlbumWithGesture:)];
-                        [cell.imageView addGestureRecognizer:tapGesture];
+                        [photoCell.imageView addGestureRecognizer:tapGesture];
   
-                    }
-                });
-            }];
+                    //}
+                //});
+            //}];
             
-            operation.queuePriority = (indexPath.item == 0) ?
-            NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
+            //operation.queuePriority = (indexPath.item == 0) ?
+            //NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
             
-            [self.thumbnailQueue addOperation:operation];
+            //[self.thumbnailQueue addOperation:operation];
         }
         
     }

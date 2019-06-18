@@ -502,13 +502,13 @@
             BHPhoto *photo = albumSelected.photos[photoIndex];//which should only be 1indexPath.item
             BOOL isSelected = photo.isSelected;
             // load photo images in the background
-            __weak BHCollectionViewController *weakSelf = self;
-            NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
+            //__weak BHCollectionViewController *weakSelf = self;
+            //NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
                 
                 //UIImage *image = [UIImage imageWithCGImage:[photo.rawImage fullScreenImage]];
                 //UIImage *image = [photo image];
                 //TODO readme https://stackoverflow.com/questions/42845357/ios-fix-cellforitematindexpath-image-loading-issue
-                dispatch_async(dispatch_get_main_queue(), ^{
+                //dispatch_async(dispatch_get_main_queue(), ^{
                     // then set them via the main queue if the cell is still visible.
                     //if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
                         //BHAlbumPhotoCell *cell =
@@ -526,13 +526,13 @@
                         // fix two: don't get the cell.  we know the index path, reload it!
                         //[collectionView reloadItemsAtIndexPaths:@[indexPath]];
                    // }
-                });
-            }];
+                //});
+           // }];
             
-            operation.queuePriority = (indexPath.item == 0) ?
-            NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
+           // operation.queuePriority = (indexPath.item == 0) ?
+           // NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
             
-            [self.thumbnailQueue addOperation:operation];
+           // [self.thumbnailQueue addOperation:operation];
         }
         
     }
