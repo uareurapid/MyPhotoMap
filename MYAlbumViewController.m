@@ -323,13 +323,14 @@
 //read all the thumbnaisl of the passwe album
 - (void)readAlbumThumbnails {
     
-    
+    NSInteger __block processed = 0;
+    NSInteger count = selectedAlbum.photosURLs.count;
     [self.albums removeAllObjects];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-           [self.collectionView.collectionViewLayout invalidateLayout];
-           [self.collectionView reloadData];
-       });
+      [self.collectionView.collectionViewLayout invalidateLayout];
+      [self.collectionView reloadData];
+    });
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset){
         
@@ -372,13 +373,20 @@
 
             [albumSingle.photosURLs addObject: [myasset valueForProperty:ALAssetPropertyAssetURL]];
             
-            //dispatch_async(dispatch_get_main_queue(), ^{
+            processed++;
+            
+
                 BHPhoto *photo = [BHPhoto photoWithImageData: thumbnailImage];
                 [albumSingle addPhoto:photo];
-                //[self.collectionView reloadData];
-                
-            //});
-  
+                NSLog(@"PROCESSED %ld", (long)processed);
+                if(processed == count) {
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                            [self.collectionView.collectionViewLayout invalidateLayout];
+                            [self.collectionView reloadData];
+                        
+                        });
+                }
         }
         
     };
@@ -395,10 +403,6 @@
        [assetslibrary assetForURL:[selectedAlbum.photosURLs objectAtIndex:i] resultBlock:resultblock failureBlock:failureblock];
     }
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.collectionView.collectionViewLayout invalidateLayout];
-        [self.collectionView reloadData];
-    });
     
     
     
@@ -505,6 +509,7 @@
     NSInteger row = indexPath.section;
     NSInteger photoIndex = indexPath.item;
     
+    
     if(row < self.albums.count) {
         BHAlbum *albumSelected =self.albums[row];
         
@@ -513,38 +518,15 @@
         if(albumSelected.photos!=nil && albumSelected.photos.count > photoIndex) {
             BHPhoto *photo = albumSelected.photos[photoIndex];//which should only be 1indexPath.item
             BOOL isSelected = photo.isSelected;
-            // load photo images in the background
-            //__weak BHCollectionViewController *weakSelf = self;
-            //NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-                
-                //UIImage *image = [UIImage imageWithCGImage:[photo.rawImage fullScreenImage]];
-                //UIImage *image = [photo image];
-                //TODO readme https://stackoverflow.com/questions/42845357/ios-fix-cellforitematindexpath-image-loading-issue
-                //dispatch_async(dispatch_get_main_queue(), ^{
-                    // then set them via the main queue if the cell is still visible.
-                    //if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
-                        //BHAlbumPhotoCell *cell =
-                        //(BHAlbumPhotoCell *)[weakSelf.collectionView cellForItemAtIndexPath:indexPath];
-                        //NSLog(@"adding it here2");
-                        
-                        photoCell.imageView.image = photo.image;
-                        photoCell.imageView.userInteractionEnabled = YES;
-                        [photoCell setPhotoSelected:isSelected];
-                        //TODO do i need to have this alos on the main thread?? probably just update the image no???
-                        photoCell.imageView.tag = tag;
-                        UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithGesture:)];
-                         [photoCell.imageView addGestureRecognizer:tapGesture];
-                        
-                        // fix two: don't get the cell.  we know the index path, reload it!
-                        //[collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                   // }
-                //});
-           // }];
             
-           // operation.queuePriority = (indexPath.item == 0) ?
-           // NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
-            
-           // [self.thumbnailQueue addOperation:operation];
+            photoCell.imageView.image = photo.image;
+            photoCell.imageView.userInteractionEnabled = YES;
+            [photoCell setPhotoSelected:isSelected];
+            //TODO do i need to have this alos on the main thread?? probably just update the image no???
+            photoCell.imageView.tag = tag;
+            UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithGesture:)];
+            [photoCell.imageView addGestureRecognizer:tapGesture];
+         
         }
         
     }
@@ -566,13 +548,13 @@
                                        withReuseIdentifier:AlbumTitleIdentifier
                                               forIndexPath:indexPath];
     NSInteger row = indexPath.section;
-    if(self.albums.count >0 && row < self.albums.count) {
+    /*if(self.albums.count >0 && row < self.albums.count) {
         BHAlbum *albumSelected = self.albums[indexPath.section];
         titleView.titleLabel.text = albumSelected.name;
     }
-    else {
+    else {*/
         titleView.titleLabel.text = [NSString stringWithFormat:@"%ld",(long)row];
-    }
+    //}
     
     return titleView;
 }

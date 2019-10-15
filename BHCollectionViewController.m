@@ -878,29 +878,7 @@
         
     }
     
-    // Create the item to share (in this example, a url)
-    /*
-	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
-	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
-    
-	// Get the ShareKit action sheet
-	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
-    
-	// Display the action sheet
-	[actionSheet showInView:imageView];
-     
-     */
-    //BHAlbum *album = albums[imageView.tag];
-    
-    
-    //[album.photos removeAllObjects];
-    
-    //[self readAlbum:album.name withAlbum:album];
-    
-    
-    //NSLog(@"album size at the end %d",album.photos.count);
-    //albumView.album = album;
-    
+ 
     NSMutableArray *arrayOfNames = [[NSMutableArray alloc] init];
     for(BHAlbum *album in albums) {
         NSLog(@"adding ALBUM %@",album);
