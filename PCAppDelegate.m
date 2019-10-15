@@ -42,6 +42,7 @@
     UITabBarController * tabBarController = [[UITabBarController alloc ] init];
     [tabBarController setViewControllers: [NSArray arrayWithObjects:navController,mapViewController, nil] ];
 
+    
     for(UIViewController *tab in  tabBarController.viewControllers)
     {
         [tab.tabBarItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:

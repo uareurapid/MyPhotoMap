@@ -67,19 +67,21 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.currentIndex = -1;
     
     
     NSLog(@"Annotations size %lu",(unsigned long)calloutAnnotations.count);
     
     if(calloutAnnotations.count>0) {
       
+      self.currentIndex = 0;
       previousPicButton.hidden = nextPictureButton.hidden = (calloutAnnotations.count == 1);
         
       MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:0];
       
        //TODO check if a album or photo, if an album show all the other images on the same location
       //from the asset url 
-      LocationDataModel *theModel = myAnnotation.dataModel;
+      //LocationDataModel *theModel = myAnnotation.dataModel;
         
       //this is the thumbnail image i think
       UIImage *image = myAnnotation.image; //TODO WAS OK
@@ -92,7 +94,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             // Update the UI
             //but i also have the asset URL here, so maybe i´ll use that
-            imageView.image = image;
+            self.imageView.image = image;
             
         });
     }
@@ -120,17 +122,43 @@
     //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 }
 
+-(IBAction)create: (id)sender {
+    NSLog(@"CREATE");
+}
+
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
     
     //NSInteger albumSize = enclosingAlbum.photosURLs.count;
     //enclosingAlbum.photosURLs objectAtIndex:0];
     if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
-        NSLog(@"Left Swipe");
+        self.currentIndex-=1;
+        if(self.currentIndex < 0) {
+            self.currentIndex = self.calloutAnnotations.count -1;
+        }
         
     }
     else if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
-        NSLog(@"swipe right....");
+        self.currentIndex+=1;
+        if(self.currentIndex >= self.calloutAnnotations.count ) {
+            self.currentIndex = 0;
+        }
     }
+    
+    if(self.currentIndex >=0 && self.currentIndex < self.calloutAnnotations.count) {
+        //change image
+        MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
+        //LocationDataModel *theModel = myAnnotation.dataModel;
+        //this is the thumbnail image i think
+        UIImage *image = myAnnotation.image; //TODO WAS OK
+       
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // Update the UI
+            //but i also have the asset URL here, so maybe i´ll use that
+            self.imageView.image = image;
+              
+        });
+    }
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated

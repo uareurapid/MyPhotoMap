@@ -313,7 +313,7 @@
         
         CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
         NSLog(@"asset location is %@",location);
-        NSLog(@"asset metadata is %@",rep.metadata);
+        //NSLog(@"asset metadata is %@",rep.metadata);
         
         if(iref!=nil) {
             // scale:1.0 orientation:(UIImageOrientation)[asset defaultRepresentation].orientation]
@@ -321,13 +321,12 @@
             __block UIImage *image = [UIImage imageWithCGImage:iref];
             __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
             
-            thumbnail = imageThumb;
+            
             
             //alwyas update the UI in the main thread
             dispatch_async(dispatch_get_main_queue(), ^{
-                
-                photoCellView.imageView.image = image;
-                //photoView.image = image;
+                self.thumbnail = imageThumb;
+                self.photoCellView.imageView.image = image;
                 
             });
         }

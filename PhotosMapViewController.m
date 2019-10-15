@@ -328,11 +328,11 @@
         
         
         NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
-        int count = samePointAnnotations.count;
+        NSUInteger count = samePointAnnotations.count;
         if(count > 1) {
             //because it contains this
             NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
-            [str appendString: [NSString stringWithFormat:@" and %d more",count - 1]];
+            [str appendString: [NSString stringWithFormat:@" and %lu more",count - 1]];
             myAnnotation.title = str;
             
         }

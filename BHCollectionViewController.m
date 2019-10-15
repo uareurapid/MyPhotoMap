@@ -54,7 +54,9 @@
         
         
         UIBarButtonItem *left = [[UIBarButtonItem alloc] initWithTitle:@"Add"
-                                                          style:UIBarButtonSystemItemAdd target:self action:@selector(addAlbumClicked:)];
+                                                          style:UIBarButtonItemStyleDone target:self action:@selector(addAlbumClicked:)];
+        
+ 
        
         self.navigationItem.leftBarButtonItem = left;
         

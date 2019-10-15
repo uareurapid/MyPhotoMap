@@ -10,6 +10,7 @@
 #import "PhotoDetailViewController.h"
 #import "PCAppDelegate.h"
 #import "PhotosMapViewController.h"
+#define GOOGLE_API_KEY @"AIzaSyBL_Lkmkxk7KIL5o4ejYYot_Y780qE6sB4"
 
 @interface SearchLocationViewController ()
 
@@ -101,8 +102,8 @@
 
 - (void) requestGeocodeLocation:(NSString *)address
 {
-    
-    NSString *url = [NSString stringWithFormat:@"http://maps.google.com/maps/api/geocode/json?address=%@&sensor=false",address];
+    //AIzaSyBL_Lkmkxk7KIL5o4ejYYot_Y780qE6sB4
+    NSString *url = [NSString stringWithFormat:@"https://maps.google.com/maps/api/geocode/json?address=%@&sensor=false&key=%@",address,GOOGLE_API_KEY];
     url=[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
         //Formulate the string as a URL object.

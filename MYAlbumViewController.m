@@ -63,9 +63,10 @@
 }
 
 -(void) viewWillAppear:(BOOL)animated {
+    
     self.selectedAction = 0;
-    [self.collectionView reloadData];
     [self readAlbumThumbnails];
+    
 }
 
 //add the "real" existing albums" names
@@ -324,6 +325,11 @@
     
     
     [self.albums removeAllObjects];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+           [self.collectionView.collectionViewLayout invalidateLayout];
+           [self.collectionView reloadData];
+       });
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset){
         
@@ -366,15 +372,14 @@
 
             [albumSingle.photosURLs addObject: [myasset valueForProperty:ALAssetPropertyAssetURL]];
             
-            dispatch_async(dispatch_get_main_queue(), ^{
+            //dispatch_async(dispatch_get_main_queue(), ^{
                 BHPhoto *photo = [BHPhoto photoWithImageData: thumbnailImage];
                 [albumSingle addPhoto:photo];
-                [self.collectionView reloadData];
+                //[self.collectionView reloadData];
                 
-            });
+            //});
   
         }
-        
         
     };
     
@@ -389,8 +394,12 @@
     for(int i=0; i < selectedAlbum.photosURLs.count; i++) {
        [assetslibrary assetForURL:[selectedAlbum.photosURLs objectAtIndex:i] resultBlock:resultblock failureBlock:failureblock];
     }
-    //[self.collectionView.collectionViewLayout invalidateLayout];
-    //[self.collectionView reloadData];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.collectionView.collectionViewLayout invalidateLayout];
+        [self.collectionView reloadData];
+    });
+    
     
     
 }
@@ -450,14 +459,17 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    NSLog(@"NUM photos in album is %lu",selectedAlbum.photosURLs.count);
+    NSLog(@"NUM photos in album is %lu",(unsigned long)selectedAlbum.photosURLs.count);
     return selectedAlbum.photosURLs.count > 0 ? selectedAlbum.photosURLs.count : 1;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-   
-    return 1; 
+    //number of images on top of the others/paging ilussion, should be always 1
+    if(selectedAlbum.photosURLs.count > 0) {
+       return 1;
+    }
+    return 0;
 }
 
 //TODO i just changed the animation on the push, and the title, don´t know why i got the ghost albums at 1st run..

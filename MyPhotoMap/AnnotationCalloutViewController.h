@@ -25,5 +25,7 @@
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
+@property (assign, nonatomic) NSInteger currentIndex;
+
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle annotations:(NSMutableArray*) annots;
 @end
