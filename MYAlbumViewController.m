@@ -10,6 +10,7 @@
 
 #import "AlbumOptionsTableViewController.h"
 #import "PCAppDelegate.h"
+#import "ALAssetsLibrary+CustomPhotoAlbum.h"
 
 #define ACTIONS_TAG 0
 #define SELECT_ALL_TAG 1
@@ -156,7 +157,72 @@
     //add another one to select all
     self.navigationItem.rightBarButtonItem.tag = SELECT_ALL_TAG;
     self.navigationItem.rightBarButtonItem.title = @"Select All";
+    
+    //TODO https://www.ecanarys.com/Blogs/ArticleID/94/How-to-Save-Photos-to-Custom-Album-in-iPhone-iPad-Photo-Library
+    //TODO #import <Photos/Photos.h>
 }
+
+
+
+/*
+ - (void)insertImage:(UIImage *)image intoAlbumNamed:(NSString *)albumName {
+ //Fetch a collection in the photos library that has the title "albumNmame"
+ PHAssetCollection *collection = [self fetchAssetCollectionWithAlbumName: albumName];
+ 
+ if (collection == nil) {
+ //If we were unable to find a collection named "albumName" we'll create it before inserting the image
+ [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+ [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle: albumName];
+ } completionHandler:^(BOOL success, NSError * _Nullable error) {
+ if (error != nil) {
+ NSLog(@"Error inserting image into album: %@", error.localizedDescription);
+ }
+ 
+ if (success) {
+ //Fetch the newly created collection (which we *assume* exists here)
+ PHAssetCollection *newCollection = [self fetchAssetCollectionWithAlbumName:albumName];
+ [self insertImage:image intoAssetCollection: newCollection];
+ }
+ }];
+ } else {
+ //If we found the existing AssetCollection with the title "albumName", insert into it
+ [self insertImage:image intoAssetCollection: collection];
+ }
+ }
+ 
+ - (PHAssetCollection *)fetchAssetCollectionWithAlbumName:(NSString *)albumName {
+ PHFetchOptions *fetchOptions = [PHFetchOptions new];
+ //Provide the predicate to match the title of the album.
+ fetchOptions.predicate = [NSPredicate predicateWithFormat:[NSString stringWithFormat:@"title == '%@'", albumName]];
+ 
+ //Fetch the album using the fetch option
+ PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:fetchOptions];
+ 
+ //Assuming the album exists and no album shares it's name, it should be the only result fetched
+ return fetchResult.firstObject;
+ }
+ 
+ - (void)insertImage:(UIImage *)image intoAssetCollection:(PHAssetCollection *)collection {
+ [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+ 
+ //This will request a PHAsset be created for the UIImage
+ PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAssetFromImage:image];
+ 
+ //Create a change request to insert the new PHAsset in the collection
+ PHAssetCollectionChangeRequest *request = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:collection];
+ 
+ //Add the PHAsset placeholder into the creation request.
+ //The placeholder is used because the actual PHAsset hasn't been created yet
+ if (request != nil && creationRequest.placeholderForCreatedAsset != nil) {
+ [request addAssets: @[creationRequest.placeholderForCreatedAsset]];
+ }
+ } completionHandler:^(BOOL success, NSError * _Nullable error) {
+ if (error != nil) {
+ NSLog(@"Error inserting image into asset collection: %@", error.localizedDescription);
+ }
+ }];
+ }
+ */
 /*
  - (IBAction)addAlbumClicked:(id)sender{
  
@@ -331,7 +397,7 @@
     [picker dismissModalViewControllerAnimated:NO];
 }
 
-//read all the thumbnaisl of the passwe album
+//read all the photo thumbnaisl of the passed/selected album
 - (void)readAlbumThumbnails {
     
     NSInteger __block processed = 0;
@@ -713,5 +779,68 @@
     return gps;
 }
 
+
+- (void)addAssetURL:(NSURL *)assetURL
+            toAlbum:(NSString *)albumName
+         completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+            failure:(ALAssetsLibraryAccessFailureBlock)failure
+{
+    __block BOOL albumWasFound = NO;
+    
+    // Signature for the block executed when a match is found during enumeration using
+    //   |-enumerateGroupsWithTypes:usingBlock:failureBlock:|.
+    //
+    // |group|: The current asset group in the enumeration.
+    // |stop| : A pointer to a boolean value; set the value to YES to stop enumeration.
+    //
+    ALAssetsLibraryGroupsEnumerationResultsBlock enumerationBlock;
+    enumerationBlock = ^(ALAssetsGroup *group, BOOL *stop) {
+        // Compare the names of the albums
+        if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
+            // Target album is found
+            albumWasFound = YES;
+            
+            // Get a hold of the photo's asset instance
+            // If the user denies access to the application, or if no application is allowed to
+            //   access the data, the failure block is called.
+            ALAssetsLibraryAssetForURLResultBlock assetForURLResultBlock =
+            [self _assetForURLResultBlockWithGroup:group
+                                          assetURL:assetURL
+                                        completion:completion
+                                           failure:failure];
+            
+            
+            // Album was found, bail out of the method
+            *stop = YES;
+        }
+        
+        
+    };
+    
+    // Search all photo albums in the library
+    //TODO
+}
+
+- (ALAssetsLibraryAssetForURLResultBlock)_assetForURLResultBlockWithGroup:(ALAssetsGroup *)group
+                                                                 assetURL:(NSURL *)assetURL
+                                                               completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+                                                                  failure:(ALAssetsLibraryAccessFailureBlock)failure
+{
+    return ^(ALAsset *asset) {
+        // Add photo to the target album
+        if ([group addAsset:asset]) {
+            // Run the completion block if the asset was added successfully
+            if (completion) completion(assetURL, nil);
+        }
+        // |-addAsset:| may fail (return NO) if the group is not editable,
+        //   or if the asset could not be added to the group.
+        else {
+            NSString * message = [NSString stringWithFormat:@"ALAssetsGroup failed to add asset: %@.", asset];
+            if (failure) failure([NSError errorWithDomain:@"LIB_ALAssetsLibrary_CustomPhotoAlbum"
+                                                     code:0
+                                                 userInfo:@{NSLocalizedDescriptionKey : message}]);
+        }
+    };
+}
 
 @end

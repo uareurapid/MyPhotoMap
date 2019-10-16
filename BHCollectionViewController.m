@@ -452,6 +452,7 @@
         
          NSString *name = [group valueForProperty:ALAssetsGroupPropertyName];
          
+         //name of the group/album
          if(name!=nil) {
              
              
