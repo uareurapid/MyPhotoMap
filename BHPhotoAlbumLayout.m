@@ -108,7 +108,11 @@ static NSString * const BHPhotoEmblemKind = @"Emblem";
     self.itemSize = CGSizeMake(125.0f, 125.0f);
     self.interItemSpacingY = 12.0f;
     //3 collumns for ipad, 2 collumns for iphone
-    self.numberOfColumns = [[UIDeviceHardware platformString] containsString:@"iPad"] ? 3 : 2;
+    CGFloat width = [UIScreen mainScreen].bounds.size.width;
+    CGFloat numPossible = width / 125;
+    CGFloat reservedSpace = numPossible * 12.0f;
+    NSLog(@"NUM %ld %ld %ld", (long)numPossible, (long)width, (long)reservedSpace);
+    self.numberOfColumns = (width - reservedSpace) / 125;// [[UIDeviceHardware platformString] containsString:@"iPad"] ? 3 : 2;
     self.titleHeight = 26.0f;
     
     

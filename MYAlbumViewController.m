@@ -34,6 +34,7 @@
 @synthesize albumsNames;
 @synthesize selectedAlbumIndex;
 @synthesize selectedAlbum,selectedPhoto,selectedAction,selectedItems;
+@synthesize isFirstLoad;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -58,6 +59,7 @@
 {
     [super viewDidLoad];
     selectedItems = 0;
+    self.isFirstLoad = true;
 	// Do any additional setup after loading the view.
     
 }
@@ -101,7 +103,7 @@
         }];
         UIAlertAction *takePhotoAction = [UIAlertAction actionWithTitle:@"Take photo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             // this block runs when the walking option is selected
-            self.selectedAction = ACTION_ADD_LOCATION;
+            self.selectedAction = ACTION_TAKE_PHOTO;
             [self takePhoto:nil];
         }];
         UIAlertAction *deleteAlbumAction = [UIAlertAction actionWithTitle:@"Delete album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -198,39 +200,46 @@
 
 -(IBAction)addLocation:(id)sender {
     
-    SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
     
-    view.navigationItem.rightBarButtonItem = nil;
-    view.navigationItem.leftBarButtonItem = nil;
     
     NSLog(@"selected album index: %lu",(unsigned long)selectedAlbumIndex);
     
-    //OK I HAVE THE SELECTED ALBUM
-    BHAlbum *theSelectedAlbum = [self.albums objectAtIndex:selectedAlbumIndex];
-    view.selectedAlbum = theSelectedAlbum;
-    view.assetURL = theSelectedAlbum.assetURL; //set the asset url (nil if a yealy album)
-    theSelectedAlbum.photosURLs = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
-    [theSelectedAlbum.photosURLs addObjectsFromArray:[selectedAlbum photosURLs]];
-    
-    //this has the ciorrect value: selectedAlbum.photosURLs.count
-    
-    //assign the correct photo
-    if(theSelectedAlbum.photosURLs.count>0) {
-        //TODO this photos is not being added 
-        BHPhoto *photo = [theSelectedAlbum.photos objectAtIndex:0];
-        view.image = photo.image;
-        //we save the thumbnail URL on the LocationDataModel
-        view.thumbnailURL = photo.imageURL;
+    if(self.selectedAlbumIndex < self.albums.count) {
+        
+        SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
+        
+        view.navigationItem.rightBarButtonItem = nil;
+        view.navigationItem.leftBarButtonItem = nil;
+        
+        //OK I HAVE THE SELECTED ALBUM
+        BHAlbum *theSelectedAlbum = [self.albums objectAtIndex:selectedAlbumIndex];
+        view.selectedAlbum = theSelectedAlbum;
+        view.assetURL = theSelectedAlbum.assetURL; //set the asset url (nil if a yealy album)
+        theSelectedAlbum.photosURLs = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
+        [theSelectedAlbum.photosURLs addObjectsFromArray:[selectedAlbum photosURLs]];
+        
+        //this has the ciorrect value: selectedAlbum.photosURLs.count
+        
+        //assign the correct photo
+        if(theSelectedAlbum.photosURLs.count>0) {
+            //TODO this photos is not being added
+            BHPhoto *photo = [theSelectedAlbum.photos objectAtIndex:0];
+            view.image = photo.image;
+            //we save the thumbnail URL on the LocationDataModel
+            view.thumbnailURL = photo.imageURL;
+        }
+        else {
+            view.image = [UIImage imageNamed:@"concrete"];
+            view.thumbnailURL = nil;
+        }
+        
+        view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
+        
+        
+        [self.navigationController pushViewController:view animated:NO];
     }
-    else {
-        view.image = [UIImage imageNamed:@"concrete"];
-        view.thumbnailURL = nil;
-    }
-    
-    view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
     
     
-    [self.navigationController pushViewController:view animated:NO];
 }
 
 - (IBAction)deleteAlbum:(id)sender {
@@ -325,12 +334,11 @@
     
     NSInteger __block processed = 0;
     NSInteger count = selectedAlbum.photosURLs.count;
-    [self.albums removeAllObjects];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self.collectionView.collectionViewLayout invalidateLayout];
-      [self.collectionView reloadData];
-    });
+    //only if not the same
+    [self.albums removeAllObjects];
+    [self refreshCollection]; //maybe invalidate layout too?
+
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset){
         
@@ -372,7 +380,7 @@
             [self.albums addObject:albumSingle];
 
             [albumSingle.photosURLs addObject: [myasset valueForProperty:ALAssetPropertyAssetURL]];
-            
+           
             processed++;
             
 
@@ -380,12 +388,9 @@
                 [albumSingle addPhoto:photo];
                 NSLog(@"PROCESSED %ld", (long)processed);
                 if(processed == count) {
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                            [self.collectionView.collectionViewLayout invalidateLayout];
-                            [self.collectionView reloadData];
-                        
-                        });
+                   dispatch_async(dispatch_get_main_queue(), ^{
+                    [self refreshCollection];
+                   });
                 }
         }
         
@@ -418,10 +423,27 @@
     selectedItems = select ? self.albums.count : 0;
     
     //make the table refresh
-    [self.collectionView.collectionViewLayout invalidateLayout];
+    //[self.collectionView.collectionViewLayout invalidateLayout];
+    [self refreshCollection];
+    
+    
+}
+
+-(void) refreshCollection {
+     
+    //[self.collectionView.collectionViewLayout invalidateLayout];
     [self.collectionView reloadData];
-    
-    
+    [self.collectionView performBatchUpdates:^{
+            
+       NSArray *indexpaths = self.collectionView.indexPathsForVisibleItems;
+       if(indexpaths!=nil && indexpaths.count>0) {
+
+          [self.collectionView reloadItemsAtIndexPaths:indexpaths];
+           
+       }
+    } completion:^(BOOL finished) {
+        // Called async when all animations are finished; finished = NO if cancelled
+    }];
 }
 
 -(void)selectAlbumPhoto: (BOOL) select atIndex:(NSInteger) index {
@@ -451,8 +473,7 @@
         }
         
         //make the table refresh
-        [self.collectionView.collectionViewLayout invalidateLayout];
-        [self.collectionView reloadData];
+        [self refreshCollection];
     }
     
 }
@@ -463,7 +484,7 @@
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    NSLog(@"NUM photos in album is %lu",(unsigned long)selectedAlbum.photosURLs.count);
+    NSLog(@"numberOfSectionsInCollectionView NUM photos in album is %lu",(unsigned long)selectedAlbum.photosURLs.count);
     return selectedAlbum.photosURLs.count > 0 ? selectedAlbum.photosURLs.count : 1;
 }
 

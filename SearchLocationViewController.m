@@ -66,7 +66,7 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText{
     
     //text changed
-    NSLog(@"searching for %@",searchText);
+    //NSLog(@"searching for %@",searchText);
 }
 
 
@@ -337,11 +337,14 @@
     //[locationObject setTimestamp: [NSDate date]];
     
     //I AM OVERWIRITING ALL THIS STUFF (WARN USER!!!!)
-    [locationObject setName: [assetURL absoluteString]];
+    locationObject.name = [assetURL absoluteString];
     locationObject.latitude = location.latitude;
     locationObject.longitude= location.longitude;
+    locationObject.desc = location.location;
     
     bool isAlbumType = false;
+    
+    NSLog(@"ASSET URL IS : %@", [assetURL absoluteString]);
     
     if([[assetURL absoluteString] rangeOfString:@"group"].location==NSNotFound)
     {
@@ -355,17 +358,31 @@
         isAlbumType = true;
     }
     
+    BOOL isFakeAlbum = assetURL == nil && [selectedAlbum isFakeAlbum];
+    
+    if(isAlbumType && isFakeAlbum) {
+        
+        [locationObject setName: selectedAlbum.name];
+        NSLog(@" SET NAME TO ALBUM NAME: %@", locationObject.name);
+    }
+    
     locationObject.assetURL = [assetURL absoluteString];
     locationObject.thumbnailURL = [thumbnailURL absoluteString];//need to save it as a string
     
-    if(isAlbumType && [locationObject.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]] ) {
+    BOOL isNativeAlbum = [locationObject.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]];
+    
+    if(isAlbumType && (isNativeAlbum || isFakeAlbum ) ) { //FAKE ALBUM
         //selectedAlbum
-        if(selectedAlbum.photosCount > 0) {
+        NSLog(@"FAKE ?%d images: %ld", isFakeAlbum, (long)selectedAlbum.photosURLs.count);
+        
+        //Update all the images inside the album with the same location
+        if(selectedAlbum.photosURLs.count > 0) {
             for(NSURL *photoURL in selectedAlbum.photosURLs) {
                 //update also the model for these photos
                 //TODO add also annotations for individual photos or not???
                 NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[photoURL absoluteString]];
                 if(photoModels!=nil && photoModels.count==1) {
+                    NSLog(@"WILL UPDATE PHOTO MODEL ");
                     LocationDataModel *model = [photoModels objectAtIndex:0];
                     model.latitude = locationObject.latitude;
                     model.longitude= locationObject.longitude;
@@ -375,6 +392,7 @@
     }
     
 
+   
    BOOL OK = YES;
    NSError *error;
    if(![managedObjectContext save:&error]){
@@ -393,7 +411,7 @@
     
     
     if(OK==YES) {
-        NSLog(@"Adding location object to the map....");
+        NSLog(@"Adding location object to the map.... isUpdate? %d", isUpdate);
         [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
     }
     

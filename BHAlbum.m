@@ -56,6 +56,8 @@
     return YES;
 }
 
-
+- (BOOL)isFakeAlbum {
+    return self.assetURL==nil || self.assetURL==NULL;
+}
 
 @end

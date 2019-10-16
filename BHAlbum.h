@@ -12,15 +12,16 @@
 
 @interface BHAlbum : NSObject
 
-@property (nonatomic, strong) NSString *name;
+@property (copy, nonatomic) NSString *name;
 @property (nonatomic, strong) NSMutableArray *photos;
 
 @property(strong,nonatomic) NSMutableArray *photosURLs;
 
-@property (nonatomic, strong) NSURL *assetURL;//if nil is a fake album
+@property (copy, nonatomic) NSURL *assetURL;//if nil is a fake album
 
 - (void)addPhoto:(BHPhoto *)photo;
 - (BOOL)removePhoto:(BHPhoto *)photo;
+- (BOOL)isFakeAlbum;
 
 @property NSInteger photosCount;
 

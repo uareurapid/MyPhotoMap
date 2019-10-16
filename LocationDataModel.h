@@ -15,13 +15,13 @@
 
 @interface LocationDataModel : NSManagedObject
 
-@property (nonatomic, retain) NSString * latitude;
-@property (nonatomic, retain) NSString * name; //name of album which belongs too or NIL
-@property (nonatomic, retain) NSString * desc; //description of pic or album
-@property (nonatomic, retain) NSString * longitude;
-@property (nonatomic, retain) NSString * assetURL; //if asset URL is nil than is a "fake" album
-@property (nonatomic, retain) NSString * thumbnailURL; //either an url to an image or NIL (use default concrete image)
-@property (nonatomic, retain) NSString * type; //TYPE_ALBUM, etc..
-@property (nonatomic, retain) NSDate * timestamp;
+@property (copy, nonatomic) NSString * latitude;
+@property (copy, nonatomic) NSString * name; //name of album which belongs too or NIL
+@property (copy, nonatomic) NSString * desc; //description of pic or album
+@property (copy, nonatomic) NSString * longitude;
+@property (copy, nonatomic) NSString * assetURL; //if asset URL is nil than is a "fake" album
+@property (copy, nonatomic) NSString * thumbnailURL; //either an url to an image or NIL (use default concrete image)
+@property (copy, nonatomic) NSString * type; //TYPE_ALBUM, etc..
+@property (copy, nonatomic) NSDate * timestamp;
 
 @end

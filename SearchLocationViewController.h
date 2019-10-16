@@ -36,7 +36,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 //the selected image
 @property (strong, nonatomic) UIImage *image;
-@property (strong, nonatomic) NSURL *assetURL;
+@property (copy, nonatomic) NSURL *assetURL;
 
 //the associated thumbnail (could use BHPhoto only)
 @property (copy, nonatomic) NSURL *thumbnailURL;

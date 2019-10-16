@@ -41,6 +41,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (assign, nonatomic) NSInteger selectedAction;
 @property (assign, nonatomic) NSInteger selectedItems;
 
+@property BOOL isFirstLoad;
 
 - (void)showDetailView: (NSString *) imgURL;
 -(void) addAlbumsNamesFromArray: (NSMutableArray*) names;

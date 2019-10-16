@@ -131,7 +131,7 @@
     //clear annotations
     [mapViewController removeAnnotations];
     
-    
+    //is just readin the numbers???
     [self readNumberOfExistingAlbums];
 
     //first get all the stuff on the device
@@ -193,12 +193,7 @@
         
         CGImageRef thumb = [asset thumbnail];
         
-        /*ALAssetRepresentation *representation = [asset defaultRepresentation];
-        __block UIImage *imageFull = [UIImage imageWithCGImage:representation.fullScreenImage
-                                   scale:[representation scale]
-                             orientation:(UIImageOrientation)[representation orientation]];
-        */
-        
+     
         if(thumb!=nil /*&& imageFull!=nil*/) {
             
             __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
@@ -244,7 +239,7 @@
 
 
 -(void) readNumberOfExistingAlbums{
-    
+    /*
     ALAssetsLibrary *assetsLib = [[ALAssetsLibrary alloc] init];
     numExistingAlbums =0;
 
@@ -263,7 +258,7 @@
               NSLog(@"Error getting the albums");
            }
      
-     ] ;
+     ] ;*/
 }
 
 -(void) reloadAlbumsInfo {
@@ -473,6 +468,7 @@
                  album.photosURLs = [[NSMutableArray alloc] init];
                  album.assetURL = [group valueForProperty:ALAssetsGroupPropertyURL];
                  album.name = name;
+                 NSLog(@"ADDING ALBUM NAME %@ for URL %@", album.name, album.assetURL);
                  [self.albums addObject:album];
                  
                  //get only the first 3 images thumbnails to display
@@ -531,7 +527,7 @@
                                   //these are FAKE yearly albums, not on the device itself
                                   if(! [albumsYears containsObject:yearSTR] && aux==nil) {
                                       
-                                      NSLog(@"adding album for year %@",yearSTR);
+                                      NSLog(@"ADDING CUSTOM/FAKE ALBUM FOR YEAR %@",yearSTR);
                                       [albumsYears addObject: yearSTR];
                                       
                                       BHAlbum *albumYear = [[BHAlbum alloc] init];
