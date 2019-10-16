@@ -237,6 +237,8 @@
         
         
         [self.navigationController pushViewController:view animated:NO];
+    } else {
+        NSLog(@"OOPS!!!");
     }
     
     
