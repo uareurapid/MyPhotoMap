@@ -22,7 +22,7 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle;
 - (void) readCameraRoll;
 -(void) readNumberOfExistingAlbums;
--(void) createNewAlbum: (NSString*) albumName;
+-(void) createNewAlbum: (NSString*) albumName completion:(void(^)(BOOL))callback;
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;
 

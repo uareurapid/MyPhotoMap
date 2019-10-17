@@ -16,7 +16,11 @@
 #import "BHCollectionViewController.h"
 #import "PhotoDetailViewController.h"
 #import "AlbumsListViewController.h"
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/PHAssetCollectionChangeRequest.h>
+#import <Photos/Photos.h>
 
+//#import <Photos/PHAssetCollection.h>
 
 typedef void (^ALAssetsLibraryAssetForURLResultBlock)(ALAsset *asset);
 typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
@@ -41,6 +45,9 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (assign, nonatomic) NSInteger selectedAction;
 @property (assign, nonatomic) NSInteger selectedItems;
 
+
+@property (assign, nonatomic) ALAssetsLibrary* assetslibrary;
+
 @property BOOL isFirstLoad;
 
 - (void)showDetailView: (NSString *) imgURL;
@@ -54,6 +61,24 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 -(IBAction)addPhotosToCurrentAlbum:(id)sender;
 
 
+/*! Write the asset to the assets library (camera roll). (Private)
+ *
+ * \param assetURL The asset URL
+ * \param albumName Custom album name
+ * \param failure Block to be executed when failed to add the asset to the custom photo album
+ */
+-(void)_addAssetURL:(NSURL *)assetURL
+            toAlbum:(NSString *)albumName
+            failure:(ALAssetsLibraryAccessFailureBlock)failure;
 
+/*! A block wraper to be executed after asset adding process done. (Private)
+ *
+ * \param albumName Custom album name
+ * \param completion Block to be executed when succeed to add the asset to the assets library (camera roll)
+ * \param failure Block to be executed when failed to add the asset to the custom photo album
+ */
+- (ALAssetsLibraryWriteImageCompletionBlock)_resultBlockOfAddingToAlbum:(NSString *)albumName
+                                                             completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+                                                                failure:(ALAssetsLibraryAccessFailureBlock)failure;
 
 @end

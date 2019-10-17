@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1897F7D32355C7FF00892EE3 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 724E90711768E0E6007E6939 /* Default-568h@2x.png */; };
+		18CDFC0A2358ABB200080BE0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18CDFC092358ABB200080BE0 /* Photos.framework */; };
 		723389E21E1AC6EF00A07EEA /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 723389E11E1AC6EF00A07EEA /* placeholder.png */; };
 		724E8F831768E07E007E6939 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E8F821768E07E007E6939 /* UIKit.framework */; };
 		724E8F851768E07E007E6939 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E8F841768E07E007E6939 /* Foundation.framework */; };
@@ -141,6 +142,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		18CDFC092358ABB200080BE0 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		723389E11E1AC6EF00A07EEA /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
 		724E8F7F1768E07E007E6939 /* MyPhotoMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyPhotoMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		724E8F821768E07E007E6939 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -397,6 +399,7 @@
 				724E90EB1768E1C6007E6939 /* CoreLocation.framework in Frameworks */,
 				724E90E91768E1BF007E6939 /* AVFoundation.framework in Frameworks */,
 				724E90E71768E1B8007E6939 /* CoreData.framework in Frameworks */,
+				18CDFC0A2358ABB200080BE0 /* Photos.framework in Frameworks */,
 				724E8F831768E07E007E6939 /* UIKit.framework in Frameworks */,
 				724E8F851768E07E007E6939 /* Foundation.framework in Frameworks */,
 				724E8F871768E07E007E6939 /* CoreGraphics.framework in Frameworks */,
@@ -452,6 +455,7 @@
 		724E8F811768E07E007E6939 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18CDFC092358ABB200080BE0 /* Photos.framework */,
 				724E8F821768E07E007E6939 /* UIKit.framework */,
 				724E8F841768E07E007E6939 /* Foundation.framework */,
 				724E8F861768E07E007E6939 /* CoreGraphics.framework */,

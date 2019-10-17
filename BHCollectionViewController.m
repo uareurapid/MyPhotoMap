@@ -268,7 +268,7 @@
 }
 
 //creates a new Album if not exists
--(void) createNewAlbum: (NSString*) albumName{
+-(void) createNewAlbum: (NSString*) albumName completion:(void(^)(BOOL))callback {
     
     ALAssetsLibrary *assetsLib = [[ALAssetsLibrary alloc] init];
     
@@ -292,6 +292,9 @@
                                                       otherButtonTitles:nil];
                 [alert show];
             });
+            if(callback!=nil) {
+                callback(NO);
+            }
             return;
         }
         
@@ -330,11 +333,18 @@
                                           
                                           [self.collectionView reloadData];
                                           
+                                          if(callback!=nil) {
+                                              callback(YES);
+                                          }
+                                          
                                       });
                                   }
              
                                   failureBlock:^(NSError *error)  {
                                      NSLog(@"Error Adding the album %@",albumName);
+                                        if(callback!=nil) {
+                                            callback(NO);
+                                        }
                                   }
              ];
             //should be the last iteration anyway, but just in case
@@ -851,7 +861,7 @@
     
     if(buttonIndex==1) { //0 - cancel, 1 - save
         NSString *albumName = [alertView textFieldAtIndex:0].text;
-        [self createNewAlbum:albumName];
+        [self createNewAlbum:albumName completion:nil];
     }
     
 }

@@ -10,7 +10,8 @@
 
 #import "AlbumOptionsTableViewController.h"
 #import "PCAppDelegate.h"
-#import "ALAssetsLibrary+CustomPhotoAlbum.h"
+//#import "ALAssetsLibrary+CustomPhotoAlbum.h"
+
 
 #define ACTIONS_TAG 0
 #define SELECT_ALL_TAG 1
@@ -20,6 +21,8 @@
 #define ACTION_TAKE_PHOTO 4
 #define ACTION_ADD_LOCATION 5
 #define ACTION_ADD_TO_ALBUM 6
+
+#define ACTION_PERSIST_ALBUM 7
 
 @interface MYAlbumViewController ()
 
@@ -85,6 +88,127 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma add/persist existing fake to new album
+//show the input new album dialog
+- (IBAction)persistAlbumClicked:(id)sender{
+    
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New album..." message:@"Enter the album name" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
+    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+    [alert textFieldAtIndex:0].text = self.selectedAlbum.name;
+    [alert show];
+}
+
+-(void) persistAlsoImagesInsideAlbum: (PHAssetCollection *) assetCollection {
+    
+       //first we get the assets on the fake album and we move them to the new persisted one
+       PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:self.selectedAlbum.photosURLs options:nil];
+            
+        if(results!=nil && results.count > 0) {
+        
+            NSMutableArray *assetsArray = [[NSMutableArray alloc] initWithCapacity:results.count];
+            
+            for(PHAsset *asset in results) {
+                
+                [assetsArray addObject:(PHAsset *)asset];
+            }
+            
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                        //PHAssetChangeRequest *assetChangeRequest = [PHAssetChangeRequest cr:asset];
+                    PHAssetCollectionChangeRequest *assetCollectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:assetCollection];
+                        [assetCollectionChangeRequest addAssets:assetsArray];
+
+                } completionHandler:^(BOOL success, NSError *error) {
+                        if (!success) {
+                            NSLog(@"Error persistsing asset: %@", error);
+                        } else {
+                            NSLog(@"Persisted assets on new album");
+                        }
+                }];
+                
+        }
+            
+    
+}
+//the delegate for the new Album
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if(buttonIndex==1) { //0 - cancel, 1 - save
+        NSString *albumName = [alertView textFieldAtIndex:0].text;
+        
+        
+        //https://developer.apple.com/documentation/photokit/browsing_and_modifying_photo_albums?language=objc
+        
+       
+        
+        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+        
+        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
+         PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+        //first check if already exists, only add if not
+        if (fetchResult.count ==0) {
+                __block PHObjectPlaceholder *albumPlaceholder;
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+                    albumPlaceholder = changeRequest.placeholderForCreatedAssetCollection;
+
+                } completionHandler:^(BOOL success, NSError *error) {
+                    if (success) {
+                        PHFetchResult *fetchResultCreated = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+                        
+                         NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
+                        
+                        if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
+                            [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
+                        }
+                    } else {
+                        NSLog(@"Error creating album: %@", error);
+                    }
+                }];
+        } else if(fetchResult.count == 1) {
+            //TODO don´t think this is happening cause we are persisting a FAKE ONE
+            
+            //first we need to delete the other one
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
+                [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
+
+            } completionHandler:^(BOOL success, NSError *error) {
+                if (!success) {
+                    NSLog(@"Error deleting album: %@", error);
+                } else {
+                    // DELETE OK
+                    NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
+                    //TODO remove from the list of albums and reload webview
+                    
+                    //AND CREATE (same code as above)
+                    __block PHObjectPlaceholder *albumPlaceholder;
+                    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                        PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+                        albumPlaceholder = changeRequest.placeholderForCreatedAssetCollection;
+
+                    } completionHandler:^(BOOL success, NSError *error) {
+                        if (success) {
+                            PHFetchResult *fetchResultCreated = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+                            
+                             NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
+                            
+                            if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
+                                [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
+                            }
+                        } else {
+                            NSLog(@"Error creating album: %@", error);
+                        }
+                    }];
+                    
+    
+                }
+            }];//end delete completion handler
+        }
+       
+    }
+    
+}
+
 -(IBAction)settingsClicked:(id) sender{
     
     NSInteger tag = self.navigationItem.rightBarButtonItem.tag;
@@ -95,7 +219,7 @@
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Album actions"
                                                                        message:@"Select one option:"
                                                                 preferredStyle:UIAlertControllerStyleActionSheet];
-        
+      
         
         UIAlertAction *editAlbumAction = [UIAlertAction actionWithTitle:@"Edit album location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             // this block runs when the driving option is selected
@@ -124,6 +248,17 @@
         [alert addAction:deleteAlbumAction];
         [alert addAction:addPhotosAction];
         [alert addAction:cancelAction];
+        if(self.selectedAlbum!=nil && [self.selectedAlbum isFakeAlbum]) {
+           //add option to persist on cameral rool, will use the same code of create album + will add all the assets currently inside this fake container
+            UIAlertAction *persistAlbumAction = [UIAlertAction actionWithTitle:@"Persist album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                // this block runs when the driving option is selected
+                self.selectedAction = ACTION_PERSIST_ALBUM;
+                [self persistAlbumClicked: nil];
+                
+            }];
+            
+            [alert addAction:persistAlbumAction];
+        }
         
         alert.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
         [self presentViewController:alert animated:YES completion:nil];
@@ -314,12 +449,38 @@
     
     if(selectedAlbum!=nil) {
         NSLog(@"DELETE ALBUM %@",selectedAlbum.name);
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+        
+        
+        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+        
+        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", selectedAlbum.name];
+         PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+        if(fetchResult.count == 1) {
+            
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
+                [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
+             
+                //[assetCollectionChangeRequest addAssets:@[[assetChangeRequest placeholderForCreatedAsset]]];
+
+            } completionHandler:^(BOOL success, NSError *error) {
+                if (!success) {
+                    NSLog(@"Error deleting album: %@", error);
+                } else {
+                    NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
+                    //TODO remove from the list of albums and reload webview
+                }
+            }];
+        }
+        
+        
+        
+        /*UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
                                                         message:@"You can only delete the album from the photos app"
                                                        delegate:nil
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
-        [alert show];
+        [alert show];*/
         [self.navigationController popToRootViewControllerAnimated:TRUE];
     }
 }
@@ -780,67 +941,163 @@
 }
 
 
-- (void)addAssetURL:(NSURL *)assetURL
-            toAlbum:(NSString *)albumName
-         completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
-            failure:(ALAssetsLibraryAccessFailureBlock)failure
+#pragma NEW STUFF
+#pragma mark - Public Method
+
+- (void)saveImage:(UIImage *)image
+          toAlbum:(NSString *)albumName
+       completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+          failure:(ALAssetsLibraryAccessFailureBlock)failure
 {
-    __block BOOL albumWasFound = NO;
+    if(self.assetslibrary==nil) {
+        self.assetslibrary = [[ALAssetsLibrary alloc] init];
+    }
     
-    // Signature for the block executed when a match is found during enumeration using
-    //   |-enumerateGroupsWithTypes:usingBlock:failureBlock:|.
-    //
-    // |group|: The current asset group in the enumeration.
-    // |stop| : A pointer to a boolean value; set the value to YES to stop enumeration.
-    //
-    ALAssetsLibraryGroupsEnumerationResultsBlock enumerationBlock;
-    enumerationBlock = ^(ALAssetsGroup *group, BOOL *stop) {
-        // Compare the names of the albums
-        if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
-            // Target album is found
-            albumWasFound = YES;
-            
-            // Get a hold of the photo's asset instance
-            // If the user denies access to the application, or if no application is allowed to
-            //   access the data, the failure block is called.
-            ALAssetsLibraryAssetForURLResultBlock assetForURLResultBlock =
-            [self _assetForURLResultBlockWithGroup:group
-                                          assetURL:assetURL
-                                        completion:completion
-                                           failure:failure];
-            
-            
-            // Album was found, bail out of the method
-            *stop = YES;
-        }
-        
-        
-    };
-    
-    // Search all photo albums in the library
-    //TODO
+  [self.assetslibrary writeImageToSavedPhotosAlbum:image.CGImage
+                         orientation:(ALAssetOrientation)image.imageOrientation
+                     completionBlock:[self _resultBlockOfAddingToAlbum:albumName
+                                                            completion:completion
+                                                               failure:failure]];
 }
 
-- (ALAssetsLibraryAssetForURLResultBlock)_assetForURLResultBlockWithGroup:(ALAssetsGroup *)group
-                                                                 assetURL:(NSURL *)assetURL
-                                                               completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
-                                                                  failure:(ALAssetsLibraryAccessFailureBlock)failure
+- (void)saveVideo:(NSURL *)videoUrl
+          toAlbum:(NSString *)albumName
+       completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+          failure:(ALAssetsLibraryAccessFailureBlock)failure
 {
-    return ^(ALAsset *asset) {
-        // Add photo to the target album
-        if ([group addAsset:asset]) {
-            // Run the completion block if the asset was added successfully
-            if (completion) completion(assetURL, nil);
-        }
-        // |-addAsset:| may fail (return NO) if the group is not editable,
-        //   or if the asset could not be added to the group.
-        else {
-            NSString * message = [NSString stringWithFormat:@"ALAssetsGroup failed to add asset: %@.", asset];
-            if (failure) failure([NSError errorWithDomain:@"LIB_ALAssetsLibrary_CustomPhotoAlbum"
-                                                     code:0
-                                                 userInfo:@{NSLocalizedDescriptionKey : message}]);
-        }
-    };
+    if(self.assetslibrary==nil) {
+        self.assetslibrary = [[ALAssetsLibrary alloc] init];
+    }
+    
+    [self.assetslibrary writeVideoAtPathToSavedPhotosAlbum: videoUrl
+                             completionBlock:[self _resultBlockOfAddingToAlbum:albumName
+                                                                    completion:completion
+                                                                       failure:failure]];
 }
+
+- (void)saveImageData:(NSData *)imageData
+              toAlbum:(NSString *)albumName
+             metadata:(NSDictionary *)metadata
+           completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+              failure:(ALAssetsLibraryAccessFailureBlock)failure
+{
+  
+    if(self.assetslibrary==nil) {
+        self.assetslibrary = [[ALAssetsLibrary alloc] init];
+    }
+    
+    [self.assetslibrary writeImageDataToSavedPhotosAlbum:imageData
+                                metadata:metadata
+                         completionBlock:[self _resultBlockOfAddingToAlbum:albumName
+                                                                completion:completion
+                                                                   failure:failure]];
+  
+}
+
+#pragma mark - Private Method
+
+-(void)_addAssetURL:(NSURL *)assetURL
+            toAlbum:(NSString *)albumName
+            failure:(ALAssetsLibraryAccessFailureBlock)failure
+{
+  __block BOOL albumWasFound = NO;
+  
+  ALAssetsLibraryGroupsEnumerationResultsBlock enumerationBlock;
+  enumerationBlock = ^(ALAssetsGroup *group, BOOL *stop) {
+    // compare the names of the albums
+    if ([albumName compare:[group valueForProperty:ALAssetsGroupPropertyName]] == NSOrderedSame) {
+      // target album is found
+      albumWasFound = YES;
+      
+    if(self.assetslibrary==nil) {
+        self.assetslibrary = [[ALAssetsLibrary alloc] init];
+    }
+      
+      // get a hold of the photo's asset instance
+      [self.assetslibrary assetForURL:assetURL
+            resultBlock:^(ALAsset *asset) {
+              // add photo to the target album
+              [group addAsset:asset];
+            }
+           failureBlock:failure];
+      
+      // album was found, bail out of the method
+      return;
+    }
+    
+    if (group == nil && albumWasFound == NO) {
+      // photo albums are over, target album does not exist, thus create it
+      
+      // Since you use the assets library inside the block,
+      //   ARC will complain on compile time that there’s a retain cycle.
+      //   When you have this – you just make a weak copy of your object.
+      //
+      //   __weak ALAssetsLibrary * weakSelf = self;
+      //
+      // by @Marin.
+      //
+      // I don't use ARC right now, and it leads a warning.
+      // by @Kjuly
+      ALAssetsLibrary * weakSelf = self;
+      
+      // if iOS version is lower than 5.0, throw a warning message
+      if (! [self respondsToSelector:@selector(addAssetsGroupAlbumWithName:resultBlock:failureBlock:)])
+        NSLog(@"![WARNING][LIB:ALAssetsLibrary+CustomPhotoAlbum]: \
+              |-addAssetsGroupAlbumWithName:resultBlock:failureBlock:| \
+              only available on iOS 5.0 or later. \
+              ASSET cannot be saved to album!");
+        
+        if(self.assetslibrary==nil) {
+            self.assetslibrary = [[ALAssetsLibrary alloc] init];
+        }
+      // create new assets album
+      else [self.assetslibrary addAssetsGroupAlbumWithName:albumName
+                                 resultBlock:^(ALAssetsGroup *group) {
+                                   // get the photo's instance
+                                   [weakSelf assetForURL:assetURL
+                                             resultBlock:^(ALAsset *asset) {
+                                               // add photo to the newly created album
+                                               [group addAsset:asset];
+                                             }
+                                            failureBlock:failure];
+                                 }
+                                failureBlock:failure];
+      
+      // should be the last iteration anyway, but just in case
+      return;
+    }
+  };
+  
+    if(self.assetslibrary==nil) {
+        self.assetslibrary = [[ALAssetsLibrary alloc] init];
+    }
+  // search all photo albums in the library
+  [self.assetslibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum
+                      usingBlock:enumerationBlock
+                    failureBlock:failure];
+}
+
+- (ALAssetsLibraryWriteImageCompletionBlock)_resultBlockOfAddingToAlbum:(NSString *)albumName
+                                                             completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
+                                                                failure:(ALAssetsLibraryAccessFailureBlock)failure
+{
+  ALAssetsLibraryWriteImageCompletionBlock result = ^(NSURL *assetURL, NSError *error) {
+    // run the completion block for writing image to saved
+    //   photos album
+    if (completion) completion(assetURL, error);
+    
+    // if an error occured, do not try to add the asset to
+    //   the custom photo album
+    if (error != nil)
+      return;
+    
+    // add the asset to the custom photo album
+    [self _addAssetURL:assetURL
+               toAlbum:albumName
+               failure:failure];
+  };
+  return [result copy];
+}
+
 
 @end
