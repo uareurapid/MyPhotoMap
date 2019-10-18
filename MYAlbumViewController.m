@@ -290,8 +290,20 @@
     NSLog(@"start selecting photos");
     //TODO disable the button or change it´s label to select
     //add another one to select all
-    self.navigationItem.rightBarButtonItem.tag = SELECT_ALL_TAG;
-    self.navigationItem.rightBarButtonItem.title = @"Select All";
+    
+    //self.navigationItem.rightBarButtonItem.tag = SELECT_ALL_TAG;
+    //self.navigationItem.rightBarButtonItem.title = @"Select All";
+    
+    if(self.selectedAlbum!=nil) {
+        QBImagePickerController *imagePickerController = [QBImagePickerController new];
+        imagePickerController.delegate = self;
+        imagePickerController.allowsMultipleSelection = YES;
+        imagePickerController.maximumNumberOfSelection = 50;
+        imagePickerController.showsNumberOfSelectedAssets = YES;
+
+        [self presentViewController:imagePickerController animated:YES completion:NULL];
+    }
+    
     
     //TODO https://www.ecanarys.com/Blogs/ArticleID/94/How-to-Save-Photos-to-Custom-Album-in-iPhone-iPad-Photo-Library
     //TODO #import <Photos/Photos.h>
@@ -617,9 +629,9 @@
                 [albumSingle addPhoto:photo];
                 NSLog(@"PROCESSED %ld", (long)processed);
                 if(processed == count) {
-                   dispatch_async(dispatch_get_main_queue(), ^{
+                   //dispatch_async(dispatch_get_main_queue(), ^{
                     [self refreshCollection];
-                   });
+                   //});
                 }
         }
         
@@ -660,19 +672,37 @@
 
 -(void) refreshCollection {
      
-    //[self.collectionView.collectionViewLayout invalidateLayout];
-    [self.collectionView reloadData];
-    [self.collectionView performBatchUpdates:^{
-            
-       NSArray *indexpaths = self.collectionView.indexPathsForVisibleItems;
-       if(indexpaths!=nil && indexpaths.count>0) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //[self.collectionView.collectionViewLayout invalidateLayout];
+        [self.collectionView reloadData];
+        [self.collectionView performBatchUpdates:^{
+                
+           NSArray *indexpaths = self.collectionView.indexPathsForVisibleItems;
+           if(indexpaths!=nil && indexpaths.count>0) {
 
-          [self.collectionView reloadItemsAtIndexPaths:indexpaths];
-           
-       }
-    } completion:^(BOOL finished) {
-        // Called async when all animations are finished; finished = NO if cancelled
-    }];
+              [self.collectionView reloadItemsAtIndexPaths:indexpaths];
+               
+           }
+        } completion:^(BOOL finished) {
+            // Called async when all animations are finished; finished = NO if cancelled
+        }];
+    });
+    
+    
+}
+
+-(void) reloadAlbumAssets {
+    
+    //TODO need to recreate the entire album strcuture
+    //read photos, photos url etc..
+    //and them call [self readAlbumThumbnails];
+    
+    //[self.selectedAlbum.photosURLs removeAllObjects];
+    //[self.selectedAlbum.photos removeAllObjects];
+
+    //add all the urls using PHAsset
+    //[self readAlbumThumbnails];
+    //will also reload the view
 }
 
 -(void)selectAlbumPhoto: (BOOL) select atIndex:(NSInteger) index {
@@ -1099,5 +1129,155 @@
   return [result copy];
 }
 
+#pragma image picker delegate methods
+- (void)qb_imagePickerController:(QBImagePickerController *)imagePickerController didFinishPickingAssets:(NSArray *)assets {
+    //first get the album
+    PHAssetCollection *assetCollection = [self findAlbumByName:self.selectedAlbum.name];
+    if(assetCollection!=nil) {
+        
+        PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+        requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+        requestOptions.networkAccessAllowed = true;
+        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        
+        // this one is key
+        requestOptions.synchronous = YES;
+        
+        NSMutableArray *assetsArray = [NSMutableArray arrayWithArray:assets];
+        //PHImageManager *manager = [PHImageManager defaultManager];
+      
+        //save them on group
+        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                //PHAssetChangeRequest *assetChangeRequest = [PHAssetChangeRequest cr:asset];
+            PHAssetCollectionChangeRequest *assetCollectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:assetCollection];
+                [assetCollectionChangeRequest addAssets:assetsArray];
+
+        } completionHandler:^(BOOL success, NSError *error) {
+                if (!success) {
+                    NSLog(@"Error persistsing asset: %@", error);
+                } else {
+                    NSLog(@"Persisted assets on new album");
+                    [self getAllPHAssetsFromAlbum:assetCollection];
+                }
+            [self dismissViewControllerAnimated:YES completion:NULL];
+        }];
+    } else {
+       [self dismissViewControllerAnimated:YES completion:NULL];
+    }
+    
+    
+    
+
+    
+}
+
+- (void)qb_imagePickerControllerDidCancel:(QBImagePickerController *)imagePickerController {
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+- (PHAssetCollection *) findAlbumByName: (NSString *) albumName {
+    
+    PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+    
+    fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
+     PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+    //first check if already exists, only add if not
+    if (fetchResult.count >= 1) {
+        return (PHAssetCollection *)fetchResult.firstObject;
+    }
+    
+    return nil;
+}
+/*
+-(void)newReloadAlbumAssets: (NSMutableArray * )imagesArray {
+    
+    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+    requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+    requestOptions.networkAccessAllowed = true;
+    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    
+    // this one is key
+    requestOptions.synchronous = YES;
+    
+    PHImageManager *manager = [PHImageManager defaultManager];
+    
+    dispatch_async(dispatch_get_main_queue(), ^(){
+        
+       
+    for (PHAsset *asset in imagesArray) {
+        // Do something with the asset
+        
+        [manager requestImageForAsset:asset
+                           targetSize:PHImageManagerMaximumSize
+                          contentMode:PHImageContentModeDefault
+                              options:requestOptions
+                        resultHandler:^void(UIImage *image, NSDictionary *info) {
+                            if(image!=nil) {
+                               // [self.attachments addObject:image];
+                                //PHImageFileURLKey could be nil if the key is not present, so we add dummy string instead
+                                NSURL *url = [info objectForKey: @"PHImageFileURLKey"];
+                                if(url==nil) {
+                                    url = [NSURL URLWithString:@"file:///var/mobile/media/dcim/100apple/pic.png"];
+                                }
+                                NSArray *data = [[NSArray alloc] initWithObjects:image, url.absoluteString, nil];
+                               // [self.attachments addObject:data];
+                           
+                            }
+                            
+                        }];
+        
+        
+    }
+        
+    });
+}*/
+
+-(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
+    
+    
+   
+    /*
+     
+     let fetchOptions = PHFetchOptions()
+     fetchOptions.predicate = NSPredicate(format: "title = %@", YourAlbumTitle)
+     let resultCollections = PHAssetCollection.fetchAssetCollectionsWithType(.Album, subtype: .AlbumRegular, options: fetchOptions)
+     
+     Actually, album title isn't unique value, they can duplicate. so I recommend use localIdentifier like below, if your app access multiple albums.
+
+     let fetchOptions = PHFetchOptions()
+     fetchOptions.predicate = NSPredicate(format: "localIdentifier = %@", YourAlbumLocalIdentifier)
+     let resultCollections = PHAssetCollection.fetchAssetCollectionsWithType(.Album, subtype: .AlbumRegular, options: fetchOptions)
+     */
+    
+    /*PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+    fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
+    PHFetchResult *results = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];*/
+        
+    PHFetchResult *results = [PHAsset fetchAssetsInAssetCollection:albumCollection options:nil];
+    if(results!=nil && results.count > 0) {
+    
+        NSMutableArray *assetsArray = [[NSMutableArray alloc] initWithCapacity:results.count];
+        
+        for(PHAsset *asset in results) {
+            
+            [assetsArray addObject:(PHAsset *)asset];
+        }
+        NSLog(@"GOT %lu Assets from album %@", (unsigned long)assetsArray.count, self.selectedAlbum.name);
+        //TODO reload the collection view
+        //READ https://stackoverflow.com/questions/28887638/how-to-get-an-alasset-url-from-a-phasset
+    }
+    /**
+     
+        Create the assetURL by leveraging the localidentifier of the PHAsset. Example: PHAsset.localidentifier returns 91B1C271-C617-49CE-A074-E391BA7F843F/L0/001
+
+        Now take the 32 first characters to build the assetURL, like:
+
+        assets-library://asset/asset.JPG?id=91B1C271-C617-49CE-A074-E391BA7F843F&ext=JPG
+
+        You might change the extension JPG depending on the UTI of the asset (requestImageDataForAsset returns the UTI), but in my testing the extensions of the assetURL seems to be ignored anyhow.
+     */
+    /*/PHAsset* legacyAsset = [PHAsset fetchAssetsWithALAssetUrls:@[assetUrl] options:nil].firstObject;
+    NSString* convertedIdentifier = legacyAsset.localIdentifier;*/
+}
 
 @end

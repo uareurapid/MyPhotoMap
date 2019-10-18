@@ -19,6 +19,7 @@
 #import <Photos/PHPhotoLibrary.h>
 #import <Photos/PHAssetCollectionChangeRequest.h>
 #import <Photos/Photos.h>
+#import <QBImagePickerController/QBImagePickerController.h>
 
 //#import <Photos/PHAssetCollection.h>
 
@@ -26,7 +27,7 @@ typedef void (^ALAssetsLibraryAssetForURLResultBlock)(ALAsset *asset);
 typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 
-@interface MYAlbumViewController : BHCollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate>
+@interface MYAlbumViewController : BHCollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, QBImagePickerControllerDelegate>
 
 @property (retain,nonatomic) PhotoDetailViewController *detailViewController;
 

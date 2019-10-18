@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1897F7D32355C7FF00892EE3 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 724E90711768E0E6007E6939 /* Default-568h@2x.png */; };
+		18C6392E2359F8780089C02D /* QBImagePickerController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18C6392D2359F8780089C02D /* QBImagePickerController.framework */; };
 		18CDFC0A2358ABB200080BE0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18CDFC092358ABB200080BE0 /* Photos.framework */; };
 		723389E21E1AC6EF00A07EEA /* placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 723389E11E1AC6EF00A07EEA /* placeholder.png */; };
 		724E8F831768E07E007E6939 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 724E8F821768E07E007E6939 /* UIKit.framework */; };
@@ -139,9 +140,11 @@
 		72DFFCA5176B74A600648679 /* CallOutViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 72DFFCA3176B74A600648679 /* CallOutViewCell.m */; };
 		72DFFCA6176B74A600648679 /* CallOutViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 72DFFCA4176B74A600648679 /* CallOutViewCell.xib */; };
 		72F644F92357BB3D00F4919B /* ALAssetsLibrary+CustomPhotoAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 72F644F82357BB3D00F4919B /* ALAssetsLibrary+CustomPhotoAlbum.m */; };
+		E5253364FED8F90A4B83CA38 /* Pods_MyPhotoMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D07505768F4AF950692B7D05 /* Pods_MyPhotoMap.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		18C6392D2359F8780089C02D /* QBImagePickerController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = QBImagePickerController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		18CDFC092358ABB200080BE0 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		723389E11E1AC6EF00A07EEA /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
 		724E8F7F1768E07E007E6939 /* MyPhotoMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyPhotoMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -381,6 +384,9 @@
 		72DFFCA4176B74A600648679 /* CallOutViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallOutViewCell.xib; sourceTree = "<group>"; };
 		72F644F72357BB3D00F4919B /* ALAssetsLibrary+CustomPhotoAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALAssetsLibrary+CustomPhotoAlbum.h"; sourceTree = "<group>"; };
 		72F644F82357BB3D00F4919B /* ALAssetsLibrary+CustomPhotoAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALAssetsLibrary+CustomPhotoAlbum.m"; sourceTree = "<group>"; };
+		D07505768F4AF950692B7D05 /* Pods_MyPhotoMap.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyPhotoMap.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D77C3A67389770031B507766 /* Pods-MyPhotoMap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyPhotoMap.release.xcconfig"; path = "Target Support Files/Pods-MyPhotoMap/Pods-MyPhotoMap.release.xcconfig"; sourceTree = "<group>"; };
+		DF09B826CC3CC76E02D98E69 /* Pods-MyPhotoMap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyPhotoMap.debug.xcconfig"; path = "Target Support Files/Pods-MyPhotoMap/Pods-MyPhotoMap.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -399,10 +405,12 @@
 				724E90EB1768E1C6007E6939 /* CoreLocation.framework in Frameworks */,
 				724E90E91768E1BF007E6939 /* AVFoundation.framework in Frameworks */,
 				724E90E71768E1B8007E6939 /* CoreData.framework in Frameworks */,
+				18C6392E2359F8780089C02D /* QBImagePickerController.framework in Frameworks */,
 				18CDFC0A2358ABB200080BE0 /* Photos.framework in Frameworks */,
 				724E8F831768E07E007E6939 /* UIKit.framework in Frameworks */,
 				724E8F851768E07E007E6939 /* Foundation.framework in Frameworks */,
 				724E8F871768E07E007E6939 /* CoreGraphics.framework in Frameworks */,
+				E5253364FED8F90A4B83CA38 /* Pods_MyPhotoMap.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +449,7 @@
 				724E8F881768E07E007E6939 /* MyPhotoMap */,
 				724E8F811768E07E007E6939 /* Frameworks */,
 				724E8F801768E07E007E6939 /* Products */,
+				9C4865D5A10E56F3CAD888B8 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -455,10 +464,12 @@
 		724E8F811768E07E007E6939 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18C6392D2359F8780089C02D /* QBImagePickerController.framework */,
 				18CDFC092358ABB200080BE0 /* Photos.framework */,
 				724E8F821768E07E007E6939 /* UIKit.framework */,
 				724E8F841768E07E007E6939 /* Foundation.framework */,
 				724E8F861768E07E007E6939 /* CoreGraphics.framework */,
+				D07505768F4AF950692B7D05 /* Pods_MyPhotoMap.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -997,6 +1008,15 @@
 			path = CustomPhotoAlbum;
 			sourceTree = "<group>";
 		};
+		9C4865D5A10E56F3CAD888B8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DF09B826CC3CC76E02D98E69 /* Pods-MyPhotoMap.debug.xcconfig */,
+				D77C3A67389770031B507766 /* Pods-MyPhotoMap.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1004,9 +1024,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 724E8F9C1768E07E007E6939 /* Build configuration list for PBXNativeTarget "MyPhotoMap" */;
 			buildPhases = (
+				7A59BF408AF323E9F1080F7D /* [CP] Check Pods Manifest.lock */,
 				724E8F7B1768E07E007E6939 /* Sources */,
 				724E8F7C1768E07E007E6939 /* Frameworks */,
 				724E8F7D1768E07E007E6939 /* Resources */,
+				8E7EFBDD1E9383C0C8DC8901 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1082,6 +1104,49 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7A59BF408AF323E9F1080F7D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MyPhotoMap-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8E7EFBDD1E9383C0C8DC8901 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MyPhotoMap/Pods-MyPhotoMap-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/QBImagePickerController/QBImagePickerController.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/QBImagePickerController.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MyPhotoMap/Pods-MyPhotoMap-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		724E8F7B1768E07E007E6939 /* Sources */ = {
@@ -1304,6 +1369,7 @@
 		};
 		724E8F9D1768E07E007E6939 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DF09B826CC3CC76E02D98E69 /* Pods-MyPhotoMap.debug.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = VAZ5V665BS;
 				GCC_NO_COMMON_BLOCKS = NO;
@@ -1311,6 +1377,7 @@
 				GCC_PREFIX_HEADER = "MyPhotoMap/MyPhotoMap-Prefix.pch";
 				INFOPLIST_FILE = "MyPhotoMap/MyPhotoMap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.pt.pcristo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1321,6 +1388,7 @@
 		};
 		724E8F9E1768E07E007E6939 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D77C3A67389770031B507766 /* Pods-MyPhotoMap.release.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = VAZ5V665BS;
 				GCC_NO_COMMON_BLOCKS = NO;
@@ -1328,6 +1396,7 @@
 				GCC_PREFIX_HEADER = "MyPhotoMap/MyPhotoMap-Prefix.pch";
 				INFOPLIST_FILE = "MyPhotoMap/MyPhotoMap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.pt.pcristo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
