@@ -1258,10 +1258,24 @@
     
         NSMutableArray *assetsArray = [[NSMutableArray alloc] initWithCapacity:results.count];
         
+        [self.selectedAlbum.photos removeAllObjects];
+        [self.selectedAlbum.photosURLs removeAllObjects];
+        
         for(PHAsset *asset in results) {
+            
+            NSLog(@"LOCAL IDENTIFIER IS %@", asset.localIdentifier);
+            NSString *url = [NSString stringWithFormat:@"assets-library://asset/asset.JPG?id=%@",asset.localIdentifier ];
+            NSString *str = [url stringByReplacingOccurrencesOfString:@"/L0/001" withString:@"&ext=JPG"];
+            NSURL *finalUrl = [[NSURL alloc] initWithString: str];
+            NSLog(@"FINAL ASSET URL IDENTIFIER IS %@", finalUrl.absoluteString);
+            [self.selectedAlbum.photosURLs addObject: finalUrl];
             
             [assetsArray addObject:(PHAsset *)asset];
         }
+        if(assetsArray.count > 0) {
+            [self readAlbumThumbnails];
+        }
+        
         NSLog(@"GOT %lu Assets from album %@", (unsigned long)assetsArray.count, self.selectedAlbum.name);
         //TODO reload the collection view
         //READ https://stackoverflow.com/questions/28887638/how-to-get-an-alasset-url-from-a-phasset
