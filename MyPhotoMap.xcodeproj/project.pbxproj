@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1835260D235DFAD000C80175 /* MYAlbumCollectionViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1835260C235DFACF00C80175 /* MYAlbumCollectionViewController.xib */; };
 		1897F7D32355C7FF00892EE3 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 724E90711768E0E6007E6939 /* Default-568h@2x.png */; };
 		18C6392E2359F8780089C02D /* QBImagePickerController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18C6392D2359F8780089C02D /* QBImagePickerController.framework */; };
 		18CDFC0A2358ABB200080BE0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18CDFC092358ABB200080BE0 /* Photos.framework */; };
@@ -144,6 +145,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1835260C235DFACF00C80175 /* MYAlbumCollectionViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MYAlbumCollectionViewController.xib; sourceTree = SOURCE_ROOT; };
 		18C6392D2359F8780089C02D /* QBImagePickerController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = QBImagePickerController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		18CDFC092358ABB200080BE0 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		723389E11E1AC6EF00A07EEA /* placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeholder.png; sourceTree = "<group>"; };
@@ -963,6 +965,7 @@
 				726164BB1C4328E200381048 /* UIDeviceHardware.m */,
 				726FAC88176B3FBE00D19726 /* POPOVER */,
 				724E8F9F1768E0E6007E6939 /* BHCollectionViewController.xib */,
+				1835260C235DFACF00C80175 /* MYAlbumCollectionViewController.xib */,
 				724E8FB31768E0E6007E6939 /* PhotosMapViewController.xib */,
 				724E8FBB1768E0E6007E6939 /* SearchLocationViewController.xib */,
 				724E905C1768E0E6007E6939 /* AlbumsListViewController.xib */,
@@ -1093,6 +1096,7 @@
 				724E90CD1768E0E6007E6939 /* AlbumsListViewController.xib in Resources */,
 				724E90CE1768E0E6007E6939 /* PhotoDetailViewController.xib in Resources */,
 				724E90D41768E0E6007E6939 /* shadow_instagram.png in Resources */,
+				1835260D235DFAD000C80175 /* MYAlbumCollectionViewController.xib in Resources */,
 				723389E21E1AC6EF00A07EEA /* placeholder.png in Resources */,
 				728F42891E214211007EAE79 /* photos.png in Resources */,
 				724E90DC1768E0E6007E6939 /* list-add.png in Resources */,

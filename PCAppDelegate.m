@@ -25,7 +25,7 @@
     
     self.mapViewController = [[PhotosMapViewController alloc] initWithNibName:@"PhotosMapViewController" bundle:nil];
     self.collectionController = [[BHCollectionViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
-    self.collectionController.albumViewController  = [[MYAlbumViewController alloc] initWithNibName:@"BHCollectionViewController" bundle:nil];
+    self.collectionController.albumViewController  = [[MYAlbumViewController alloc] initWithNibName:@"MYAlbumCollectionViewController" bundle:nil];
     
     self.searchController = [[SearchLocationViewController alloc] initWithNibName:@"SearchLocationViewController" bundle:nil];
 

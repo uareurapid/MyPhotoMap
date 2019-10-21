@@ -31,9 +31,8 @@
 @synthesize numExistingAlbums;
 @synthesize albumTextField;
 @synthesize addAlbumButton,navController;
-@synthesize location;
 @synthesize mapViewController;
-//@synthesize managedObjectContext;
+@synthesize location;
 @synthesize databaseRecords;
 @synthesize albumsYears;
 
@@ -173,7 +172,7 @@
 
 #pragma asset stuff
 -(void) loadAssetInfoFromDataModel:(LocationDataModel*)model {
-    NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
+    //NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
     
     //if it is an album found the match in the complete array, and get the list of photos
     NSMutableArray *photos = nil;
@@ -895,7 +894,6 @@
     
     //remove the one on the left , leaving only the back button
     albumViewController.navigationItem.leftBarButtonItem=nil;
-    //[albumViewController readAlbumThumbnails]; on viewWillAppear
     [self.navigationController pushViewController: albumViewController animated:NO];
   
     

@@ -22,12 +22,13 @@
 #import <QBImagePickerController/QBImagePickerController.h>
 
 //#import <Photos/PHAssetCollection.h>
+@class PhotosMapViewController;
 
 typedef void (^ALAssetsLibraryAssetForURLResultBlock)(ALAsset *asset);
 typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 
-@interface MYAlbumViewController : BHCollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, QBImagePickerControllerDelegate>
+@interface MYAlbumViewController : UICollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, QBImagePickerControllerDelegate>//BHCollectionViewController
 
 @property (retain,nonatomic) PhotoDetailViewController *detailViewController;
 
@@ -35,7 +36,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 //will actaully be abums of just one photo/thumbnail
 
-//@property (assign, nonatomic) BHAlbumPhotoCell *selectedPhotoCell;
+@property (strong, nonatomic) PhotosMapViewController *mapViewController;
 
 @property (strong, nonatomic) BHAlbum *selectedAlbum;
 @property (strong, nonatomic) BHAlbum *selectedPhoto;
@@ -45,7 +46,9 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property (assign, nonatomic) NSInteger selectedAction;
 @property (assign, nonatomic) NSInteger selectedItems;
+@property (strong,nonatomic) CLLocation *location;
 
+@property (nonatomic, strong) NSMutableArray *albums;
 
 @property (assign, nonatomic) ALAssetsLibrary* assetslibrary;
 
@@ -61,6 +64,8 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 -(IBAction)deleteAlbum:(id)sender;
 -(IBAction)addPhotosToCurrentAlbum:(id)sender;
 
+@property (nonatomic, weak) IBOutlet BHPhotoAlbumLayout *photoAlbumLayout;
+@property (strong, nonatomic) IBOutlet UITabBar *tabBarController;
 
 /*! Write the asset to the assets library (camera roll). (Private)
  *

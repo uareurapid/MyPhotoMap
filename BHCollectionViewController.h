@@ -32,11 +32,10 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 @property (strong, nonatomic) NSMutableArray *databaseRecords;
 @property (strong, nonatomic) NSMutableArray *albumsYears;
 
+@property (strong,nonatomic) CLLocation *location;
 //was retain
 @property (strong,nonatomic) NSMutableArray *assetsURLs;
 @property (retain, nonatomic) UINavigationController *navController;
-
-@property (strong,nonatomic) CLLocation *location;
 
 @property (nonatomic, strong) NSMutableArray *albums;
 @property (nonatomic, weak) IBOutlet BHPhotoAlbumLayout *photoAlbumLayout;

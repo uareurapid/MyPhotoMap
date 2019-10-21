@@ -39,11 +39,15 @@
 @synthesize selectedAlbumIndex;
 @synthesize selectedAlbum,selectedPhoto,selectedAction,selectedItems;
 @synthesize isFirstLoad;
+@synthesize location;
+@synthesize albums;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        
+         albums = [NSMutableArray array];
         // Custom initialization
         //albumPhotos = [[NSMutableArray alloc] init];
         detailViewController = [[PhotoDetailViewController alloc] initWithNibName:@"PhotoDetailViewController" bundle:nil];
@@ -61,7 +65,20 @@
 
 - (void)viewDidLoad
 {
-    [super viewDidLoad];
+    //[super viewDidLoad];
+    
+    UIImage *patternImage = [UIImage imageNamed:@"concrete_wall"];
+    self.collectionView.backgroundColor = [UIColor colorWithPatternImage:patternImage];
+    
+    [self.collectionView registerClass:[BHAlbumPhotoCell class]
+            forCellWithReuseIdentifier:PhotoCellIdentifier];
+    [self.collectionView registerClass:[BHAlbumTitleReusableView class]
+            forSupplementaryViewOfKind:BHPhotoAlbumLayoutAlbumTitleKind
+                   withReuseIdentifier:AlbumTitleIdentifier];
+    
+    //self.thumbnailQueue = [[NSOperationQueue alloc] init];
+    //self.thumbnailQueue.maxConcurrentOperationCount = 3;
+
     selectedItems = 0;
     self.isFirstLoad = true;
 	// Do any additional setup after loading the view.
@@ -70,6 +87,7 @@
 
 -(void) viewWillAppear:(BOOL)animated {
     
+    NSLog(@"viewWillAppear, album");
     self.selectedAction = 0;
     [self readAlbumThumbnails];
     
@@ -480,7 +498,10 @@
                     NSLog(@"Error deleting album: %@", error);
                 } else {
                     NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
+                    
                     //TODO remove from the list of albums and reload webview
+                    [self.albumsNames removeObject:self.selectedAlbum.name];
+                    //TODO remove them from the root view controller too!!!!
                 }
             }];
         }
@@ -576,9 +597,11 @@
     NSInteger __block processed = 0;
     NSInteger count = selectedAlbum.photosURLs.count;
     
+    NSLog(@"COUNT %ld", (long)count);
     //only if not the same
-    [self.albums removeAllObjects];
-    [self refreshCollection]; //maybe invalidate layout too?
+    
+    //[self.albums removeAllObjects];
+    //[self refreshCollection]; //maybe invalidate layout too?
 
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset){
@@ -629,9 +652,9 @@
                 [albumSingle addPhoto:photo];
                 NSLog(@"PROCESSED %ld", (long)processed);
                 if(processed == count) {
-                   //dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    self.selectedAlbum.photosCount = processed;
                     [self refreshCollection];
-                   //});
                 }
         }
         
@@ -672,21 +695,20 @@
 
 -(void) refreshCollection {
      
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //[self.collectionView.collectionViewLayout invalidateLayout];
+    //dispatch_async(dispatch_get_main_queue(), ^{
+        [self.collectionView.collectionViewLayout invalidateLayout];
         [self.collectionView reloadData];
         [self.collectionView performBatchUpdates:^{
                 
            NSArray *indexpaths = self.collectionView.indexPathsForVisibleItems;
            if(indexpaths!=nil && indexpaths.count>0) {
-
               [self.collectionView reloadItemsAtIndexPaths:indexpaths];
                
            }
         } completion:^(BOOL finished) {
             // Called async when all animations are finished; finished = NO if cancelled
         }];
-    });
+    //});
     
     
 }
@@ -789,17 +811,22 @@
     NSInteger row = indexPath.section;
     NSInteger photoIndex = indexPath.item;
     
-    
-    if(row < self.albums.count) {
-        BHAlbum *albumSelected =self.albums[row];
+    NSLog(@"ROW is %ld %ld %ld", (long)row, self.selectedAlbum.photosCount, photoIndex);
+    if(row < self.selectedAlbum.photosURLs.count) {
+        
+        BHAlbum *albumSelected = self.selectedAlbum;
         
         NSInteger tag = row;
         
-        if(albumSelected.photos!=nil && albumSelected.photos.count > photoIndex) {
-            BHPhoto *photo = albumSelected.photos[photoIndex];//which should only be 1indexPath.item
+        if(albumSelected.photos!=nil && albumSelected.photos.count > row) {
+            BHPhoto *photo = albumSelected.photos[row];//which should only be 1indexPath.item
             BOOL isSelected = photo.isSelected;
             
-            photoCell.imageView.image = photo.image;
+            
+            //dispatch_async(dispatch_get_main_queue(), ^(){
+               photoCell.imageView.image = photo.image;
+            //});
+            
             photoCell.imageView.userInteractionEnabled = YES;
             [photoCell setPhotoSelected:isSelected];
             //TODO do i need to have this alos on the main thread?? probably just update the image no???
@@ -1234,24 +1261,6 @@
 
 -(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
     
-    
-   
-    /*
-     
-     let fetchOptions = PHFetchOptions()
-     fetchOptions.predicate = NSPredicate(format: "title = %@", YourAlbumTitle)
-     let resultCollections = PHAssetCollection.fetchAssetCollectionsWithType(.Album, subtype: .AlbumRegular, options: fetchOptions)
-     
-     Actually, album title isn't unique value, they can duplicate. so I recommend use localIdentifier like below, if your app access multiple albums.
-
-     let fetchOptions = PHFetchOptions()
-     fetchOptions.predicate = NSPredicate(format: "localIdentifier = %@", YourAlbumLocalIdentifier)
-     let resultCollections = PHAssetCollection.fetchAssetCollectionsWithType(.Album, subtype: .AlbumRegular, options: fetchOptions)
-     */
-    
-    /*PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
-    fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
-    PHFetchResult *results = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];*/
         
     PHFetchResult *results = [PHAsset fetchAssetsInAssetCollection:albumCollection options:nil];
     if(results!=nil && results.count > 0) {
@@ -1269,6 +1278,8 @@
             NSURL *finalUrl = [[NSURL alloc] initWithString: str];
             NSLog(@"FINAL ASSET URL IDENTIFIER IS %@", finalUrl.absoluteString);
             [self.selectedAlbum.photosURLs addObject: finalUrl];
+            
+            NSLog(@"TYPE IS %@",[asset valueForKey:@"uniformTypeIdentifier"]);
             
             [assetsArray addObject:(PHAsset *)asset];
         }
