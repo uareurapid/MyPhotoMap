@@ -177,12 +177,17 @@
     //if it is an album found the match in the complete array, and get the list of photos
     NSMutableArray *photos = nil;
     if([model.type isEqualToString:TYPE_ALBUM]) {
+        //if it is an album it will add the array of all the images on the album
         for(BHAlbum *album in self.albums) {
             if([[album.assetURL absoluteString] isEqualToString:model.assetURL]) {
                 photos = [[NSMutableArray alloc] initWithCapacity:album.photosCount];
                 [photos addObjectsFromArray:album.photosURLs];
             }
         }
+        //single image
+    } else if(model.assetURL!=nil) {
+        photos = [[NSMutableArray alloc] initWithCapacity:1];
+        [photos addObject:model.assetURL];
     }
     
     
@@ -204,12 +209,10 @@
                 //UIImage *imageFinal = imageFull;
                 CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                     longitude:[model.longitude doubleValue]];
-                
+                NSLog(@"Adding location to the map, read from database 1");
                 //TODO add the full size here:
                 [mapViewController addLocation:locationCL withImage:image andTitle:@"other test" forModel:model containingURLS:photos];
                 
-                //[mapViewController addLocation:locationCL withThumbnail:image withImage:imageFinal andTitle:@"other test" forModel:model containingURLS:photos];
-                //NSLog(@"Adding location to the map, read from database");
                 
             });
         }
@@ -562,8 +565,7 @@
                                       auxiliar = aux;
                                   }
                                   
-                                  //NSLog(@"Location is: %@ with year: %ld",_location,(long)components.year);
-                                  
+                               
                                   //------------------------------ TODO check repetitive code -----------------------------------------------
                                   //check if this asset/image was already added to the current album (NOTE: this is not not counting the yearly album here)
                                   
@@ -594,7 +596,12 @@
                                       if(imageLocation!=nil) {
                                           //There is an exif cordinate???
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:nil];
+                                          
+                                           NSLog(@"Adding location to the map, exif 1");
+                                          
+                                          NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL.absoluteString, nil];
+                                          
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:urls];
                                       }
                                   }
                                   //----------------------------------------------------------------------------------
@@ -623,7 +630,12 @@
                                       //for all images
                                       if(imageLocation!=nil) {
                                           //if we have location data, add the annotation to the map
-                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:nil];
+                                          
+                                           NSLog(@"Adding location to the map 2");
+                                          
+                                          NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL.absoluteString, nil];
+                                          
+                                          [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i] forModel:nil containingURLS:urls];
                                       }
                                   }
                                   //------------------------------------------------------------------------------------
@@ -661,34 +673,7 @@
     
 }
 
-/*-(void) insertPictureOnAlbum: (BHAlbum *) album withURL:(NSURL *)url andThumbnail: (CGImageRef thumbnail) {
-    
-    if( [self albumContainsAssetURL:album assetURL:url] == NO) {
-        
-        [album.photosURLs addObject: url];
-        //get the thumbnail
-        __block UIImage *thumbnail = [UIImage imageWithCGImage: thumbnail];
-        
-        //ONLY process maximum of 3 images per album
-        if(processedImages <  (maxNumPhotosPerAlbum * self.albums.count) ) {
-            processedImages = processedImages +1;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                [album addPhoto:photo];
-                [self.collectionView reloadData];
-                
-                
-            });
-        }
-        //for all images
-        if(imageLocation!=nil) {
-            //if we have location data, add the annotation to the map
-            [mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: [NSString stringWithFormat:@"%d",i]];
-        }
-    }
-}*/
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];

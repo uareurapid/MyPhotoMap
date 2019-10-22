@@ -11,6 +11,7 @@
 #import "FPPopoverController.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
+
 @interface PhotosMapViewController ()
 
 @end
@@ -76,18 +77,15 @@
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
     annotation.subtitle = title;
-    //if(model != nil && model.assetURL!=nil) {
-    //     annotation.assetURL = NSU model.assetURL;
-    //}
    
     
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
-    //[self getFullScreenImage: annotation];
+    //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
-        NSLog(@"this annotation is for an album with %d pictures",photosURLS.count);
-        annotation.albumPhotos = photosURLS;
+        NSLog(@"this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
+        [annotation.albumPhotos addObjectsFromArray:photosURLS];
     }
     
     
@@ -105,21 +103,16 @@
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
     annotation.subtitle = title;
-    //annotation.imageFullScreen = image;
-    //annotation.image = thumb;
-    //if(model != nil && model.assetURL!=nil) {
-    //     annotation.assetURL = NSU model.assetURL;
-    //}
     
     
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
-    annotation.imageFullScreen = image;
+    //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
-        NSLog(@"this annotation is for an album with %d pictures",photosURLS.count);
-        annotation.albumPhotos = photosURLS;
-    }
+        NSLog(@"this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
+        [annotation.albumPhotos addObjectsFromArray:photosURLS];
+    } 
     
     
     //don´t plot them until they are on the array
@@ -150,6 +143,8 @@
     ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
     [assetslibrary assetForURL: [NSURL URLWithString: annotation.dataModel.assetURL ] resultBlock:resultblock failureBlock:failureblock];
 }
+
+
 
 //get the full screen image representation
 -(UIImage *)imageFromAsset:(ALAsset *)asset
@@ -496,5 +491,8 @@
     UIImage * image = [UIImage imageNamed:@"shadow_instagram"];
     return image;
 }
+
+
+
 
 @end

@@ -8,6 +8,9 @@
 
 #import "AnnotationCalloutViewController.h"
 #import "CallOutViewCell.h"
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/Photos.h>
+#import "PCImageUtils.h"
 
 @interface AnnotationCalloutViewController ()
 
@@ -15,7 +18,7 @@
 
 @implementation AnnotationCalloutViewController
 
-@synthesize calloutAnnotations,imageView,nextPictureButton,previousPicButton;
+@synthesize calloutAnnotations,imageView;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle  {
     self = [super initWithNibName:nibName bundle:nibBundle];
@@ -67,41 +70,89 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.currentIndex = -1;
+    self.currentIndex = 0;//-1;
     
     
-    NSLog(@"Annotations size %lu",(unsigned long)calloutAnnotations.count);
+    NSLog(@"Annotations size is %lu",(unsigned long)calloutAnnotations.count);
     
-    if(calloutAnnotations.count>0) {
+    
+    
+    NSLog(@"VIEW WILL APPEAR");
+    if(self.calloutAnnotations.count>0) {
       
-      self.currentIndex = 0;
-      previousPicButton.hidden = nextPictureButton.hidden = (calloutAnnotations.count == 1);
-        
-      MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:0];
+     //if(self.currentIndex < 0 || self.currentIndex >= self.calloutAnnotations.count ) {
+     //    self.currentIndex = 0;
+     //}
+     
+      MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
       
        //TODO check if a album or photo, if an album show all the other images on the same location
-      //from the asset url 
-      //LocationDataModel *theModel = myAnnotation.dataModel;
         
       //this is the thumbnail image i think
-      UIImage *image = myAnnotation.image; //TODO WAS OK
+        UIImage *image = myAnnotation.image; //TODO WAS OK
+        NSLog(@"IMAGE SIZE %fl %fl", image.size.width,image.size.height);
         
-      //  UIImage *image = myAnnotation.imageFullScreen;
-        //cell.imageName.text = myAnnotation.subtitle;
+        BOOL hasModel = (myAnnotation.dataModel != nil && myAnnotation.dataModel.assetURL!=nil);
         
-        
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // Update the UI
-            //but i also have the asset URL here, so maybe i´ll use that
-            self.imageView.image = image;
+        //this is the thumbnail image
+        if(myAnnotation.image!=nil) {
             
-        });
+            NSURL *url = nil;
+            NSArray *urls = nil;
+            if(hasModel) {
+                url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
+                urls = [[NSArray alloc] initWithObjects: url , nil];
+            }
+            else if(myAnnotation.albumPhotos.count > 0) {
+                url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: 0]]; //convert NSString to NSURL
+                urls = [[NSArray alloc] initWithObjects: url , nil];
+            }
+            
+            //only if i have some asset url to convert back to image
+            if(urls.count > 0) {
+                
+                PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:urls options:nil];
+                if(results!=nil && results.count > 0) {
+                    PHAsset *asset = (PHAsset *)results.firstObject;
+                    
+                    //this is the bigger image, after clicking the annotation (i) disclosure button
+                    //where we can move to next/previous pic on the same location (if any)
+                    //CGSize newSize = CGSizeMake(cell.cellImageView.frame.size.width, cell.cellImageView.frame.size.height);
+                    
+                    NSLog(@"FETCH IMAGE FULLSCREEN SIZE");
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        
+                        //this is the full screen image, maybe it should be restricted?
+                        NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
+                        [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
+                            
+                            if(image!=nil) {
+                                NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);
+                                
+                                    // Update the UI
+                                    //but i also have the asset URL here, so maybe i´ll use that
+                                    self.imageView.image = image;
+                            }
+                            else {
+                                NSLog(@"IT FAILED");
+                            }
+                            
+                                
+                          
+                        }];
+                        
+                  });
+                    
+                }
+                
+            }
+    
+        }
+        
+        
     }
-    else {
-        previousPicButton.hidden = true;
-        nextPictureButton.hidden = true;
-    }
+    
     
     //SWIP BETWEEN IMAGES IN ANOTTATIONS
     [imageView setUserInteractionEnabled:YES];
@@ -116,10 +167,6 @@
     // Adding the swipe gesture on image view
     [imageView addGestureRecognizer:swipeLeft];
     [imageView addGestureRecognizer:swipeRight];
-    
-    
-    
-    //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
 }
 
 -(IBAction)create: (id)sender {
@@ -134,6 +181,7 @@
         self.currentIndex-=1;
         if(self.currentIndex < 0) {
             self.currentIndex = self.calloutAnnotations.count -1;
+            NSLog(@"set index to %ld", (long)self.currentIndex);
         }
         
     }
@@ -141,30 +189,78 @@
         self.currentIndex+=1;
         if(self.currentIndex >= self.calloutAnnotations.count ) {
             self.currentIndex = 0;
+            NSLog(@"set index to %ld", (long)self.currentIndex);
         }
     }
     
     if(self.currentIndex >=0 && self.currentIndex < self.calloutAnnotations.count) {
         //change image
         MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
-        //LocationDataModel *theModel = myAnnotation.dataModel;
-        //this is the thumbnail image i think
-        UIImage *image = myAnnotation.image; //TODO WAS OK
+        
+        
+        
+        BOOL hasModel = (myAnnotation.dataModel != nil && myAnnotation.dataModel.assetURL!=nil);
+            
+            //this is the thumbnail image
+            if(myAnnotation.image!=nil) {
+                
+                NSURL *url = nil;
+                NSArray *urls = nil;
+                if(hasModel) {
+                    url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
+                    urls = [[NSArray alloc] initWithObjects: url , nil];
+                }
+                else if(myAnnotation.albumPhotos.count > 0 && self.currentIndex < myAnnotation.albumPhotos.count) {
+                    url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: self.currentIndex]]; //convert NSString to NSURL
+                    urls = [[NSArray alloc] initWithObjects: url , nil];
+                }
+                
+                //only if i have some asset url to convert back to image
+                if(urls.count > 0) {
+                    
+                    PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:urls options:nil];
+                    if(results!=nil && results.count > 0) {
+                        PHAsset *asset = (PHAsset *)results.firstObject;
+                        
+                        //this is the bigger image, after clicking the annotation (i) disclosure button
+                        //where we can move to next/previous pic on the same location (if any)
+                        //CGSize newSize = CGSizeMake(cell.cellImageView.frame.size.width, cell.cellImageView.frame.size.height);
+                        
+                        NSLog(@"FETCH IMAGE FULLSCREEN SIZE");
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            
+                            //this is the full screen image, maybe it should be restricted?
+                            NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
+                            [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
+                                
+                                if(image!=nil) {
+                                    NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);
+                                    
+                                        // Update the UI
+                                        //but i also have the asset URL here, so maybe i´ll use that
+                                        self.imageView.image = image;
+                                }
+                                else {
+                                    NSLog(@"IT FAILED");
+                                }
+                                
+                                    
+                              
+                            }];
+                            
+                      });
+                        
+                    }
+                    
+                }
+        
+            }
        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // Update the UI
-            //but i also have the asset URL here, so maybe i´ll use that
-            self.imageView.image = image;
-              
-        });
     }
     
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    //[self.tableView reloadData];
-}
 
 - (void)didReceiveMemoryWarning
 {
@@ -172,7 +268,8 @@
     // Dispose of any resources that can be recreated.
 }
 
-
+/*
+ DEAD CODE TODO DELETE
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -213,22 +310,27 @@
         //TODO, this operation must be done somewhere else
         //cell = [self getFullScreenImage: myAnnotation.dataModel forCell:cell];
 
+        
+        
          dispatch_async(dispatch_get_main_queue(), ^{
                 // Update the UI
                 //but i also have the asset URL here, so maybe i´ll use that
-             cell.cellImageView.image = image; // [self getResizedImage:image];
+             cell.cellImageView.image = image;
+             //CGSize newSize = CGSizeMake(cell.cellImageView.frame.size.width, cell.cellImageView.frame.size.height);
+             //TODO -> NOTE: no need to resize cause i´m already getting a small thumbnail only (128*128px)
+             //[self resizeImage: image newSize:newSize]; // [self getResizedImage:image];
                 
          });
         //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     }
     
     return cell;
-}
+}*/
 
 //returns squared image
 
 - (UIImage *) getResizedImage:(UIImage *) original {
-    CGSize newSize = newSize = CGSizeMake(67, 66);
+    CGSize newSize = CGSizeMake(67, 66);
     
     if(original.size.width>original.size.height) {
         newSize = CGSizeMake(original.size.width, original.size.width);
@@ -314,4 +416,31 @@
 - (IBAction)previousButton:(id)sender {
     NSLog(@"previous button");
 }
+
+//resizes the image but still makes it sharp
+- (UIImage *)resizeImage:(UIImage*)image newSize:(CGSize)newSize {
+    CGRect newRect = CGRectIntegral(CGRectMake(0, 0, newSize.width, newSize.height));
+    CGImageRef imageRef = image.CGImage;
+
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+
+    // Set the quality level to use when rescaling
+    CGContextSetInterpolationQuality(context, kCGInterpolationHigh);
+    CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, newSize.height);
+
+    CGContextConcatCTM(context, flipVertical);
+    // Draw into the context; this scales the image
+    CGContextDrawImage(context, newRect, imageRef);
+
+    // Get the resized image from the context and a UIImage
+    CGImageRef newImageRef = CGBitmapContextCreateImage(context);
+    UIImage *newImage = [UIImage imageWithCGImage:newImageRef];
+
+    CGImageRelease(newImageRef);
+    UIGraphicsEndImageContext();
+
+    return newImage;
+}
+
 @end

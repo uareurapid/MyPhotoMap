@@ -21,7 +21,7 @@
 @property (nonatomic,copy) UIImage *imageFullScreen;
 @property (nonatomic,assign) LocationDataModel *dataModel;
 
-//in case the annotation is from an album we add here the album.photoURLS
+//in case the annotation is from an album we add here the album.photoURLS (NSString needs to be converted back to NSUrl)
 @property (strong,nonatomic) NSMutableArray *albumPhotos;
 
 

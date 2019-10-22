@@ -551,17 +551,16 @@
             
             CGImageRef thumb = [asset thumbnail];
             
-            
             if(thumb!=nil) {
                 
                 //TODO if it is of album type, it has no thumbnail (either select the first image or the default blank thumbnail)
-                image = [UIImage imageWithCGImage:thumb];
+                self.image = [UIImage imageWithCGImage:thumb];
                 //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
                 [self addLocationWithThumbnail:model];
             }
             else {
                 //should never happen
-                image = [UIImage imageNamed:@"concrete"];
+                self.image = [UIImage imageNamed:@"concrete"];
                 [self addLocationWithThumbnail:model];
             }
             

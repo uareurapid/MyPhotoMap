@@ -1162,13 +1162,13 @@
     PHAssetCollection *assetCollection = [self findAlbumByName:self.selectedAlbum.name];
     if(assetCollection!=nil) {
         
-        PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-        requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
-        requestOptions.networkAccessAllowed = true;
-        requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+        //PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+        //requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+        //requestOptions.networkAccessAllowed = true;
+        //requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
         
         // this one is key
-        requestOptions.synchronous = YES;
+        //requestOptions.synchronous = YES;
         
         NSMutableArray *assetsArray = [NSMutableArray arrayWithArray:assets];
         //PHImageManager *manager = [PHImageManager defaultManager];
