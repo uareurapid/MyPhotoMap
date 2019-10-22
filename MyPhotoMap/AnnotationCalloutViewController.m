@@ -175,10 +175,12 @@
 
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
     
-    //NSInteger albumSize = enclosingAlbum.photosURLs.count;
-    //enclosingAlbum.photosURLs objectAtIndex:0];
+    NSInteger currentVale = self.currentIndex;
+    
     if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
         self.currentIndex-=1;
+        currentVale = self.currentIndex;
+        
         if(self.currentIndex < 0) {
             self.currentIndex = self.calloutAnnotations.count -1;
             NSLog(@"set index to %ld", (long)self.currentIndex);
@@ -187,14 +189,20 @@
     }
     else if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         self.currentIndex+=1;
+        currentVale = self.currentIndex;
+        
         if(self.currentIndex >= self.calloutAnnotations.count ) {
             self.currentIndex = 0;
             NSLog(@"set index to %ld", (long)self.currentIndex);
         }
     }
     
-    if(self.currentIndex >=0 && self.currentIndex < self.calloutAnnotations.count) {
+    if(self.currentIndex >=0 && self.currentIndex < self.calloutAnnotations.count ) {
+        NSLog(@"CHANGE IMAGE SWIPE");
         //change image
+        
+        
+        
         MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
         
         
@@ -210,8 +218,13 @@
                     url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
-                else if(myAnnotation.albumPhotos.count > 0 && self.currentIndex < myAnnotation.albumPhotos.count) {
-                    url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: self.currentIndex]]; //convert NSString to NSURL
+                else if(myAnnotation.albumPhotos.count > 0 ) {
+                    NSLog(@"SEVERAL IMAGES IN ONE");
+                    if( (currentVale >= myAnnotation.albumPhotos.count) || currentVale < 0 ) {
+                        currentVale = 0;
+                    }
+                    
+                    url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: currentVale]]; //convert NSString to NSURL
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
                 
