@@ -26,7 +26,7 @@
     }
     return self;
 }
-- (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title assetURL: (NSURL *) url {
+- (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title assetURL: (NSString *) url {
     self = [self initWithCoordinate:cord title:title];
     if(self)
     {

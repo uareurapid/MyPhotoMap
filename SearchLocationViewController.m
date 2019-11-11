@@ -239,7 +239,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSLog(@"places list count is: %lu",(unsigned long)placesList.count);
+    //NSLog(@"places list count is: %lu",(unsigned long)placesList.count);
     return placesList.count;
 }
 
@@ -309,19 +309,23 @@
 -(void)saveLocationRecord:(MyGPSPosition*)location {
     
     LocationDataModel *locationObject = nil;
+    NSMutableArray *records = nil;
     //FIRST check if already exists the model on database
-    NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[assetURL absoluteString]];
-    if(records==nil || (records!=nil && records.count > 1 )) {
-        //OOPS, something is very wrong
-        NSLog(@"something is very wrong");
-        return;
+    if(assetURL) {
+        records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[assetURL absoluteString]];
+        if(records==nil || (records!=nil && records.count > 1 )) {
+            //OOPS, something is very wrong
+            NSLog(@"something is very wrong");
+            return;
+        }
     }
+    
     
     NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
     
     BOOL isUpdate = false;
     
-    if(records.count==1) {
+    if(records!=nil && records.count==1) {
         //already exists, just update it
         isUpdate = true;
         locationObject = [records objectAtIndex:0];
@@ -358,18 +362,23 @@
         isAlbumType = true;
     }
     
-    BOOL isFakeAlbum = assetURL == nil && [selectedAlbum isFakeAlbum];
+    BOOL isFakeAlbum = (isAlbumType && assetURL == nil && [selectedAlbum isFakeAlbum]);
     
     if(isAlbumType && isFakeAlbum) {
         
         [locationObject setName: selectedAlbum.name];
-        NSLog(@" SET NAME TO ALBUM NAME: %@", locationObject.name);
+        //NSLog(@" SET NAME TO ALBUM NAME: %@", locationObject.name);
     }
     
-    locationObject.assetURL = [assetURL absoluteString];
-    locationObject.thumbnailURL = [thumbnailURL absoluteString];//need to save it as a string
+    if(assetURL) {
+       locationObject.assetURL = [assetURL absoluteString];
+    }
     
-    BOOL isNativeAlbum = [locationObject.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]];
+    if(thumbnailURL) {
+       locationObject.thumbnailURL = [thumbnailURL absoluteString];//need to save it as a string
+    }
+    
+    BOOL isNativeAlbum = [locationObject.assetURL isEqualToString: selectedAlbum.assetURL];
     
     if(isAlbumType && (isNativeAlbum || isFakeAlbum ) ) { //FAKE ALBUM
         //selectedAlbum
@@ -378,16 +387,22 @@
         //Update all the images inside the album with the same location
         if(selectedAlbum.photosURLs.count > 0) {
             for(NSURL *photoURL in selectedAlbum.photosURLs) {
-                //update also the model for these photos
-                //TODO add also annotations for individual photos or not???
-                NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[photoURL absoluteString]];
-                if(photoModels!=nil && photoModels.count==1) {
-                    NSLog(@"WILL UPDATE PHOTO MODEL ");
-                    LocationDataModel *model = [photoModels objectAtIndex:0];
-                    model.latitude = locationObject.latitude;
-                    model.longitude= locationObject.longitude;
+                
+                if(photoURL) {
+                    
+                    //update also the model for these photos
+                    //TODO add also annotations for individual photos or not???
+                    NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:[photoURL absoluteString]];
+                    if(photoModels!=nil && photoModels.count==1) {
+                        
+                        NSLog(@"WILL UPDATE PHOTO MODEL ");
+                        LocationDataModel *model = [photoModels objectAtIndex:0];
+                        model.latitude = locationObject.latitude;
+                        model.longitude= locationObject.longitude;
+                    }
                 }
-            }
+                
+            }//end for
         }
     }
     
@@ -539,47 +554,77 @@
 }
 
 #pragma asset stuff
--(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) album {
+-(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) isAlbum {
     
-    NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
     
-    if(model.assetURL!=nil && image == nil) {
+    //as usual. do the assets enumeration
+    
+    
+    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
         
-        NSLog(@"TRYING TO LOAD IMAGE");
-        //as usual. do the assets enumeration
-        ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
+        CGImageRef thumb = [asset thumbnail];
+        
+        __block UIImage *image;
+        if(thumb!=nil) {
             
-            CGImageRef thumb = [asset thumbnail];
+            //TODO if it is of album type, it has no thumbnail (either select the first image or the default blank thumbnail)
+            image = [UIImage imageWithCGImage:thumb];
+            //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
+            [self addLocationWithThumbnail:model thumbnail:image];
+        }
+        else {
+            //should never happen
+            image = [UIImage imageNamed:@"concrete"];
+            [self addLocationWithThumbnail:model thumbnail:image];
+        }
+        
+    };
+    
+    ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
+        NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
+        //failed to get image.
+    };
+
+    //either a valid album or a valid image
+    if(model.assetURL!=nil) {
+        
+        NSLog(@"Loading asset for model with assetURL %@: ",model.assetURL);
+        
+        //if it is of album type, it has no thumbnail
+        if(isAlbum && self.selectedAlbum.photosCount > 0) {
             
-            if(thumb!=nil) {
+          //select the first image or the default blank thumbnail
+           NSURL *assetUrl =  [self.selectedAlbum.photosURLs objectAtIndex:0];
+            //get the first pic of the fake album and load that unique thubmnail
+            if(assetUrl!=nil) {
+                ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+                [assetslibrary assetForURL: assetUrl resultBlock:resultblock failureBlock:failureblock];
                 
-                //TODO if it is of album type, it has no thumbnail (either select the first image or the default blank thumbnail)
-                self.image = [UIImage imageWithCGImage:thumb];
-                //alwyas update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
-                [self addLocationWithThumbnail:model];
             }
-            else {
-                //should never happen
-                self.image = [UIImage imageNamed:@"concrete"];
-                [self addLocationWithThumbnail:model];
-            }
-            
-        };
+        } else {
+            //load normally the thumbnail
+            ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+            [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+        }
         
-        ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
-            NSLog(@"Failed to get image for assetURL %@: ",model.assetURL);
-            //failed to get image.
-        };
         
-        ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
-        [assetslibrary assetForURL: [NSURL URLWithString: model.assetURL ] resultBlock:resultblock failureBlock:failureblock];
+        
         
     }
     else {
-        if(image == nil) {
-            image = [UIImage imageNamed:@"concrete"];
+        
+        BOOL isFakeAlbum = isAlbum && [selectedAlbum isFakeAlbum];
+        if(isFakeAlbum && self.selectedAlbum.photosCount > 0) {
+            
+           NSURL *assetPhotoURL =  [self.selectedAlbum.photosURLs objectAtIndex:0];
+            //get the first pic of the fake album and load that unique thubmnail
+            if(assetPhotoURL!=nil) {
+                ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+                [assetslibrary assetForURL: assetPhotoURL resultBlock:resultblock failureBlock:failureblock];
+                
+            }
         }
-        [self addLocationWithThumbnail:model];
+        
     }
     
     
@@ -587,25 +632,30 @@
     
 }
 
-
--(void) addLocationWithThumbnail:(LocationDataModel *)model  {
+//TODOFIXME
+-(void) addLocationWithThumbnail:(LocationDataModel *)model thumbnail:(UIImage *) image  {
     //always update the UI in the main thread (ONLY WHEN WE HAVE THE THUMBNAIL)
     dispatch_async(dispatch_get_main_queue(), ^{
         
         CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                             longitude:[model.longitude doubleValue]];
         
+        //BOOL isAlbum = [model.type isEqualToString: TYPE_ALBUM];
+       // BOOL isFakeAlbum = [model.type isEqualToString: TYPE_ALBUM] && [selectedAlbum isFakeAlbum];
+        //TODO COULD BE A FAKE ALBUM!!!!
         //if it is an album wer add all the other photos in it, to the annotation
+        
         NSMutableArray *otherPhotos = nil;
-        if([model.type isEqualToString: TYPE_ALBUM] && [model.assetURL isEqualToString: [selectedAlbum.assetURL absoluteString]] ) {
+        if([model.type isEqualToString: TYPE_ALBUM]) {
             //selectedAlbum
-            if(selectedAlbum.photosCount > 0) {
-                otherPhotos = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
-                [otherPhotos addObjectsFromArray:selectedAlbum.photosURLs];
+            if(self.selectedAlbum.photosCount > 0) {
+                otherPhotos = [[NSMutableArray alloc] initWithCapacity:self.selectedAlbum.photosCount];
+                [otherPhotos addObjectsFromArray: self.selectedAlbum.photosURLs];
+                NSLog(@"Adding otherPhotos URLS to the map, %lu",(unsigned long)otherPhotos.count);
             }
         }
         
-        [mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model containingURLS:otherPhotos ];
+        [self.mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model containingURLS:otherPhotos ];
         NSLog(@"Adding location to the map, read from database");
         
     });

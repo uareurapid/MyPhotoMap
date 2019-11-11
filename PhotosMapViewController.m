@@ -84,7 +84,7 @@
     //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
-        NSLog(@"this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
+        NSLog(@"#1 this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
         [annotation.albumPhotos addObjectsFromArray:photosURLS];
     }
     
@@ -110,7 +110,7 @@
     //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
-        NSLog(@"this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
+        NSLog(@"#2 this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
         [annotation.albumPhotos addObjectsFromArray:photosURLS];
     } 
     
@@ -324,10 +324,22 @@
         
         NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
         NSUInteger count = samePointAnnotations.count;
+        
+        //discard albums
+        for(MapViewAnnotationPoint *other in samePointAnnotations) {
+            if(other!=nil) {
+                LocationDataModel *data = (LocationDataModel*)other.dataModel;
+                if(data!=nil && [data.type isEqualToString: TYPE_ALBUM]) {
+                    count--;
+                }
+            }
+            
+        }
         if(count > 1) {
             //because it contains this
             if(myAnnotation.title!=nil) {
                 NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
+                if(myAnnotation.dataModel)
                 [str appendString: [NSString stringWithFormat:@" and %lu more",count - 1]];
                 myAnnotation.title = str;
             }
@@ -442,10 +454,10 @@
 //check if they represent the same object or not
 -(BOOL) isSameAnnotationModel:(MapViewAnnotationPoint*) anotOne andSecondAnnotation: (MapViewAnnotationPoint*) anotTwo {
     
-    if(anotOne.assetURL !=nil && [anotOne.assetURL.absoluteString isEqualToString:anotTwo.assetURL.absoluteString]) {
+    if(anotOne.assetURL !=nil && anotTwo.assetURL!=nil && [anotOne.assetURL isEqualToString:anotTwo.assetURL]) {
         return true;
     }
-    else if(anotOne.dataModel!=nil && anotTwo.dataModel!=nil) {
+    else if(anotOne.dataModel!=nil && anotTwo.dataModel!=nil && anotOne.dataModel.assetURL!=nil && anotTwo.dataModel.assetURL!=nil) {
         return [anotOne.dataModel.assetURL isEqualToString:anotTwo.dataModel.assetURL];
     }
     

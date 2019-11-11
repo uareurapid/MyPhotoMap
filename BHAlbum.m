@@ -21,6 +21,8 @@
 @synthesize photos;
 @synthesize photosURLs;
 @synthesize assetURL;
+@synthesize type;
+
 
 #pragma mark - Properties
 

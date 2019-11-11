@@ -19,6 +19,7 @@
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
 @property (assign, nonatomic) NSInteger currentIndex;
+@property (assign, nonatomic) NSInteger currentSecondaryIndex; //used when we have multiple photos urls in 1 annotation (an album?)
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle annotations:(NSMutableArray*) annots;
 @end

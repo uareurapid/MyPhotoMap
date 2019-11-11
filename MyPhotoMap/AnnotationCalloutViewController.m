@@ -71,18 +71,13 @@
 {
     [super viewDidLoad];
     self.currentIndex = 0;//-1;
-    
+    self.currentSecondaryIndex = 0;
     
     NSLog(@"Annotations size is %lu",(unsigned long)calloutAnnotations.count);
     
     
-    
-    NSLog(@"VIEW WILL APPEAR");
     if(self.calloutAnnotations.count>0) {
       
-     //if(self.currentIndex < 0 || self.currentIndex >= self.calloutAnnotations.count ) {
-     //    self.currentIndex = 0;
-     //}
      
       MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
       
@@ -103,8 +98,15 @@
                 url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
                 urls = [[NSArray alloc] initWithObjects: url , nil];
             }
-            else if(myAnnotation.albumPhotos.count > 0) {
-                url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: 0]]; //convert NSString to NSURL
+            else if(myAnnotation.albumPhotos.count == 1) {
+                NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
+                url = [[NSURL alloc] initWithString: str]; //convert to NSURL
+                urls = [[NSArray alloc] initWithObjects: url , nil];
+            }
+            else if(myAnnotation.albumPhotos.count > 0 && (self.currentSecondaryIndex >-1 && self.currentSecondaryIndex < myAnnotation.albumPhotos.count) ) {
+                
+                NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex]; //convert NSString to NSURL
+                url = [[NSURL alloc] initWithString: str]; //convert to NSURL
                 urls = [[NSArray alloc] initWithObjects: url , nil];
             }
             
@@ -175,11 +177,11 @@
 
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
     
-    NSInteger currentVale = self.currentIndex;
+    BOOL swipeLeft = YES;
     
     if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
         self.currentIndex-=1;
-        currentVale = self.currentIndex;
+        self.currentSecondaryIndex-=1;
         
         if(self.currentIndex < 0) {
             self.currentIndex = self.calloutAnnotations.count -1;
@@ -189,7 +191,8 @@
     }
     else if (swipe.direction == UISwipeGestureRecognizerDirectionRight) {
         self.currentIndex+=1;
-        currentVale = self.currentIndex;
+        swipeLeft = NO;
+        self.currentSecondaryIndex+=1;
         
         if(self.currentIndex >= self.calloutAnnotations.count ) {
             self.currentIndex = 0;
@@ -198,10 +201,7 @@
     }
     
     if(self.currentIndex >=0 && self.currentIndex < self.calloutAnnotations.count ) {
-        NSLog(@"CHANGE IMAGE SWIPE");
-        //change image
-        
-        
+        NSLog(@"CHANGE IMAGE SWIPE, Annotations size is %lu, index: %ld",(unsigned long)calloutAnnotations.count, (long)self.currentIndex);
         
         MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
         
@@ -211,20 +211,35 @@
             
             //this is the thumbnail image
             if(myAnnotation.image!=nil) {
-                
+                NSLog(@"Has model %d url %@", hasModel, myAnnotation.dataModel.assetURL);
                 NSURL *url = nil;
                 NSArray *urls = nil;
                 if(hasModel) {
                     url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
-                else if(myAnnotation.albumPhotos.count > 0 ) {
-                    NSLog(@"SEVERAL IMAGES IN ONE");
-                    if( (currentVale >= myAnnotation.albumPhotos.count) || currentVale < 0 ) {
-                        currentVale = 0;
-                    }
+                else if(myAnnotation.albumPhotos.count == 1) {
+                    NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
+                    url =  [[NSURL alloc] initWithString: str]; //convert to NSURL
+                    urls = [[NSArray alloc] initWithObjects: url , nil];
+                }
+                else if(myAnnotation.albumPhotos.count > 0 && (self.currentSecondaryIndex >-1 && self.currentSecondaryIndex < myAnnotation.albumPhotos.count) ) {
+                    NSLog(@"SEVERAL IMAGES IN ONE %lu LEFT-> %d",(unsigned long)myAnnotation.albumPhotos.count, swipeLeft);
                     
-                    url = [[NSURL alloc] initWithString: [myAnnotation.albumPhotos objectAtIndex: currentVale]]; //convert NSString to NSURL
+                    if(swipeLeft) {
+                        self.currentSecondaryIndex-=1;
+                        if(self.currentSecondaryIndex < 0 ){
+                            self.currentSecondaryIndex = myAnnotation.albumPhotos.count -1;
+                        }
+                    }else {
+                        self.currentSecondaryIndex+=1;
+                        if(self.currentSecondaryIndex >= myAnnotation.albumPhotos.count){
+                           self.currentSecondaryIndex = 0;
+                        }
+                    }
+                    //ALWAYS CAST TO STRING
+                    NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex]; //convert NSString to NSURL
+                    url = [[NSURL alloc] initWithString: str];
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
                 

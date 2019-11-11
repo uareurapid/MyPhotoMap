@@ -21,8 +21,9 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle;
 - (void) readCameraRoll;
--(void) readNumberOfExistingAlbums;
+//-(void) readNumberOfExistingAlbums;
 -(void) createNewAlbum: (NSString*) albumName completion:(void(^)(BOOL))callback;
+- (void) fetchLocationRecordsFromDatabase;
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;
 
@@ -31,6 +32,8 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 @property (strong, nonatomic) NSMutableArray *databaseRecords;
 @property (strong, nonatomic) NSMutableArray *albumsYears;
+
+@property (strong, nonatomic) NSMutableArray *existingAlbumsNames;
 
 @property (strong,nonatomic) CLLocation *location;
 //was retain

@@ -16,7 +16,7 @@
 @property (nonatomic,readwrite) CLLocationCoordinate2D coordinate;
 @property (nonatomic,copy) NSString *title;
 @property (nonatomic,copy) NSString *subtitle;
-@property (nonatomic,copy) NSURL *assetURL;
+@property (nonatomic,copy) NSString *assetURL;
 @property (nonatomic,copy) UIImage *image;//this is actually the thumbnail only
 @property (nonatomic,copy) UIImage *imageFullScreen;
 @property (nonatomic,assign) LocationDataModel *dataModel;
@@ -27,7 +27,7 @@
 
 //@property (assign,nonatomic) BOOL usingAPIMarker;//are we using the api marker or the image one??
 
-- (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title assetURL: (NSURL *) url;
+- (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title assetURL: (NSString *) url;
 
 - (id) initWithCoordinate: (CLLocationCoordinate2D) cord title: (NSString*) title image: (UIImage *) image;
 

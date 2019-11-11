@@ -433,41 +433,41 @@
     
     
     
-    NSLog(@"selected album index: %lu",(unsigned long)selectedAlbumIndex);
+    NSLog(@"selected album index: %lu %lu",(unsigned long)selectedAlbumIndex, (unsigned long)selectedAlbum.photosCount);
     
-    if(self.selectedAlbumIndex < self.albums.count) {
+    if(self.selectedAlbum!=nil) {
         
-        SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
+        SearchLocationViewController *searchView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
         
-        view.navigationItem.rightBarButtonItem = nil;
-        view.navigationItem.leftBarButtonItem = nil;
+        searchView.navigationItem.rightBarButtonItem = nil;
+        searchView.navigationItem.leftBarButtonItem = nil;
         
         //OK I HAVE THE SELECTED ALBUM
-        BHAlbum *theSelectedAlbum = [self.albums objectAtIndex:selectedAlbumIndex];
-        view.selectedAlbum = theSelectedAlbum;
-        view.assetURL = theSelectedAlbum.assetURL; //set the asset url (nil if a yealy album)
-        theSelectedAlbum.photosURLs = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
-        [theSelectedAlbum.photosURLs addObjectsFromArray:[selectedAlbum photosURLs]];
+        //BHAlbum *theSelectedAlbum = self.selectedAlbum;// [self.albums objectAtIndex:selectedAlbumIndex];
+        searchView.selectedAlbum = self.selectedAlbum;
+        searchView.assetURL = self.selectedAlbum.assetURL; //set the asset url (nil if a yealy album)
+        //searchView.selectedAlbum.photosURLs = [[NSMutableArray alloc] initWithCapacity:selectedAlbum.photosCount];
+        //[searchView.selectedAlbum.photosURLs addObjectsFromArray:[selectedAlbum photosURLs]];
         
-        //this has the ciorrect value: selectedAlbum.photosURLs.count
+        NSLog(@"ASSET URL HERE %@ %@",self.selectedAlbum.assetURL,searchView.assetURL);
         
         //assign the correct photo
-        if(theSelectedAlbum.photosURLs.count>0) {
+        if(searchView.selectedAlbum.photosURLs.count>0) {
             //TODO this photos is not being added
-            BHPhoto *photo = [theSelectedAlbum.photos objectAtIndex:0];
-            view.image = photo.image;
+            BHPhoto *photo = [searchView.selectedAlbum.photos objectAtIndex:0];
+            searchView.image = photo.image;
             //we save the thumbnail URL on the LocationDataModel
-            view.thumbnailURL = photo.imageURL;
+            searchView.thumbnailURL = photo.imageURL;
         }
         else {
-            view.image = [UIImage imageNamed:@"concrete"];
-            view.thumbnailURL = nil;
+            searchView.image = [UIImage imageNamed:@"concrete"];
+            searchView.thumbnailURL = nil;
         }
         
-        view.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
+        searchView.mapView = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] mapViewController];
         
         
-        [self.navigationController pushViewController:view animated:NO];
+        [self.navigationController pushViewController:searchView animated:NO];
     } else {
         NSLog(@"OOPS!!!");
     }
@@ -600,8 +600,8 @@
     NSLog(@"COUNT %ld", (long)count);
     //only if not the same
     
-    //[self.albums removeAllObjects];
-    //[self refreshCollection]; //maybe invalidate layout too?
+    [self.albums removeAllObjects];
+    [self refreshCollection]; //maybe invalidate layout too?
 
     //do the assets enumeration
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset){
@@ -650,9 +650,8 @@
 
                 BHPhoto *photo = [BHPhoto photoWithImageData: thumbnailImage];
                 [albumSingle addPhoto:photo];
-                NSLog(@"PROCESSED %ld", (long)processed);
                 if(processed == count) {
-                    
+                    NSLog(@"PROCESSED %ld", (long)processed);
                     self.selectedAlbum.photosCount = processed;
                     [self refreshCollection];
                 }
@@ -822,10 +821,10 @@
             BHPhoto *photo = albumSelected.photos[row];//which should only be 1indexPath.item
             BOOL isSelected = photo.isSelected;
             
-            
-            //dispatch_async(dispatch_get_main_queue(), ^(){
+            NSLog(@"WILL SET IMAGE %@",photo.image.description);
+            dispatch_async(dispatch_get_main_queue(), ^(){
                photoCell.imageView.image = photo.image;
-            //});
+            });
             
             photoCell.imageView.userInteractionEnabled = YES;
             [photoCell setPhotoSelected:isSelected];

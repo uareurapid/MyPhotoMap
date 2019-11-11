@@ -52,7 +52,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 -(void)saveLocationRecord:(MyGPSPosition*)location;
 - (void)fetchLocationRecords;
--(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) album;
+-(void) loadAssetInfoFromDataModel:(LocationDataModel*)model isAlbum: (bool) isAlbum;
 
 
 @end
