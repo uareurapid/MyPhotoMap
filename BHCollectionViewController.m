@@ -93,45 +93,61 @@
     self.thumbnailQueue = [[NSOperationQueue alloc] init];
     self.thumbnailQueue.maxConcurrentOperationCount = 3;
     
-    //The following code for example does nothing more than get the number of photos in the camera roll, but will be enough to trigger the permission prompt.
-    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
-    [lib enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
-        NSLog(@"%zd", [group numberOfAssets]);
-    } failureBlock:^(NSError *error) {
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
-        [alert show];
-        
-        if (error.code == ALAssetsLibraryAccessUserDeniedError) {
-            NSLog(@"user denied access, code: %zd", error.code);
-        } else {
-            NSLog(@"Other error code: %zd", error.code);
-        }
-    }];
     
-    //TODO check if appearing twice
-    //check permissions
-    ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
-    if (status != ALAuthorizationStatusAuthorized) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
-        [alert show];
-    }
+    
     
     self.existingAlbumsNames = [[NSMutableArray alloc] init];
     
     //clear annotations
     [mapViewController removeAnnotations];
     
-    [self readAllAlbumsOnDevice];
-
-    //first get all the stuff on the device
-    //[self readCameraRoll];
+    [self checkAuthorizationStatus];
     
     //and now load all existing data from database
     [self fetchLocationRecordsFromDatabase];
     
     
     
+}
+
+-(void) checkAuthorizationStatus {
+    
+    PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
+
+    if (status == PHAuthorizationStatusAuthorized) {
+         // Access has been granted.
+        [self readAllAlbumsOnDevice];
+    }
+
+    else if (status == PHAuthorizationStatusDenied) {
+         // Access has been denied.
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
+        [alert show];
+    }
+
+    else if (status == PHAuthorizationStatusNotDetermined) {
+
+         // Access has not been determined.
+         [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+
+             if (status == PHAuthorizationStatusAuthorized) {
+                 // Access has been granted.
+                 [self readAllAlbumsOnDevice];
+             }
+
+             else {
+                 // Access has been denied.
+                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
+                 [alert show];
+             }
+         }];
+    }
+
+    else if (status == PHAuthorizationStatusRestricted) {
+         // Restricted access - normally won't happen.
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Attention" message:@"Please give this app permission to access your photo library in your settings app!" delegate:nil cancelButtonTitle:@"Close" otherButtonTitles:nil, nil];
+        [alert show];
+    }
 }
 
 //get all the records from db
@@ -800,7 +816,7 @@
     //grab the album location if any
     CLLocation *albumlocation = [collection approximateLocation];
     
-    NSLog(@"1 NUMBER OF PHOTOS FOR ALBUM %@ %lu", album.name, (unsigned long)numOfPicturesInAlbum);
+    //NSLog(@"1 NUMBER OF PHOTOS FOR ALBUM %@ %lu", album.name, (unsigned long)numOfPicturesInAlbum);
     
     if(numOfPicturesInAlbum==0) {
         BHPhoto *photo = [BHPhoto photoWithImageData: [UIImage imageNamed:@"concrete"]];
@@ -810,9 +826,9 @@
         
         //this is the max thumbnails i will read here, but i will grab all the thumbnails
         NSInteger maxNumPhotosPerAlbum = 3;
-        //NSInteger processedImages = 0;
-        //NSInteger processedImagesInYearlyAlbum = 0;
         __block NSInteger albumProcessedImages = 0;
+
+        __block NSInteger processedImagesInYearlyAlbum = 0;
         
         //parse image
         NSInteger *i = 0;
@@ -823,7 +839,7 @@
                   CLLocation *imageLocation = asset.location;
                   //save the URL of the asset Photo
                   NSString *assetPhotoURL = asset.localIdentifier;
-                  NSLog(@"asset photo url %@", asset.localIdentifier);
+                  //NSLog(@"asset photo url %@", asset.localIdentifier);
                   NSDate *theDate = asset.creationDate;
                   NSDateComponents *components = [[NSCalendar currentCalendar] components:NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit fromDate:theDate];
             
@@ -849,6 +865,7 @@
                       albumForYear.photosURLs = [[NSMutableArray alloc] init];
                       albumForYear.assetURL = nil;
                       albumForYear.name = yearSTR;
+                      [albumForYear setType:ALBUM_TYPE_FAKE];
             
                       [self.albums addObject:albumForYear]; //was album
                       
@@ -864,9 +881,9 @@
                    //INSERT THE PICTURE INTO THE NORMAL ALBUM
                    
                    //----------------------------------------------------------------------------------
-                 [album.photosURLs addObject: assetPhotoURL];
+                   [album.photosURLs addObject: assetPhotoURL];
                   
-                  NSLog(@"2 - NUMBER OF PHOTOS FOR ALBUM %@ %lu", album.name, (unsigned long)album.photosURLs.count);
+                  //NSLog(@"2 - NUMBER OF PHOTOS FOR ALBUM %@ %lu", album.name, (unsigned long)album.photosURLs.count);
                   
                    //INSERT THE PICTURE INTO THE AUXILIAR/YEARLY ALBUM;
                    
@@ -876,53 +893,74 @@
                    }
                    //------------------------------------------------------------------------------------
                        
-                  //ONLY process maximum of 3 images per album
-                  if(albumProcessedImages < maxNumPhotosPerAlbum) {
+                  
                       
+                    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+                    requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+                    requestOptions.networkAccessAllowed = true;
+                    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+                    requestOptions.synchronous = true;
                       
-                      PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-                      requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
-                      requestOptions.networkAccessAllowed = true;
-                      requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-                      requestOptions.synchronous = true;
-                      
-                      [imageManager requestImageForAsset:asset
+                    [imageManager requestImageForAsset:asset
                                              targetSize:CGSizeMake(125.0f, 125.0f)
                                             contentMode:PHImageContentModeDefault
                                                 options:requestOptions
                                           resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
                                               if(thumbnail!=nil) {
                                                   
-                                                  albumProcessedImages = albumProcessedImages +1;
+                                                  //ONLY process maximum of 3 images per album
+                                                  if(albumProcessedImages < maxNumPhotosPerAlbum) {
+                                                     
+                                                      albumProcessedImages = albumProcessedImages +1;
+                                                      
+                                                      //add the photo and reload the collection view
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                          
+                                                          BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                                          photo.imageURL = assetPhotoURL;
+                                                          [album addPhoto:photo];
+                                                          
+                                                          //also add to the auxiliar album
+                                                          if(auxiliar!=nil && auxiliar.photos.count < maxNumPhotosPerAlbum) {
+                                                              
+                                                              BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                                              photo.imageURL = assetPhotoURL;
+                                                              [auxiliar addPhoto:photo];
+                                                          }
+                                                          
+                                                          //reload collectiuon view
+                                                          [self.collectionView reloadData];
+                                                          
+                                                          
+                                                      });
+                                                      
+                                                  }
                                                   
-                                                  //add the photo and reload the collection view
-                                                  dispatch_async(dispatch_get_main_queue(), ^{
+                                                  //insert max 3 thumbnails on the yearly album as well
+                                                  //ONLY process maximum of 3 images per album
+                                                  if( auxiliar!=nil && (processedImagesInYearlyAlbum <  (maxNumPhotosPerAlbum * self.albums.count) ) ) {
                                                       
-                                                      BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                                      photo.imageURL = assetPhotoURL;
-                                                      [album addPhoto:photo];
+                                                      processedImagesInYearlyAlbum = processedImagesInYearlyAlbum +1;
                                                       
-                                                      //also add to the auxiliar album
-                                                      if(auxiliar!=nil && auxiliar.photos.count < maxNumPhotosPerAlbum) {
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
                                                           
                                                           BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
                                                           photo.imageURL = assetPhotoURL;
                                                           [auxiliar addPhoto:photo];
-                                                      }
-                                                      
-                                                      //reload collectiuon view
-                                                      [self.collectionView reloadData];
-                                                      
-                                                      
-                                                  });
+                                                          [self.collectionView reloadData];
+                                                          
+                                                          
+                                                      });
+                                                  }
                                                   
                                                   
+                                     
                                                   
                                                  //save the location of the record on the location model
       
                                                   if(imageLocation==nil && albumlocation!=nil) {
                                                       //SAVE THE RECORD WITH THE ALBUM LOCATION
-                                                      NSLog(@"SAVING %@ with album location %@", assetPhotoURL, albumlocation.description);
+                                                      //NSLog(@"SAVING %@ with album location %@", assetPhotoURL, albumlocation.description);
                                                       LocationDataModel *model = [self saveLocationRecord: assetPhotoURL withDate:theDate andLocation:albumlocation andAssetType:TYPE_ALBUM];
                                                       
                                                       if(model!=nil) {
@@ -937,7 +975,7 @@
                                                       //There is an exif cordinate???
                                                       //if we have location data, add the annotation to the map
                                                       
-                                                      NSLog(@"SAVING %@ with photo own location %@",assetPhotoURL,imageLocation.description);
+                                                      //NSLog(@"SAVING %@ with photo own location %@",assetPhotoURL,imageLocation.description);
                                                       LocationDataModel *model = [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation andAssetType:TYPE_PHOTO];
                                                     
                                                       if(model!=nil) {
@@ -949,10 +987,8 @@
                                                   }
                                               }
                                               
-                                          }];
+                        }];
 
-                      
-                  }//end if album processed images < 3
                     
               }
               i++;
@@ -1030,7 +1066,7 @@
 {
     if(self.albums.count >0) {
         BHAlbum *album = self.albums[section];
-        NSLog(@"number of items for album %@ is  %ld",album.name, (unsigned long)album.photos.count);
+        //NSLog(@"number of items for album %@ is  %ld",album.name, (unsigned long)album.photos.count);
         //NOTE empty albums will always contain the default cover photo (concrete)
         return album.photos.count;
     }

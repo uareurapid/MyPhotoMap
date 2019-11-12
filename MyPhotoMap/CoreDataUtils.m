@@ -98,6 +98,11 @@
 //get the one with this asset url
 + (NSMutableArray *)fetchLocationRecordsFromDatabaseWithAssetURL: (NSString *) assetURL {
     
+    
+    //dispatch_async(dispatch_get_main_queue(), ^{
+    
+    //})
+    //TODO check warning delagate must be called from main thread only
     NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
     
     

@@ -26,7 +26,7 @@
 
 @property (retain, nonatomic) IBOutlet BHPhotoAlbumView *photoCellView;
 
-@property (copy, nonatomic) NSURL *assetURL;
+@property (copy, nonatomic) NSString *assetURL;
 @property (assign,nonatomic) NSInteger selectedIndex;
 @property (strong, nonatomic) BHAlbum *enclosingAlbum;
 

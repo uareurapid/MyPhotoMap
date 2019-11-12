@@ -7,7 +7,9 @@
 //
 
 #import "PhotoDetailViewController.h"
-
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/PHAssetCollectionChangeRequest.h>
+#import <Photos/Photos.h>
 
 @interface PhotoDetailViewController ()
 
@@ -134,7 +136,7 @@
 -(void) updateTitle {
     
     if(self.assetURL!=nil) {
-        self.dataModel = [self fetchLocationModelWithAssetURL:[self.assetURL absoluteString]];
+        self.dataModel = [self fetchLocationModelWithAssetURL:self.assetURL ];
         if(self.dataModel!=nil && self.dataModel.desc!=nil){
             self.title = self.dataModel.desc;
         }
@@ -146,6 +148,14 @@
     //NSLog(@" i have %d url: %@",self.navigationItem.leftBarButtonItems.count,assetURL);
     [self readFullSizeImageAndThumbnail];
     [self updateTitle];
+}
+
+-(void) viewWillDisappear:(BOOL)animated{
+    if( [self isBeingDismissed]) {
+      //TODO do not reload teh previous one
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setBool:true forKey:@"was_dismissed"];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -258,7 +268,7 @@
         LocationDataModel *locationObject = nil;
         for(LocationDataModel *entity in mutableFetchResults) {
             //load the thumbnail
-            if(entity.assetURL!=nil && [entity.assetURL isEqualToString: [self.assetURL absoluteString]]) {
+            if(entity.assetURL!=nil && [entity.assetURL isEqualToString: self.assetURL]) {
                 //found it
                 found = true;
                 locationObject = entity;
@@ -302,46 +312,42 @@
 
 - (void)readFullSizeImageAndThumbnail {
     
-    //do the assets enumeration
-    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
-        
     
-        ALAssetRepresentation *rep = [asset defaultRepresentation];
-        CGImageRef iref = [rep fullResolutionImage];
-        CGImageRef thumb = [asset thumbnail];
+    PHImageManager *imageManager = [PHImageManager defaultManager];
+    PHFetchOptions *options = [PHFetchOptions new];
+    options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
+    NSLog(@"will try load asset thumnail %@", assetURL);
+    PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: assetURL,nil] options:options];
+    if(assets!=nil && assets.count >0) {
         
-        
-        CLLocation *location = [asset valueForProperty:ALAssetPropertyLocation];
-        NSLog(@"asset location is %@",location);
-        //NSLog(@"asset metadata is %@",rep.metadata);
-        
-        if(iref!=nil) {
-            // scale:1.0 orientation:(UIImageOrientation)[asset defaultRepresentation].orientation]
-            
-            __block UIImage *image = [UIImage imageWithCGImage:iref];
-            __block UIImage *imageThumb = [UIImage imageWithCGImage:thumb];
-            
-            
-            
-            //alwyas update the UI in the main thread
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.thumbnail = imageThumb;
-                self.photoCellView.imageView.image = image;
-                
-            });
+        PHAsset *asset = [assets firstObject];
+        if(asset!=nil){
+               PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+               requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+               requestOptions.networkAccessAllowed = true;
+               requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+               requestOptions.synchronous = true;
+               
+               NSLog(@"THE DETAIL URL IS %@", self.assetURL);
+               [imageManager requestImageForAsset:asset
+                                      targetSize:CGSizeMake(self.view.frame.size.width, self.view.frame.size.height)//CGSizeMake(125.0f, 125.0f)//CGSizeMake(self.photoCellView.imageView.frame.size.width, self.photoCellView.imageView.frame.size.height)
+                                     contentMode:PHImageContentModeDefault
+                                         options:requestOptions
+                                   resultHandler:^void(UIImage *image, NSDictionary *info) {
+                                       if(image!=nil) {
+                                           //alwyas update the UI in the main thread
+                                           NSLog(@"OK, got the image");
+                                           dispatch_async(dispatch_get_main_queue(), ^{
+                                               self.photoCellView.imageView.image = image;
+                                            
+                                           });
+                                       } else {
+                                           NSLog(@"NIL image");
+                                       }
+               }];
         }
-        
-        
-    };
+   }
     
-    ALAssetsLibraryAccessFailureBlock failureblock  = ^(NSError *myerror){
-        NSLog(@"Failed to get image!");
-        //failed to get image.
-    };
-    
-    ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
-    [assetslibrary assetForURL:assetURL resultBlock:resultblock failureBlock:failureblock];
-
     
 }
 
