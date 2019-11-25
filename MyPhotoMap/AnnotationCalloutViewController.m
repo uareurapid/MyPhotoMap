@@ -18,7 +18,7 @@
 
 @implementation AnnotationCalloutViewController
 
-@synthesize calloutAnnotations,imageView;
+@synthesize calloutAnnotations,imageView, previousAssetURL;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle  {
     self = [super initWithNibName:nibName bundle:nibBundle];
@@ -92,28 +92,26 @@
         //this is the thumbnail image
         if(myAnnotation.image!=nil) {
             
-            NSURL *url = nil;
+            NSString *url = nil;
             NSArray *urls = nil;
             if(hasModel) {
-                url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
+                url = myAnnotation.dataModel.assetURL;
                 urls = [[NSArray alloc] initWithObjects: url , nil];
             }
             else if(myAnnotation.albumPhotos.count == 1) {
-                NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
-                url = [[NSURL alloc] initWithString: str]; //convert to NSURL
+                url = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
                 urls = [[NSArray alloc] initWithObjects: url , nil];
             }
             else if(myAnnotation.albumPhotos.count > 0 && (self.currentSecondaryIndex >-1 && self.currentSecondaryIndex < myAnnotation.albumPhotos.count) ) {
                 
-                NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex]; //convert NSString to NSURL
-                url = [[NSURL alloc] initWithString: str]; //convert to NSURL
+                url = [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex]; //convert NSString to NSURL
                 urls = [[NSArray alloc] initWithObjects: url , nil];
             }
             
             //only if i have some asset url to convert back to image
             if(urls.count > 0) {
                 
-                PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:urls options:nil];
+                PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers: urls options:nil];
                 if(results!=nil && results.count > 0) {
                     PHAsset *asset = (PHAsset *)results.firstObject;
                     
@@ -134,10 +132,13 @@
                                 
                                     // Update the UI
                                     //but i also have the asset URL here, so maybe i´ll use that
+                                    //self.imageView.contentMode = UIViewContentModeScaleAspectFit;
                                     self.imageView.image = image;
+                                    self.previousAssetURL = asset.localIdentifier;
                             }
                             else {
                                 NSLog(@"IT FAILED");
+                                self.previousAssetURL = nil;
                             }
                             
                                 
@@ -212,15 +213,14 @@
             //this is the thumbnail image
             if(myAnnotation.image!=nil) {
                 NSLog(@"Has model %d url %@", hasModel, myAnnotation.dataModel.assetURL);
-                NSURL *url = nil;
+                NSString *url = nil;
                 NSArray *urls = nil;
                 if(hasModel) {
-                    url = [[NSURL alloc] initWithString: myAnnotation.dataModel.assetURL]; //convert to NSURL
+                    url = myAnnotation.dataModel.assetURL;
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
                 else if(myAnnotation.albumPhotos.count == 1) {
-                    NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
-                    url =  [[NSURL alloc] initWithString: str]; //convert to NSURL
+                    url = (NSString *) [myAnnotation.albumPhotos objectAtIndex:0];
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
                 else if(myAnnotation.albumPhotos.count > 0 && (self.currentSecondaryIndex >-1 && self.currentSecondaryIndex < myAnnotation.albumPhotos.count) ) {
@@ -238,15 +238,14 @@
                         }
                     }
                     //ALWAYS CAST TO STRING
-                    NSString *str = (NSString *) [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex]; //convert NSString to NSURL
-                    url = [[NSURL alloc] initWithString: str];
+                    url = [myAnnotation.albumPhotos objectAtIndex: self.currentSecondaryIndex];
                     urls = [[NSArray alloc] initWithObjects: url , nil];
                 }
                 
                 //only if i have some asset url to convert back to image
                 if(urls.count > 0) {
                     
-                    PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:urls options:nil];
+                    PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers:urls options:nil];
                     if(results!=nil && results.count > 0) {
                         PHAsset *asset = (PHAsset *)results.firstObject;
                         
@@ -254,34 +253,42 @@
                         //where we can move to next/previous pic on the same location (if any)
                         //CGSize newSize = CGSizeMake(cell.cellImageView.frame.size.width, cell.cellImageView.frame.size.height);
                         
-                        NSLog(@"FETCH IMAGE FULLSCREEN SIZE");
                         
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            
-                            //this is the full screen image, maybe it should be restricted?
-                            NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
-                            [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
-                                
-                                if(image!=nil) {
-                                    NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);
-                                    
-                                        // Update the UI
-                                        //but i also have the asset URL here, so maybe i´ll use that
-                                        self.imageView.image = image;
-                                }
-                                else {
-                                    NSLog(@"IT FAILED");
-                                }
-                                
-                                    
-                              
-                            }];
-                            
-                      });
                         
-                    }
+                        if(self.previousAssetURL == nil || ( self.previousAssetURL!=nil && ![self.previousAssetURL isEqualToString:asset.localIdentifier]) ) {
+                            NSLog(@"FETCH IMAGE FULLSCREEN SIZE, because it is different");
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                  
+                                  //this is the full screen image, maybe it should be restricted?
+                                  NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
+                                  [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
+                                      
+                                      if(image!=nil) {
+                                          NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);
+                                          
+                                              // Update the UI
+                                              //but i also have the asset URL here, so maybe i´ll use that
+                                              //self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+                                              self.imageView.image = image;
+                                              self.previousAssetURL = asset.localIdentifier;
+                                      }
+                                      else {
+                                          NSLog(@"IT FAILED");
+                                          self.previousAssetURL = nil;
+                                      }
+                                      
+                                          
+                                    
+                                  }];
+                                  
+                            });//end dispatch
+                        }//end get image
+                        
+                        
+                        
+                    }//end results
                     
-                }
+                }//end urls count
         
             }
        
@@ -296,64 +303,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
- DEAD CODE TODO DELETE
-#pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
-    return 1;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return calloutAnnotations.count;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString *CellIdentifier = @"myCalloutCell";
-    CallOutViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[CallOutViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-        //NSArray *nib = [[NSBundle mainBundle] loadNibNamed:@"CallOutViewCell" owner:self options:nil];
-        //cell = [nib objectAtIndex:0];
-        NSLog(@"cell class %@",[cell class]);
-    }
-    
-     // Configure the cell...
-    NSInteger row = indexPath.row;
-    if(row < calloutAnnotations.count) {
-   
-        MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:row];
-        
-        //this is the thumbnail image i think
-        UIImage *image = myAnnotation.image;
-        cell.imageName.text = myAnnotation.subtitle;
-        
-        //TODO, this operation must be done somewhere else
-        //cell = [self getFullScreenImage: myAnnotation.dataModel forCell:cell];
-
-        
-        
-         dispatch_async(dispatch_get_main_queue(), ^{
-                // Update the UI
-                //but i also have the asset URL here, so maybe i´ll use that
-             cell.cellImageView.image = image;
-             //CGSize newSize = CGSizeMake(cell.cellImageView.frame.size.width, cell.cellImageView.frame.size.height);
-             //TODO -> NOTE: no need to resize cause i´m already getting a small thumbnail only (128*128px)
-             //[self resizeImage: image newSize:newSize]; // [self getResizedImage:image];
-                
-         });
-        //cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
-    }
-    
-    return cell;
-}*/
 
 //returns squared image
 

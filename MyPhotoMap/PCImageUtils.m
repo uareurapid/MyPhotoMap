@@ -12,30 +12,11 @@
 
 +(void) getImageFromPHAsset: (PHAsset *) asset  completion:(void (^)(UIImage *))completionBlock {
     
-    /**
-     if(image!=nil && model != nil && model.assetURL!=nil) {
-         
-         NSURL *url = [[NSURL alloc] initWithString: model.assetURL]; //convert to NSURL
-         NSArray *urls = [[NSArray alloc] initWithObjects: url , nil];
-         
-         PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:urls options:nil];
-         if(results!=nil && results.count > 0) {
-             PHAsset *asset = (PHAsset *)results.firstObject;
-             
-             [self getImageFromPHAsset:asset completion:^(UIImage *image) {
-                 NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1");
-                 annotation.imageFullScreen =  image;
-             }];
-             
-         }
-             
-     }
-     */
     
     PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
     requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
     requestOptions.networkAccessAllowed = true;
-    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
     
     // this one is key
     requestOptions.synchronous = YES;

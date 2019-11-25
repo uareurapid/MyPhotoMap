@@ -59,7 +59,7 @@
 }
 
 - (BOOL)isFakeAlbum {
-    return self.assetURL==nil || self.assetURL==NULL;
+    return self.assetURL==nil || self.assetURL==NULL || [self.type isEqualToString:ALBUM_TYPE_FAKE];
 }
 
 @end

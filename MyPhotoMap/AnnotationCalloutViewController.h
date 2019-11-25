@@ -14,7 +14,7 @@
 
 //it appears as a list of 1-n images
 @property (strong,nonatomic) NSMutableArray *calloutAnnotations;
-
+@property (copy, nonatomic) NSString *previousAssetURL;
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 

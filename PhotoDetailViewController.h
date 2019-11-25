@@ -13,6 +13,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "SearchLocationViewController.h"
 #import "BHAlbum.h"
+#import "BHPhoto.h"
 #import "LocationDataModel.h"
 #import "BHPhotoAlbumView.h"
 
@@ -25,6 +26,9 @@
 
 
 @property (retain, nonatomic) IBOutlet BHPhotoAlbumView *photoCellView;
+
+
+@property (nonatomic, strong) NSMutableArray *singleAlbums;//BHAlbums with 1 pic each
 
 @property (copy, nonatomic) NSString *assetURL;
 @property (assign,nonatomic) NSInteger selectedIndex;

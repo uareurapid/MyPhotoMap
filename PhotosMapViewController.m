@@ -77,10 +77,14 @@
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
     annotation.subtitle = title;
-   
+    annotation.title = title;
     
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
+    //TODO check
+    if(model!=nil && model.assetURL!=nil && annotation.assetURL == nil) {
+        annotation.assetURL = model.assetURL;
+    }
     //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
@@ -98,6 +102,7 @@
 }
 
 //TODO CHECK THIS ONE
+/*
 - (void) addLocation:(CLLocation*) imageLocation withThumbnail: (UIImage*) thumb withImage: (UIImage*) image andTitle: (NSString *)title forModel: (LocationDataModel *)model containingURLS: (NSMutableArray *)photosURLS {
     
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
@@ -108,6 +113,10 @@
     //we save the data mode to know if dealing with a single album or a photo
     annotation.dataModel = model;
     //NOTE if model is nil then probably the location is just from EXIF
+    //TODO check
+    if(model!=nil && model.assetURL!=nil && annotation.assetURL == nil) {
+        annotation.assetURL = model.assetURL;
+    }
     
     if(photosURLS!=nil && photosURLS.count>0) {
         NSLog(@"#2 this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
@@ -120,9 +129,10 @@
     
     //plot them inside the visible view
     [self plotMapAnnotationsInsideView];
-}
+}*/
 
 //TODO do this when we add the annotation
+/*
 -(void) getFullScreenImage:(MapViewAnnotationPoint *) annotation {
     
     ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *asset){
@@ -153,7 +163,7 @@
     return [UIImage imageWithCGImage:representation.fullResolutionImage
                                scale:[representation scale]
                          orientation:(UIImageOrientation)[representation orientation]];
-}
+}*/
 
 
 //sets view region and zoom level
@@ -320,57 +330,59 @@
     if([annotation isKindOfClass: [MapViewAnnotationPoint class]])
     {
         MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)annotation;
-        
-        
-        NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
-        NSUInteger count = samePointAnnotations.count;
-        
-        //discard albums
-        for(MapViewAnnotationPoint *other in samePointAnnotations) {
-            if(other!=nil) {
-                LocationDataModel *data = (LocationDataModel*)other.dataModel;
-                if(data!=nil && [data.type isEqualToString: TYPE_ALBUM]) {
-                    count--;
+        if(myAnnotation!=nil) {
+            NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
+            NSUInteger count = samePointAnnotations.count;
+            
+            //discard albums
+            for(MapViewAnnotationPoint *other in samePointAnnotations) {
+                if(other!=nil) {
+                    LocationDataModel *data = (LocationDataModel*)other.dataModel;
+                    if(data!=nil && data.type == nil) {
+                        NSLog(@"WATATFUCKK");
+                    }
+                    if(data!=nil && [data.type isEqualToString: TYPE_ALBUM]) {
+                        count--;
+                    }
                 }
+                
+            }
+            if(count > 1) {
+                //because it contains this
+                if(myAnnotation.title!=nil) {
+                    NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
+                    [str appendString: [NSString stringWithFormat:@" and %lu more",count - 1]];
+                    myAnnotation.title = str;
+                }
+               
+                
             }
             
+            
+            UIImage *backImage = [self getBackgroundImage:nil];
+            
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                // Update the UI
+                
+                __block UIImage *image = myAnnotation.image;
+                if(image.size.width!=image.size.height) {
+                    //make it round square
+                    image = [self getResizedImage:image];
+                }
+                
+                UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image];
+                annotationView.image = overlayedImage;
+            });
+            
+            //set the callout button
+            UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+            [disclosure setTitle:@"+" forState:UIControlStateNormal];
+            [annotationView setRightCalloutAccessoryView:disclosure];
+            
+            annotationView.canShowCallout = YES;
         }
-        if(count > 1) {
-            //because it contains this
-            if(myAnnotation.title!=nil) {
-                NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
-                if(myAnnotation.dataModel)
-                [str appendString: [NSString stringWithFormat:@" and %lu more",count - 1]];
-                myAnnotation.title = str;
-            }
-           
-            
-        }
-        
-        
-        UIImage *backImage = [self getBackgroundImage:nil];
-        
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // Update the UI
-            
-            __block UIImage *image = myAnnotation.image;
-            if(image.size.width!=image.size.height) {
-                //make it round square
-                image = [self getResizedImage:image];
-            }
-            
-            UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image];
-            annotationView.image = overlayedImage;
-        });
-        
-        //set the callout button
-        UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-        [disclosure setTitle:@"+" forState:UIControlStateNormal];
-        [annotationView setRightCalloutAccessoryView:disclosure];
-        
-        annotationView.canShowCallout = YES;
-        
+         
     }
 
         
@@ -386,15 +398,29 @@
     
     
     MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)view.annotation;
-    //immediatelly start the array with this one;
-    NSMutableArray *annotsOnSameLocation = [self getAnnotationsOnSameLocation:myAnnotation];
+    if(myAnnotation!=nil) {
+        //immediatelly start the array with this one;
+        NSMutableArray *annotsOnSameLocation = [self getAnnotationsOnSameLocation:myAnnotation];
+        
+        //the view controller you want to present as popover
+        AnnotationCalloutViewController *calloutController = [[AnnotationCalloutViewController alloc]
+          initWithNibName:@"AnnotationCalloutViewController" bundle:nil annotations:annotsOnSameLocation];
+        
+        //our popover
+           FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
+           popover.delegate = calloutController;
+           
+           popover.contentSize = CGSizeMake(300,400);
+           
+           //the popover will be presented from the ok Button view
+           [popover presentPopoverFromView:view];
+    }
+    
     
     //initiate the controller (list)
    //NSLog(@"creating custom callout view for %d annotations",annotsOnSameLocation.count);
     
-    //the view controller you want to present as popover
-    AnnotationCalloutViewController *calloutController = [[AnnotationCalloutViewController alloc]
-      initWithNibName:@"AnnotationCalloutViewController" bundle:nil annotations:annotsOnSameLocation];
+    
     
     
 
@@ -411,14 +437,7 @@
 */
  
     
-    //our popover
-    FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
-    popover.delegate = calloutController;
-    
-    popover.contentSize = CGSizeMake(300,400);
-    
-    //the popover will be presented from the ok Button view
-    [popover presentPopoverFromView:view];
+   
     
 
                                        
@@ -438,6 +457,31 @@
 -(NSMutableArray *) getAnnotationsOnSameLocation: (MapViewAnnotationPoint*) myAnnotation {
     
     NSMutableArray *annotsOnSameLocation = [[NSMutableArray alloc] initWithObjects:myAnnotation, nil];
+  /*
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+    
+  
+    
+    [geocoder reverseGeocodeLocation:myAnnotation.co completionHandler:^(NSArray *placemarks, NSError *error)
+    {
+        if (!placemarks) {
+            // handle error
+        }
+
+        if(placemarks && placemarks.count > 0)
+        {
+            CLPlacemark *placemark= [placemarks objectAtIndex:0];
+            NSString *address = [NSString stringWithFormat:@"%@ %@,%@ %@", [placemark subThoroughfare],[placemark thoroughfare],[placemark locality], [placemark administrativeArea]];
+
+            // you have the address.
+            // do something with it.
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"MBDidReceiveAddressNotification"
+                 object:self
+               userInfo:@{ @"address" : address }];
+        }
+    }];*/
+    
+    
     
     for (MapViewAnnotationPoint *annotation in annotationsArray) {
         if( (annotation.coordinate.latitude == myAnnotation.coordinate.latitude) &&
@@ -454,7 +498,10 @@
 //check if they represent the same object or not
 -(BOOL) isSameAnnotationModel:(MapViewAnnotationPoint*) anotOne andSecondAnnotation: (MapViewAnnotationPoint*) anotTwo {
     
-    if(anotOne.assetURL !=nil && anotTwo.assetURL!=nil && [anotOne.assetURL isEqualToString:anotTwo.assetURL]) {
+    if(anotOne == nil || anotTwo == nil) {
+        return false;
+    }
+    else if(anotOne.assetURL !=nil && anotTwo.assetURL!=nil && [anotOne.assetURL isEqualToString:anotTwo.assetURL]) {
         return true;
     }
     else if(anotOne.dataModel!=nil && anotTwo.dataModel!=nil && anotOne.dataModel.assetURL!=nil && anotTwo.dataModel.assetURL!=nil) {

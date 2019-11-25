@@ -17,7 +17,7 @@
 
 @implementation PhotoDetailViewController
 
-@synthesize assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel,photoCellView;
+@synthesize assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel,photoCellView,singleAlbums;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -48,8 +48,8 @@
 {
     [super viewDidLoad];
     
-    selectedIndex = 0;
-    //[photoView setUserInteractionEnabled:YES];
+    //selectedIndex = 0;
+    singleAlbums = [[NSMutableArray alloc] init];
     
     CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
     photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
@@ -92,6 +92,7 @@
 - (void)handleSwipe:(UISwipeGestureRecognizer *)swipe {
     
     NSInteger albumSize = enclosingAlbum.photosURLs.count;
+    NSLog(@"ALBUM SIZE %ld, selected index %ld", (long)albumSize, (long) selectedIndex);
     //enclosingAlbum.photosURLs objectAtIndex:0];
     if (swipe.direction == UISwipeGestureRecognizerDirectionLeft) {
         NSLog(@"Left Swipe");
@@ -120,7 +121,19 @@
     NSLog(@"selected index %ld and size is %ld",(long)selectedIndex,(long)albumSize);
     
     //Curl Animation!!!
-    assetURL = [enclosingAlbum.photosURLs objectAtIndex:selectedIndex];
+    if(self.singleAlbums.count > 0 && selectedIndex < self.singleAlbums.count) {
+        
+        BHAlbum *albumTap = [self.singleAlbums objectAtIndex: selectedIndex];
+        
+        //these "albums" are made of only 1 image
+        BHPhoto *photo = [albumTap.photos objectAtIndex:0];
+        assetURL = photo.imageURL;
+        NSLog(@"ASSET URL : %@",assetURL);
+    }else {
+        //should never happen
+        assetURL =  [enclosingAlbum.photosURLs objectAtIndex:selectedIndex];
+    }
+    
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:photoCellView.imageView cache:YES];
     [UIView setAnimationDuration:1.5];
@@ -132,7 +145,10 @@
     
 }
 
-
+/**
+ This updates the description field of the LocationDataModel
+ TODO updtate the location record on Database
+ */
 -(void) updateTitle {
     
     if(self.assetURL!=nil) {
@@ -144,14 +160,28 @@
 }
 
 -(void) viewWillAppear:(BOOL)animated {
-    selectedIndex =0;
+    //selectedIndex =0;
+    
+    //TODO IT IS WORKING BUT MAYBE BETTER do this before? or just pass the collection of "albums" inside the enclosingAlbum?
+    //the i just need to  grab the BHAlbum given the selectedIndex, and grab his only photo
+    /*NSUInteger albumSize = enclosingAlbum.photosURLs.count;
+    if(selectedIndex >=0 && selectedIndex < albumSize && assetURL != nil){
+        //find real index, this just the tag
+        for(NSUInteger i = 0; i < albumSize; i++) {
+            NSString *url =  [enclosingAlbum.photosURLs objectAtIndex:i];
+            if(url!= nil && [url isEqualToString:assetURL]) {
+                selectedIndex = i;
+                break;
+            }
+        }
+    }*/
     //NSLog(@" i have %d url: %@",self.navigationItem.leftBarButtonItems.count,assetURL);
     [self readFullSizeImageAndThumbnail];
     [self updateTitle];
 }
 
 -(void) viewWillDisappear:(BOOL)animated{
-    if( [self isBeingDismissed]) {
+    if( [self isBeingDismissed] || [self.navigationController isBeingDismissed]) {
       //TODO do not reload teh previous one
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [defaults setBool:true forKey:@"was_dismissed"];
@@ -197,6 +227,7 @@
 
 -(void) openLocationView{
     SearchLocationViewController *view = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] searchController];
+    view.selectedAlbum = nil;
     view.assetURL = assetURL; //set the asset url
     view.image = thumbnail;
     [self.navigationController pushViewController:view animated:YES];
@@ -325,7 +356,7 @@
                PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                requestOptions.networkAccessAllowed = true;
-               requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+               requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
                requestOptions.synchronous = true;
                
                NSLog(@"THE DETAIL URL IS %@", self.assetURL);

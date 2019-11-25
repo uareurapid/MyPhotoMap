@@ -127,7 +127,7 @@
 -(void) persistAlsoImagesInsideAlbum: (PHAssetCollection *) assetCollection {
     
        //first we get the assets on the fake album and we move them to the new persisted one
-       PHFetchResult *results = [PHAsset fetchAssetsWithALAssetURLs:self.selectedAlbum.photosURLs options:nil];
+       PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers: self.selectedAlbum.photosURLs options:nil];
             
         if(results!=nil && results.count > 0) {
         
@@ -660,19 +660,21 @@
                                                      albumSingle.name = [NSString stringWithFormat:@"%lu",(unsigned long)self.albums.count ];
                                                 }
                                                 
-                                               
-                                                //save the URL of the asset Photo
-                                                [albumSingle.photosURLs addObject: asset.localIdentifier];
-                                                //add to the list of albums (each of these albums has just one image)
-                                                [self.albums addObject:albumSingle];
-
-                                                
+                                        
                                                
                                                 processed++;
                                                 
 
                                                 BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                                photo.imageURL = theURL;
                                                 [albumSingle addPhoto:photo];
+                                               
+                                               //save the URL of the asset Photo
+                                               [albumSingle.photosURLs addObject: asset.localIdentifier];
+                                               //add to the list of albums (each of these albums has just one image)
+                                               [self.albums addObject:albumSingle];
+                                               
+                                               
                                                 //TODO check is only refreshing the view after all images have been processed, might want to do it every one or every 2 or 3 for instance
                                                 if(processed == count) {
                                                     NSLog(@"PROCESSED %ld albums count: %ld", (long)processed , self.albums.count);
@@ -931,6 +933,8 @@
        
         //represents here an album with just one image
         BHAlbum *albumTap = [self.albums objectAtIndex:tag];
+        
+        //these "albums" are made of only 1 image
         BHPhoto *photo = [albumTap.photos objectAtIndex:0];
         
         //nothing selected yet, select it now
@@ -953,11 +957,21 @@
             //JUST SHOW DETAIL
             detailViewController.title = albumTap.name;
             //each of these albums only has one image
-            NSLog(@"The url here is : %@",[albumTap.photosURLs objectAtIndex:0]);
+            NSLog(@"SHOW DETAIL: The url here is : %@, just to make sure num photos is : %ld",[albumTap.photosURLs objectAtIndex:0],(long)albumTap.photosURLs.count);
+            NSLog(@"ALBUMS COUNT:  %ld",(long) self.albums.count);
             detailViewController.enclosingAlbum = selectedAlbum;
+            detailViewController.selectedIndex = tag;
+            /************************************************************/
+            //here the single "albums"
+            detailViewController.singleAlbums = [[NSMutableArray alloc] initWithArray:self.albums];
+            //[detailViewController.singleAlbums removeAllObjects];
+            //[detailViewController.singleAlbums addObjectsFromArray:self.albums];
+            
+            NSLog(@"2nd ALBUMS COUNT:  %ld",(long) detailViewController.singleAlbums.count);
+            //**********************************
             //the albumTap has just one image
             detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
-            NSLog(@"pushing now: with assetURL %@",detailViewController.assetURL);
+            NSLog(@"pushing now: with assetURL %@ index > %ld",detailViewController.assetURL,tag);
             [self.navigationController pushViewController:detailViewController animated:NO];
         }
         

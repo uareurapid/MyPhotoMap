@@ -11,7 +11,7 @@
 
 @interface BHPhoto : NSObject
 
-@property (nonatomic, strong) NSString *imageURL;
+@property (copy, nonatomic) NSString *imageURL;
 @property (nonatomic, strong) UIImage *image;
 @property (nonatomic, assign) BOOL isSelected;
 
