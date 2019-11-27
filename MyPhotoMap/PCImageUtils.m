@@ -10,7 +10,7 @@
 
 @implementation PCImageUtils
 
-+(void) getImageFromPHAsset: (PHAsset *) asset  completion:(void (^)(UIImage *))completionBlock {
++(void) getImageFromPHAsset: (PHAsset *) asset withTargetSize:(CGSize) size  completion:(void (^)(UIImage *))completionBlock {
     
     
     PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
@@ -27,12 +27,13 @@
         
         __block UIImage *theImage;
     [manager requestImageForAsset:asset
-                           targetSize:PHImageManagerMaximumSize
+                           targetSize:size
                           contentMode:PHImageContentModeDefault
                               options:requestOptions
                         resultHandler:^void(UIImage *image, NSDictionary *info) {
                             if(image!=nil) {
                                 theImage = image;
+                                NSLog(@"HERE WAS OK ");
                                 completionBlock(theImage);
                            
                             } else {

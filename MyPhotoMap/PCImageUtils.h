@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface PCImageUtils : NSObject
 
 //get imageFromPHAssets
-+(void) getImageFromPHAsset: (PHAsset *) asset  completion:(void (^)(UIImage *))completionBlock;
++(void) getImageFromPHAsset: (PHAsset *) asset withTargetSize:(CGSize) size  completion:(void (^)(UIImage *))completionBlock;
 
 @end
 

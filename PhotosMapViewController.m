@@ -76,6 +76,7 @@
     //NSLog(@"Add location.....");
     CLLocationCoordinate2D coordinate = imageLocation.coordinate;
     MapViewAnnotationPoint *annotation = [[MapViewAnnotationPoint alloc] initWithCoordinate: coordinate title: title image: image] ;
+    //TODO NEXT (use different??)
     annotation.subtitle = title;
     annotation.title = title;
     
@@ -88,13 +89,15 @@
     //NOTE if model is nil then probably the location is just from EXIF
     
     if(photosURLS!=nil && photosURLS.count>0) {
-        NSLog(@"#1 this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
+        //NSLog(@"#1 this annotation is for an album with %lu pictures",(unsigned long)photosURLS.count);
         [annotation.albumPhotos addObjectsFromArray:photosURLS];
     }
     
     
     //don´t plot them until they are on the array
     [annotationsArray addObject:annotation];
+    
+    //NSLog(@"map annotations size: %ld",(long)annotationsArray.count);
     
     //plot them inside the visible view
     [self plotMapAnnotationsInsideView];
@@ -550,8 +553,19 @@
     UIImage * image = [UIImage imageNamed:@"shadow_instagram"];
     return image;
 }
-
-
+//updates photo title
+- (void) updateAnnotationTitle:(NSString *) title forModel:(LocationDataModel *)model{
+  for (MapViewAnnotationPoint *annotation in annotationsArray) {
+      if(annotation.dataModel != nil && annotation.dataModel.assetURL!=nil && model.assetURL!=nil ){
+          if([annotation.dataModel.assetURL isEqualToString:model.assetURL]){
+              //TODO NEXT (use different things?)
+              annotation.title = title;
+              annotation.subtitle = title;
+              return;
+          }
+      }
+  }
+}
 
 
 @end

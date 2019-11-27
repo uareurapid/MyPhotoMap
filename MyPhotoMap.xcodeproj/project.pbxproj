@@ -1381,6 +1381,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DF09B826CC3CC76E02D98E69 /* Pods-MyPhotoMap.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				DEVELOPMENT_TEAM = VAZ5V665BS;
 				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1400,6 +1401,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D77C3A67389770031B507766 /* Pods-MyPhotoMap.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				DEVELOPMENT_TEAM = VAZ5V665BS;
 				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

@@ -17,7 +17,7 @@
 
 @implementation PhotoDetailViewController
 
-@synthesize assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel,photoCellView,singleAlbums;
+@synthesize assetURL,thumbnail,enclosingAlbum,selectedIndex,locationEntitiesArray,dataModel,photoCellView,singleAlbums, mapViewController;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -27,7 +27,7 @@
         // Custom initialization
         [self.navigationItem setHidesBackButton:NO];
         
-        
+        self.singleAlbums = [[NSMutableArray alloc] init];
         /*UIBarButtonItem *editTitle = [[UIBarButtonItem alloc] initWithTitle:@"Edit Title"
                                                                          style:UIBarButtonItemStyleDone target:self action:@selector(addLabelClicked:)];*/
         
@@ -49,7 +49,6 @@
     [super viewDidLoad];
     
     //selectedIndex = 0;
-    singleAlbums = [[NSMutableArray alloc] init];
     
     CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
     photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
@@ -83,6 +82,15 @@
     locationEntitiesArray = [[NSMutableArray alloc] init];
     
     [self updateTitle];
+}
+
+-(void) resetAlbumsListFromList: (NSMutableArray *) listOfAlbums {
+    if(singleAlbums==nil) {
+      singleAlbums = [[NSMutableArray alloc] init];
+    } else {
+        [singleAlbums removeAllObjects];
+    }
+     [singleAlbums addObjectsFromArray:listOfAlbums];
 }
 
 - (void)didTapImageThumbnailWithGesture:(UITapGestureRecognizer *)tapGesture{
@@ -235,7 +243,7 @@
 
 
 #pragma add title description
-
+//change the title of the photo (desc field)
 - (void)changeLabel{
     
     UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New label..." message:@"Enter the photo label" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
@@ -328,6 +336,13 @@
         else{
             //save ok
             self.title = self.dataModel.desc;
+            if(self.mapViewController!=nil) {
+                [self.mapViewController updateAnnotationTitle:self.title forModel:self.dataModel];
+            }
+            
+            
+            //TODO NEXT update the map annotations if any
+            //when reading the model and creating the annotation, check teh desc
         }  
     }
     

@@ -31,7 +31,7 @@
 - (void)mutateCoordinatesOfClashingAnnotations:(NSArray *)annotations;
 - (NSDictionary *)groupAnnotationsByLocationValue:(NSArray *)annotations;
 - (void)repositionAnnotations:(NSMutableArray *)annotations toAvoidClashAtCoordination:(CLLocationCoordinate2D)coordinate;
-
+-(void) updateAnnotationTitle:(NSString *) title forModel:(LocationDataModel *)model;
 - (void) removeAnnotations;
 - (IBAction)terrainClicked:(id)sender;
 - (IBAction)satelliteClicked:(id)sender;

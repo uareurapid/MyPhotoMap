@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "SHK.h"
+#import "BHAlbum.h"
+#import "BHPhoto.h"
 #import "BHPhotoAlbumLayout.h"
 #import  <CoreLocation/CoreLocation.h>
 
@@ -23,6 +25,7 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 - (void) readCameraRoll;
 //-(void) readNumberOfExistingAlbums;
 -(void) createNewAlbum: (NSString*) albumName completion:(void(^)(BOOL))callback;
+-(void) deleteAlbum: (BHAlbum *) album completion:(void(^)(BOOL))callback;
 - (void) fetchLocationRecordsFromDatabase;
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;

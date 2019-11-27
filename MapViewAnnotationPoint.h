@@ -19,7 +19,7 @@
 @property (nonatomic,copy) NSString *assetURL;
 @property (nonatomic,copy) UIImage *image;//this is actually the thumbnail only
 @property (nonatomic,copy) UIImage *imageFullScreen;
-@property (nonatomic,readwrite) LocationDataModel *dataModel; //or add the nscopying protocol
+@property (nonatomic,strong) LocationDataModel *dataModel; //or add the nscopying protocol
 
 //in case the annotation is from an album we add here the album.photoURLS (NSString needs to be converted back to NSUrl)
 @property (strong,nonatomic) NSMutableArray *albumPhotos;

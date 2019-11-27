@@ -9,8 +9,6 @@
 #import "BHCollectionViewController.h"
 
 #import "BHAlbumPhotoCell.h"
-#import "BHAlbum.h"
-#import "BHPhoto.h"
 #import "BHAlbumTitleReusableView.h"
 #import "MYAlbumViewController.h"
 #import "SearchLocationViewController.h"
@@ -234,7 +232,7 @@
                                               //UIImage *imageFinal = imageFull;
                                               CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
                                                                                                   longitude:[model.longitude doubleValue]];
-                                              NSLog(@"Adding location to the map, read from database 1");
+                                              //NSLog(@"Adding location to the map, read from database 1");
                                               //TODO add the full size here:
                                               [self.mapViewController addLocation:locationCL withImage:thumbnail andTitle:model.description forModel:model containingURLS:photos];
                                               
@@ -484,7 +482,7 @@
         for (PHAssetCollection *collection in smartAlbum){
             
             
-            NSLog(@"ADDING Title for SMART Album= %@",collection.localizedTitle);
+            //NSLog(@"ADDING Title for SMART Album= %@",collection.localizedTitle);
             [self.existingAlbumsNames addObject:collection.localizedTitle];
             BHAlbum *album = [[BHAlbum alloc] init];
             [album setName:collection.localizedTitle];
@@ -495,7 +493,7 @@
             
             
             CLLocation *albumlocation = [collection approximateLocation];
-            NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
+            //NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
             
             LocationDataModel *model;
             
@@ -524,7 +522,7 @@
     //2. Get list of User created albums
     PHFetchResult *userAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
         for (PHAssetCollection *collection in userAlbums){
-            NSLog(@"ADDING Title for USER Album= %@",collection.localizedTitle);
+            //NSLog(@"ADDING Title for USER Album= %@",collection.localizedTitle);
             [self.existingAlbumsNames addObject:collection.localizedTitle];
             BHAlbum *album = [[BHAlbum alloc] init];
             [album setName:collection.localizedTitle];
@@ -535,7 +533,7 @@
             
             
             CLLocation *albumlocation = [collection approximateLocation];
-            NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
+            //NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
             
             LocationDataModel *model;
             if(album.assetURL!=nil ) {
@@ -616,7 +614,6 @@
                   //these are FAKE yearly albums, not on the device itself
                   if(!existsNativeAlbumWithSameName && ![self.albumsYears containsObject:yearSTR] && auxiliar==nil) {
                       
-                      NSLog(@"ADDING CUSTOM/FAKE ALBUM FOR YEAR %@",yearSTR);
                       [self.albumsYears addObject: yearSTR];
                       
                       BHAlbum *albumForYear = [[BHAlbum alloc] init];
@@ -727,7 +724,7 @@
                                                           //  && albumlocation!=nil
                                                           if(albumLocationModel!=nil) {
                                                               
-                                                              NSLog(@"Adding image location to the map from pre-existing album location");
+                                                              //NSLog(@"Adding image location to the map from pre-existing album location");
                                                               NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                               [self.mapViewController addLocation:albumlocation withImage: thumbnail  andTitle: albumLocationModel.desc forModel:albumLocationModel containingURLS:urls];
                                                               
@@ -735,10 +732,10 @@
                                                               
                                                               //SAVE THE RECORD WITH THE ALBUM LOCATION
                                                               //TODO pass description of image
-                                                              LocationDataModel *model = [self saveLocationRecord: assetPhotoURL withDate:theDate andLocation:albumlocation andAssetType:TYPE_ALBUM andDescription:desc];
+                                                              LocationDataModel *model = [self saveLocationRecord: assetPhotoURL withDate:theDate andLocation:albumlocation andAssetType:TYPE_PHOTO andDescription:desc];
                                                               
                                                               if(model!=nil) {
-                                                                  NSLog(@"Adding image location to the map from album location");
+                                                                  //NSLog(@"Adding image location to the map from album location");
                                                                   NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                                   [self.mapViewController addLocation:albumlocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
                                                               }
@@ -760,7 +757,7 @@
                                                           LocationDataModel *model = [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation andAssetType:TYPE_PHOTO andDescription:desc];
                                                         
                                                           if(model!=nil) {
-                                                              NSLog(@"Adding image location to the map from image exif data");
+                                                              //NSLog(@"Adding image location to the map from image exif data");
                                                               NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                               [self.mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
                                                           }
@@ -770,9 +767,12 @@
                                                       
                                                      LocationDataModel *model = [photoModels objectAtIndex:0];
                                                     //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
-                                                     NSLog(@"Adding image location to the map from image already existing location data");
+                                                    // NSLog(@"Adding image location to the map from image already existing location data");
                                                      NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                     [self.mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
+                                                      
+                                                      CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
+                                                      longitude:[model.longitude doubleValue]];
+                                                     [self.mapViewController addLocation:location withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
                                                       
                                                     
                                                   }//end else, location already previously saved
@@ -1004,6 +1004,8 @@
     
     //remove the one on the left , leaving only the back button
     albumViewController.navigationItem.leftBarButtonItem=nil;
+    //pass this one so i can call some things back, like deleteAlbum
+    albumViewController.rootViewController = self;
     [self.navigationController pushViewController: albumViewController animated:NO];
   
     
@@ -1032,6 +1034,23 @@ ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
     
 	// Display the action sheet
 	[actionSheet showFromToolbar:self.navigationController.toolbar];
+}
+
+-(void) deleteAlbum: (BHAlbum *) album completion:(void(^)(BOOL))callback {
+    
+    NSUInteger count = self.albums.count;
+    [self.albums removeObject:album];
+    if(self.albums.count < count) {
+        callback(true);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self.collectionView reloadData];
+            
+        });
+    }else {
+        callback(false);
+    }
+    
 }
 
 

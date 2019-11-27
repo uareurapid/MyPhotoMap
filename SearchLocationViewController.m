@@ -23,7 +23,6 @@
 
 @synthesize searchBar,placesList, placesTableView;
 @synthesize assetURL,image, selectedAlbum,thumbnailURL;
-@synthesize locationEntitiesArray;
 @synthesize mapView;
 
 
@@ -315,7 +314,6 @@
     }*/
  
     // Save our fetched data to an array
-    [self setLocationEntitiesArray: mutableFetchResults];
 
     //if(image!=nil && OK==YES) {
     //NSLog(@"Adding to the map....");
@@ -327,15 +325,15 @@
     
     LocationDataModel *locationObject = nil;
     NSMutableArray *records = nil;
+    PHFetchResult *results;
     //FIRST check if already exists the model on database
-    if(assetURL) {
+    if(assetURL!=nil) {
         records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: assetURL];
-        if(records==nil || (records!=nil && records.count > 1 )) {
-            //OOPS, something is very wrong
-            NSLog(@"something is very wrong");
-            return;
-        }
+        //also get the real PHAsset and maybe modify it??
+        results = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects:assetURL, nil] options:nil];
     }
+    //TODO LOAD THE PHASSET AND CHNAGE IS REAL LOCATION
+    
     
     
     NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
@@ -372,6 +370,8 @@
         isAlbumType = true;
         //TODO if it is an album, i need to show it on that location
         locationObject.type = TYPE_ALBUM;
+        
+        NSLog(@"YES I AM UPDATING AN ALBUM");
     }
     else {
        //it is an image
@@ -396,7 +396,6 @@
        locationObject.thumbnailURL = thumbnailURL ;//need to save it as a string
     }
     
-    //BOOL isNativeAlbum = isAlbumType && ![self.selectedAlbum.type isEqualToString:ALBUM_TYPE_FAKE];
     BOOL OK = YES;
     NSError *error;
     
@@ -423,11 +422,19 @@
                         model.latitude = location.latitude;
                         model.longitude= location.longitude;
                         model.desc = location.location;
-                        //model.name = photoURL;
+                        model.type = TYPE_PHOTO;
                         
-                        [locationEntitiesArray addObject:model];
-                        NSLog(@"Adding image location %@ object (from album location) to the map.... isUpdate? %d", location.location, isUpdate);
-                        [self loadAssetInfoFromDataModel: model isAlbum: false];
+                        if(![managedObjectContext save:&error]){
+                            NSLog(@"Unable to save object error is: %@",error.description);
+                            OK= NO;
+                         //This is a serious error saying the record
+                         //could not be saved. Advise the user to
+                         //try again or restart the application.
+                        } else{
+                            NSLog(@"Adding image location %@ object (from album location) to the map.... isUpdate? %d", location.location, isUpdate);
+                            [self loadAssetInfoFromDataModel: model isAlbum: false];
+                        }
+                        
                         
                     } else {
                         //TODO need to create location records for all these images
@@ -439,6 +446,7 @@
                         imageLocationModel.assetURL = photoURL;
                         imageLocationModel.thumbnailURL = photoURL;
                         imageLocationModel.desc = location.location;
+                        imageLocationModel.type = TYPE_PHOTO;
                         
                         if(![managedObjectContext save:&error]){
                             NSLog(@"Unable to save object error is: %@",error.description);
@@ -447,7 +455,6 @@
                          //could not be saved. Advise the user to
                          //try again or restart the application.
                         } else {
-                           [locationEntitiesArray addObject:imageLocationModel];
                            NSLog(@"Adding image location %@ object (from album location) to the map.... isUpdate? %d", location.location, isUpdate);
                            [self loadAssetInfoFromDataModel: imageLocationModel isAlbum: false];
                             
@@ -472,14 +479,26 @@
     //could not be saved. Advise the user to
     //try again or restart the application.
    }
-
-    //is a new one, add to the list
-    if(!isUpdate) {
-       [locationEntitiesArray insertObject:locationObject atIndex:0]; 
-    }
     
     if(OK==YES) {
-        NSLog(@"Adding location object to the map.... isUpdate? %d", isUpdate);
+        
+        if(assetURL!=nil && results!=nil && results.count == 1) {
+            PHAsset *asset = [results firstObject];
+            
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                PHAssetChangeRequest *change = [PHAssetChangeRequest changeRequestForAsset:asset];
+                
+                CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[location.latitude doubleValue]
+                longitude:[location.longitude doubleValue]];
+                
+                [change setLocation:locationCL];
+                
+            } completionHandler:^(BOOL success, NSError *error) {
+                NSLog(@"Finished adding asset. %@", (success ? @"Success" : error));
+            }];
+        }
+        
+        NSLog(@"Adding location object to the map.... isUpdate? %d isAlbum? %d", isUpdate, isAlbumType);
         [self loadAssetInfoFromDataModel: locationObject isAlbum: isAlbumType];
     }
     
@@ -607,17 +626,21 @@
     return gps;
 }
 
+//TODO not working immediately when is editin the location of an entire album, PHFetchResult is always 0
 -(void) loadImageDataFromAssetURL: (NSString *) theURL forLocationModel: (LocationDataModel*) model {
- 
-    PHImageManager *imageManager = [PHImageManager defaultManager];
+
+     
      PHFetchOptions *options = [PHFetchOptions new];
      options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
      NSLog(@"will try load asset thumnail %@", theURL);
-     PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: assetURL,nil] options:options];
+     PHFetchResult <PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: assetURL,nil] options:options];
      if(assets!=nil && assets.count >0) {
          
          PHAsset *asset = [assets firstObject];
          if(asset!=nil){
+             
+                PHImageManager *imageManager = [PHImageManager defaultManager];
+             
                 PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                 requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                 requestOptions.networkAccessAllowed = true;
@@ -643,7 +666,9 @@
                                         }
                 }];
          }
-    }
+     } else {
+         NSLog(@"FOUND NOTHING for %@",theURL);
+     }
 }
 #pragma asset stuff
 //will get the thumnail for the location object
@@ -707,6 +732,7 @@
         }
         
         [self.mapView addLocation:locationCL withImage:image andTitle:model.desc forModel:model containingURLS:otherPhotos ];
+        
         NSLog(@"Adding location to the map, read from database");
         
     });

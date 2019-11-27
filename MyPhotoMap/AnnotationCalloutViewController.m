@@ -125,7 +125,9 @@
                         
                         //this is the full screen image, maybe it should be restricted?
                         NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
-                        [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
+                        [PCImageUtils getImageFromPHAsset:asset
+                                           withTargetSize: CGSizeMake(self.imageView.frame.size.width, self.imageView.frame.size.height)
+                                               completion:^(UIImage *image) {
                             
                             if(image!=nil) {
                                 NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);
@@ -261,7 +263,9 @@
                                   
                                   //this is the full screen image, maybe it should be restricted?
                                   NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
-                                  [PCImageUtils getImageFromPHAsset:asset completion:^(UIImage *image) {
+                                  [PCImageUtils getImageFromPHAsset:asset
+                                                     withTargetSize:CGSizeMake(self.imageView.frame.size.width, self.imageView.frame.size.height)
+                                                         completion:^(UIImage *image) {
                                       
                                       if(image!=nil) {
                                           NSLog(@"SUCCESS GOT FULL SIZE IMAGE OK 1 WIDTH: %lf %lf", image.size.width, image.size.height);

@@ -21,6 +21,9 @@
 #import <Photos/Photos.h>
 #import <QBImagePickerController/QBImagePickerController.h>
 
+#define DELETE_ABUM_TAG 1000
+#define ADD_ALBUM_ATG 1001
+#define PERSIST_ALBUM_TAG 1002
 //#import <Photos/PHAssetCollection.h>
 @class PhotosMapViewController;
 
@@ -33,6 +36,9 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (retain,nonatomic) PhotoDetailViewController *detailViewController;
 
 @property (retain,nonatomic) AlbumsListViewController *listAlbumsAvailableController;//available for save
+
+
+@property (strong,nonatomic) BHCollectionViewController *rootViewController;
 
 //will actaully be abums of just one photo/thumbnail
 

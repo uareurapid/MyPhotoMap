@@ -16,7 +16,7 @@
 #import "BHPhoto.h"
 #import "LocationDataModel.h"
 #import "BHPhotoAlbumView.h"
-
+#import "PhotosMapViewController.h"
 //need to put this just in one location
 
 
@@ -34,6 +34,8 @@
 @property (assign,nonatomic) NSInteger selectedIndex;
 @property (strong, nonatomic) BHAlbum *enclosingAlbum;
 
+@property (strong, nonatomic) PhotosMapViewController *mapViewController;
+
 @property (nonatomic, retain) NSMutableArray *locationEntitiesArray;
 
 @property (strong, nonatomic) LocationDataModel *dataModel;
@@ -43,4 +45,5 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
 -(IBAction)closeWindow:(id)sender;
 - (void)readFullSizeImageAndThumbnail;
+-(void) resetAlbumsListFromList: (NSMutableArray *) listOfAlbums;
 @end

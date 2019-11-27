@@ -41,6 +41,7 @@
 @synthesize isFirstLoad;
 @synthesize location;
 @synthesize albums;
+@synthesize rootViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -121,6 +122,7 @@
     UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"New album..." message:@"Enter the album name" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Save",nil];
     alert.alertViewStyle = UIAlertViewStylePlainTextInput;
     [alert textFieldAtIndex:0].text = self.selectedAlbum.name;
+    alert.tag = PERSIST_ALBUM_TAG;
     [alert show];
 }
 
@@ -158,55 +160,22 @@
 //the delegate for the new Album
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     
-    if(buttonIndex==1) { //0 - cancel, 1 - save
-        NSString *albumName = [alertView textFieldAtIndex:0].text;
-        
-        
-        //https://developer.apple.com/documentation/photokit/browsing_and_modifying_photo_albums?language=objc
-        
-       
-        
-        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
-        
-        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
-         PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
-        //first check if already exists, only add if not
-        if (fetchResult.count ==0) {
-                __block PHObjectPlaceholder *albumPlaceholder;
-                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                    PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
-                    albumPlaceholder = changeRequest.placeholderForCreatedAssetCollection;
-
-                } completionHandler:^(BOOL success, NSError *error) {
-                    if (success) {
-                        PHFetchResult *fetchResultCreated = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
-                        
-                         NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
-                        
-                        if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
-                            [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
-                        }
-                    } else {
-                        NSLog(@"Error creating album: %@", error);
-                    }
-                }];
-        } else if(fetchResult.count == 1) {
-            //TODO don´t think this is happening cause we are persisting a FAKE ONE
+    
+    if(alertView.tag == PERSIST_ALBUM_TAG) {
+        if(buttonIndex==1) { //0 - cancel, 1 - save
+            NSString *albumName = [alertView textFieldAtIndex:0].text;
             
-            //first we need to delete the other one
-            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
-                [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
-
-            } completionHandler:^(BOOL success, NSError *error) {
-                if (!success) {
-                    NSLog(@"Error deleting album: %@", error);
-                } else {
-                    // DELETE OK
-                    NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
-                    //TODO remove from the list of albums and reload webview
-                    
-                    //AND CREATE (same code as above)
+            
+            //https://developer.apple.com/documentation/photokit/browsing_and_modifying_photo_albums?language=objc
+            
+           
+            
+            PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+            
+            fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", albumName];
+             PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+            //first check if already exists, only add if not
+            if (fetchResult.count ==0) {
                     __block PHObjectPlaceholder *albumPlaceholder;
                     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
                         PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
@@ -225,13 +194,51 @@
                             NSLog(@"Error creating album: %@", error);
                         }
                     }];
-                    
-    
-                }
-            }];//end delete completion handler
+            } else if(fetchResult.count == 1) {
+                //TODO don´t think this is happening cause we are persisting a FAKE ONE
+                
+                //first we need to delete the other one
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
+                    [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
+
+                } completionHandler:^(BOOL success, NSError *error) {
+                    if (!success) {
+                        NSLog(@"Error deleting album: %@", error);
+                    } else {
+                        // DELETE OK
+                        NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
+                        //TODO remove from the list of albums and reload webview
+                        
+                        //AND CREATE (same code as above)
+                        __block PHObjectPlaceholder *albumPlaceholder;
+                        [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                            PHAssetCollectionChangeRequest *changeRequest = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:albumName];
+                            albumPlaceholder = changeRequest.placeholderForCreatedAssetCollection;
+
+                        } completionHandler:^(BOOL success, NSError *error) {
+                            if (success) {
+                                PHFetchResult *fetchResultCreated = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+                                
+                                 NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
+                                
+                                if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
+                                    [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
+                                }
+                            } else {
+                                NSLog(@"Error creating album: %@", error);
+                            }
+                        }];
+                        
+        
+                    }
+                }];//end delete completion handler
+            }
+           
         }
-       
     }
+    
+    
     
 }
 
@@ -489,40 +496,53 @@
         NSLog(@"DELETE ALBUM %@",selectedAlbum.name);
         
         
-        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
-        
-        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", selectedAlbum.name];
-         PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
-        if(fetchResult.count == 1) {
+        if([selectedAlbum isFakeAlbum]) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                            message:@"This is a fake album (only exists inside the app), and cannot be deleted!"
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            alert.tag = DELETE_ABUM_TAG;
+            alert.delegate = self;
+            [alert show];
             
-            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
-                [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
-             
-                //[assetCollectionChangeRequest addAssets:@[[assetChangeRequest placeholderForCreatedAsset]]];
+        }else {
+            //otherwise continue
+            PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+            
+            fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", selectedAlbum.name];
+             PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+            if(fetchResult.count == 1) {
+                
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    NSArray *toDelete = [[NSArray alloc] initWithObjects:fetchResult.firstObject, nil];
+                    [PHAssetCollectionChangeRequest deleteAssetCollections:toDelete];
+                 
+                    //[assetCollectionChangeRequest addAssets:@[[assetChangeRequest placeholderForCreatedAsset]]];
 
-            } completionHandler:^(BOOL success, NSError *error) {
-                if (!success) {
-                    NSLog(@"Error deleting album: %@", error);
-                } else {
-                    NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
-                    
-                    //TODO remove from the list of albums and reload webview
-                    [self.albumsNames removeObject:self.selectedAlbum.name];
-                    //TODO remove them from the root view controller too!!!!
-                }
-            }];
+                } completionHandler:^(BOOL success, NSError *error) {
+                    if (!success) {
+                        NSLog(@"Error deleting album: %@", error);
+                    } else {
+                        NSLog(@"Deleted album %@ ",self.selectedAlbum.name);
+                        
+                        //TODO remove from the list of albums and reload webview
+                        [self.albumsNames removeObject:self.selectedAlbum.name];
+                        //
+                        if(self.rootViewController!=nil) {
+                            [self.rootViewController deleteAlbum:self.selectedAlbum completion:^(BOOL deleted) {
+                                [self.navigationController popToRootViewControllerAnimated:YES];
+                                //TODO remove them from the root view controller too!!!!
+                            }];
+                        } else {
+                            //BAD THINGS HAPPENED!!!
+                            [self.navigationController popToRootViewControllerAnimated:YES];
+                        }
+                        
+                    }
+                }];
+            }
         }
-        
-        
-        
-        /*UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
-                                                        message:@"You can only delete the album from the photos app"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];*/
-        [self.navigationController popToRootViewControllerAnimated:TRUE];
     }
 }
 
@@ -963,9 +983,12 @@
             detailViewController.selectedIndex = tag;
             /************************************************************/
             //here the single "albums"
-            detailViewController.singleAlbums = [[NSMutableArray alloc] initWithArray:self.albums];
-            //[detailViewController.singleAlbums removeAllObjects];
-            //[detailViewController.singleAlbums addObjectsFromArray:self.albums];
+            //WAS OK detailViewController.singleAlbums = [[NSMutableArray alloc] initWithArray:self.albums];
+            
+            [detailViewController resetAlbumsListFromList: self.albums];
+            
+            //pass the map too
+            detailViewController.mapViewController = self.mapViewController;
             
             NSLog(@"2nd ALBUMS COUNT:  %ld",(long) detailViewController.singleAlbums.count);
             //**********************************
@@ -1306,6 +1329,7 @@
     });
 }*/
 
+//TODO REFACTOR NO ALA ASSETS STUFF
 -(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
     
         
@@ -1320,15 +1344,11 @@
         for(PHAsset *asset in results) {
             
             NSLog(@"LOCAL IDENTIFIER IS %@", asset.localIdentifier);
-            NSString *url = [NSString stringWithFormat:@"assets-library://asset/asset.JPG?id=%@",asset.localIdentifier ];
-            NSString *str = [url stringByReplacingOccurrencesOfString:@"/L0/001" withString:@"&ext=JPG"];
-            NSURL *finalUrl = [[NSURL alloc] initWithString: str];
-            NSLog(@"FINAL ASSET URL IDENTIFIER IS %@", finalUrl.absoluteString);
-            [self.selectedAlbum.photosURLs addObject: finalUrl];
+            [self.selectedAlbum.photosURLs addObject: asset.localIdentifier];
             
             NSLog(@"TYPE IS %@",[asset valueForKey:@"uniformTypeIdentifier"]);
             
-            [assetsArray addObject:(PHAsset *)asset];
+            [assetsArray addObject:asset];
         }
         if(assetsArray.count > 0) {
             [self readAlbumThumbnails];
