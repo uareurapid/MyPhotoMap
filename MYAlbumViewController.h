@@ -44,6 +44,8 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property (strong, nonatomic) PhotosMapViewController *mapViewController;
 
+@property (strong, nonatomic) NSString *previouslySelectedAlbum;
+
 @property (strong, nonatomic) BHAlbum *selectedAlbum;
 @property (strong, nonatomic) BHAlbum *selectedPhoto;
 @property (assign, nonatomic) NSUInteger selectedAlbumIndex;
@@ -60,7 +62,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property BOOL isFirstLoad;
 
-- (void)showDetailView: (NSString *) imgURL;
+//- (void)showDetailView: (NSString *) imgURL;
 -(void) addAlbumsNamesFromArray: (NSMutableArray*) names;
 - (void)readAlbumThumbnails;
 

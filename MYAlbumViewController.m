@@ -41,7 +41,7 @@
 @synthesize isFirstLoad;
 @synthesize location;
 @synthesize albums;
-@synthesize rootViewController;
+@synthesize rootViewController, previouslySelectedAlbum;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -90,16 +90,34 @@
     
     NSLog(@"viewWillAppear, album");
     self.selectedAction = 0;
-    
+    /*
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if(![defaults boolForKey:@"was_dismissed"]) {
-        [self readAlbumThumbnails];
-    } else {
-        [defaults setBool:false forKey:@"was_dismissed"];
+        if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name]) ) {
+            //is a different album so do this too
+            [self readAlbumThumbnails];
+        }
+        //else same album, ignore
+        
+    } else {*/
+       // [defaults setBool:false forKey:@"was_dismissed"];
+        
+        if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
+            //is a different album so do this too
+            [self readAlbumThumbnails];
+        }
+    //}
+    
+    
+    
+}
+
+-(void) viewDidDisappear:(BOOL)animated {
+    
+    if(self.selectedAlbum!=nil) {
+        self.previouslySelectedAlbum = self.selectedAlbum.name;
     }
-    
-    
-    
+  
 }
 
 //add the "real" existing albums" names
@@ -126,7 +144,7 @@
     [alert show];
 }
 
--(void) persistAlsoImagesInsideAlbum: (PHAssetCollection *) assetCollection {
+-(void) persistAlsoImagesInsideAlbum: (PHAssetCollection *) assetCollection name:(NSString *)albumName {
     
        //first we get the assets on the fake album and we move them to the new persisted one
        PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers: self.selectedAlbum.photosURLs options:nil];
@@ -150,6 +168,16 @@
                             NSLog(@"Error persistsing asset: %@", error);
                         } else {
                             NSLog(@"Persisted assets on new album");
+                            
+                            
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                NSString *str = [NSString stringWithFormat:@"Persisted photos on new album: %@",albumName];
+                                
+                                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Persist album..." message:str delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
+                                alert.tag = -100;
+                                [alert show];
+                            });
+                            
                         }
                 }];
                 
@@ -188,7 +216,7 @@
                              NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
                             
                             if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
-                                [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
+                                [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject name: albumName];
                             }
                         } else {
                             NSLog(@"Error creating album: %@", error);
@@ -223,7 +251,7 @@
                                  NSLog(@"OK CREATED ALBUM NAMED %@", albumName);
                                 
                                 if (fetchResultCreated.count > 0 && self.selectedAlbum!=nil && self.selectedAlbum.photosURLs.count > 0) {
-                                    [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject];
+                                    [self persistAlsoImagesInsideAlbum:fetchResultCreated.firstObject name: albumName];
                                 }
                             } else {
                                 NSLog(@"Error creating album: %@", error);
@@ -531,12 +559,18 @@
                         //
                         if(self.rootViewController!=nil) {
                             [self.rootViewController deleteAlbum:self.selectedAlbum completion:^(BOOL deleted) {
-                                [self.navigationController popToRootViewControllerAnimated:YES];
-                                //TODO remove them from the root view controller too!!!!
+                                
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [self.navigationController popToRootViewControllerAnimated:YES];
+                                });
+                                
+                                
                             }];
                         } else {
                             //BAD THINGS HAPPENED!!!
-                            [self.navigationController popToRootViewControllerAnimated:YES];
+                           dispatch_async(dispatch_get_main_queue(), ^{
+                               [self.navigationController popToRootViewControllerAnimated:YES];
+                           });
                         }
                         
                     }
@@ -655,7 +689,7 @@
                                        resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
                                            if(thumbnail!=nil) {
                                                
-                                               NSLog(@"loaded thumbnail %ld", processed +1);
+                                               //NSLog(@"loaded thumbnail %ld", processed +1);
                                                BHAlbum *albumSingle = [[BHAlbum alloc] init];
                                                albumSingle.photosURLs = [[NSMutableArray alloc] init];
                                                 
@@ -740,7 +774,7 @@
 
 -(void) refreshCollection {
      
-    //dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         [self.collectionView.collectionViewLayout invalidateLayout];
         [self.collectionView reloadData];
         [self.collectionView performBatchUpdates:^{
@@ -748,9 +782,9 @@
            NSArray *indexpaths = self.collectionView.indexPathsForVisibleItems;
            if(indexpaths!=nil && indexpaths.count>0) {
                
-               for(NSIndexPath *path in indexpaths) {
-                   NSLog(@"VISIBLE PATH ROW: %ld SECTION %ld", (long)path.row, (long)path.section);
-               }
+               //for(NSIndexPath *path in indexpaths) {
+                   //NSLog(@"VISIBLE PATH ROW: %ld SECTION %ld", (long)path.row, (long)path.section);
+               //}
                
               [self.collectionView reloadItemsAtIndexPaths:indexpaths];
                
@@ -758,7 +792,7 @@
         } completion:^(BOOL finished) {
             // Called async when all animations are finished; finished = NO if cancelled
         }];
-    //});
+    });
     
     
 }
@@ -861,7 +895,7 @@
     NSInteger row = indexPath.row;
     NSInteger photoIndex = indexPath.section;
     
-    NSLog(@"ROW is %ld count %ld section/index %ld", (long)row, self.selectedAlbum.photosCount, photoIndex);
+    //NSLog(@"ROW is %ld count %ld section/index %ld", (long)row, self.selectedAlbum.photosCount, photoIndex);
     if( (photoIndex < self.selectedAlbum.photosURLs.count && row == 0) ) {
         
         
@@ -875,7 +909,7 @@
             BHPhoto *photo = albumSelected.photos[0];//which should only be 1indexPath.item
             BOOL isSelected = photo.isSelected;
             
-            NSLog(@"WILL SET IMAGE %@ at index %ld",photo.image.description,(long) photoIndex);
+            //NSLog(@"WILL SET IMAGE %@ at index %ld",photo.image.description,(long) photoIndex);
             dispatch_async(dispatch_get_main_queue(), ^(){
                photoCell.imageView.image = photo.image;
             });
@@ -1070,7 +1104,7 @@
 
 #pragma NEW STUFF
 #pragma mark - Public Method
-
+/*
 - (void)saveImage:(UIImage *)image
           toAlbum:(NSString *)albumName
        completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
@@ -1085,8 +1119,8 @@
                      completionBlock:[self _resultBlockOfAddingToAlbum:albumName
                                                             completion:completion
                                                                failure:failure]];
-}
-
+}*/
+/*
 - (void)saveVideo:(NSURL *)videoUrl
           toAlbum:(NSString *)albumName
        completion:(ALAssetsLibraryWriteImageCompletionBlock)completion
@@ -1119,7 +1153,7 @@
                                                                 completion:completion
                                                                    failure:failure]];
   
-}
+}*/
 
 #pragma mark - Private Method
 

@@ -234,7 +234,11 @@
                                                                                                   longitude:[model.longitude doubleValue]];
                                               //NSLog(@"Adding location to the map, read from database 1");
                                               //TODO add the full size here:
-                                              [self.mapViewController addLocation:locationCL withImage:thumbnail andTitle:model.description forModel:model containingURLS:photos];
+                                              NSString *desc = model.desc;
+                                              if(desc == nil) {
+                                                  desc = model.description;
+                                              }
+                                              [self.mapViewController addLocation:locationCL withImage:thumbnail andTitle:desc forModel:model containingURLS:photos];
                                               
                                           });
                                       }
@@ -482,7 +486,7 @@
         for (PHAssetCollection *collection in smartAlbum){
             
             
-            //NSLog(@"ADDING Title for SMART Album= %@",collection.localizedTitle);
+            NSLog(@"ADDING Title for SMART Album= %@",collection.localizedTitle);
             [self.existingAlbumsNames addObject:collection.localizedTitle];
             BHAlbum *album = [[BHAlbum alloc] init];
             [album setName:collection.localizedTitle];
@@ -522,7 +526,7 @@
     //2. Get list of User created albums
     PHFetchResult *userAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
         for (PHAssetCollection *collection in userAlbums){
-            //NSLog(@"ADDING Title for USER Album= %@",collection.localizedTitle);
+            NSLog(@"ADDING Title for USER Album= %@",collection.localizedTitle);
             [self.existingAlbumsNames addObject:collection.localizedTitle];
             BHAlbum *album = [[BHAlbum alloc] init];
             [album setName:collection.localizedTitle];
@@ -613,7 +617,7 @@
                   
                   //these are FAKE yearly albums, not on the device itself
                   if(!existsNativeAlbumWithSameName && ![self.albumsYears containsObject:yearSTR] && auxiliar==nil) {
-                      
+                      NSLog(@"ADDING FAKE ALBUM FOR YEAR %@", yearSTR);
                       [self.albumsYears addObject: yearSTR];
                       
                       BHAlbum *albumForYear = [[BHAlbum alloc] init];
@@ -756,7 +760,7 @@
                                                           //NSLog(@"SAVING %@ with photo own location %@",assetPhotoURL,imageLocation.description);
                                                           LocationDataModel *model = [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation andAssetType:TYPE_PHOTO andDescription:desc];
                                                         
-                                                          if(model!=nil) {
+                                                          if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
                                                               //NSLog(@"Adding image location to the map from image exif data");
                                                               NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                               [self.mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
@@ -766,15 +770,16 @@
                                                   } else {
                                                       
                                                      LocationDataModel *model = [photoModels objectAtIndex:0];
-                                                    //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
-                                                    // NSLog(@"Adding image location to the map from image already existing location data");
-                                                     NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                       
-                                                      CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
-                                                      longitude:[model.longitude doubleValue]];
-                                                     [self.mapViewController addLocation:location withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
-                                                      
-                                                    
+                                                      if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
+                                                          //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
+                                                          // NSLog(@"Adding image location to the map from image already existing location data");
+                                                        NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
+                                                            
+                                                        CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
+                                                        [self.mapViewController addLocation:location withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
+                                                      }
+                             
                                                   }//end else, location already previously saved
                                                  
                                               }
@@ -996,11 +1001,18 @@
     
  
     NSMutableArray *arrayOfNames = [[NSMutableArray alloc] init];
+    //not the fake ones
+    NSMutableArray *albumsWhereWeCanAddPhotos = [[NSMutableArray alloc] init];
+    
     for(BHAlbum *album in albums) {
         NSLog(@"adding ALBUM %@",album);
         [arrayOfNames addObject:album.name];
+        if(![album isFakeAlbum]) {
+            [albumsWhereWeCanAddPhotos addObject:album.name];
+        }
     }
-    [albumViewController addAlbumsNamesFromArray:arrayOfNames];
+    //TODO NEXT do not add fake ones as we cannot save photo to those (they show on the list of options)
+    [albumViewController addAlbumsNamesFromArray:albumsWhereWeCanAddPhotos];
     
     //remove the one on the left , leaving only the back button
     albumViewController.navigationItem.leftBarButtonItem=nil;

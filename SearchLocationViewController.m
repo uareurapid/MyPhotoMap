@@ -359,7 +359,11 @@
     locationObject.name = assetURL;
     locationObject.latitude = location.latitude;
     locationObject.longitude= location.longitude;
-    locationObject.desc = location.location;
+    //we do not want to override the title if any
+    if(locationObject.desc == nil) {
+       locationObject.desc = location.location;
+    }
+    
     
     bool isAlbumType = false;
     
@@ -421,7 +425,11 @@
                         LocationDataModel *model = [photoModels objectAtIndex:0];
                         model.latitude = location.latitude;
                         model.longitude= location.longitude;
-                        model.desc = location.location;
+                        //no override if exists
+                        if(model.desc == nil) {
+                           model.desc = location.location;
+                        }
+                        
                         model.type = TYPE_PHOTO;
                         
                         if(![managedObjectContext save:&error]){

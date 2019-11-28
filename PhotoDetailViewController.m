@@ -81,7 +81,7 @@
     
     locationEntitiesArray = [[NSMutableArray alloc] init];
     
-    [self updateTitle];
+    //[self updateTitle];
 }
 
 -(void) resetAlbumsListFromList: (NSMutableArray *) listOfAlbums {
@@ -259,7 +259,7 @@
     if(buttonIndex==1) { //0 - cancel, 1 - save
         NSString *label = [alertView textFieldAtIndex:0].text;
         //check if this label already exists in some model (must have same url)
-        [self fetchLocationRecords:label];
+        [self fetchLocationRecordsAndUpdateTitle:label];
     }
     
 }
@@ -281,70 +281,120 @@
 
 #pragma save locations core data
 //fetch all the records from the database
-- (void)fetchLocationRecords: (NSString *) descriptionString {
+- (void)fetchLocationRecordsAndUpdateTitle: (NSString *) descriptionString {
     
     //do nothing if it doesn´t exist
+    //TODO NEXT write medatadata on the PHAsset itself?
     if(self.dataModel==nil) {
         NSLog(@"don´t found any model");
         //TODO create one now
-        return;
-    }
-    
-    BOOL canUpdate = false;
-    //TODO, improve method to include assetURL in the query predicate as well
-    NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabaseWithDescription: descriptionString];
-    if (!mutableFetchResults) {
-        //ERROR
-        return;
-    }
-    else if(mutableFetchResults.count==0) {
-     //OK
-        canUpdate = true;
-    }
-    else {
-        //TODO alert because the label already exists
-        BOOL found = false;
-        LocationDataModel *locationObject = nil;
-        for(LocationDataModel *entity in mutableFetchResults) {
-            //load the thumbnail
-            if(entity.assetURL!=nil && [entity.assetURL isEqualToString: self.assetURL]) {
-                //found it
-                found = true;
-                locationObject = entity;
-                break;
-            }
-        }
-        if(!found) {
-            canUpdate = true;
-            //OK
         
+        NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+        __block LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+        //current date
+        [locationObject setTimestamp: [NSDate date]];
+        //TODO THE NAME SAME OF ASSET? WHY??? THERE IS A PROPER FIELD
+        [locationObject setName: assetURL];
+        [locationObject setAssetURL:assetURL];
+        [locationObject setDesc:descriptionString];//TODO pass this to the annotation title
+        //explicitly set this to nil
+        [locationObject setLatitude:nil];
+        [locationObject setLongitude:nil];
+        [locationObject setType:TYPE_PHOTO];
+        [locationObject setThumbnailURL:self.assetURL];
+        
+        BOOL OK = YES;
+        NSError *error;
+        if(![managedObjectContext save:&error]){
+            NSLog(@"Unable to save object error is: %@",error.description);
+            OK= NO;
+        }
+         
+        if(OK==YES) {
+            self.title = descriptionString;
+            //NSMutableArray *results = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:self.assetURL];
+            //if(results && results.count == 1) {
+            //    self.dataModel =  (LocationDataModel *) [results objectAtIndex:0];
+            //}
+        }
+        
+        /*PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects:self.assetURL, nil] options:nil];
+        //
+        if(results!=nil && results.count == 1) {
+            
+            PHAsset *asset = [results firstObject];
+            
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                PHAssetChangeRequest *change = [PHAssetChangeRequest changeRequestForAsset:asset];
+                
+                
+                [change setFavorite:true];
+                
+            } completionHandler:^(BOOL success, NSError *error) {
+                NSLog(@"Finished updating asset. %@", (success ? @"Success" : error));
+            }];
+        }*/
+        
+    } else {
+        
+        BOOL canUpdate = false;
+        //TODO, improve method to include assetURL in the query predicate as well
+        NSMutableArray *mutableFetchResults = [CoreDataUtils fetchLocationRecordsFromDatabaseWithDescription: descriptionString];
+        if (!mutableFetchResults) {
+            //ERROR
+            return;
+        }
+        else if(mutableFetchResults.count==0) {
+         //OK
+            canUpdate = true;
         }
         else {
-            //NOK, already exists
+            //TODO alert because the label already exists
+            BOOL found = false;
+            LocationDataModel *locationObject = nil;
+            for(LocationDataModel *entity in mutableFetchResults) {
+                //load the thumbnail
+                if(entity.assetURL!=nil && [entity.assetURL isEqualToString: self.assetURL]) {
+                    //found it
+                    found = true;
+                    locationObject = entity;
+                    break;
+                }
+            }
+            if(!found) {
+                canUpdate = true;
+                //OK
+            
+            }
+            else {
+                //NOK, already exists
+            }
+        }
+        
+        if(canUpdate) {
+            NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+            
+            //update the description and save the context/model
+            dataModel.desc= descriptionString;
+            NSError *error;
+            if (![managedObjectContext save:&error]) {
+                NSLog(@"Whoops, unable to save");
+            }
+            else{
+                //save ok, update view controller title too
+                self.title = self.dataModel.desc;
+                if(self.mapViewController!=nil) {
+                    [self.mapViewController updateAnnotationTitle:self.title forModel:self.dataModel];
+                }
+                
+                
+                //TODO NEXT update the map annotations if any
+                //when reading the model and creating the annotation, check teh desc
+            }
         }
     }
     
-    if(canUpdate) {
-        NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
-        
-        //update the description and save the context/model
-        dataModel.desc= descriptionString;
-        NSError *error;
-        if (![managedObjectContext save:&error]) {
-            NSLog(@"Whoops, unable to save");
-        }
-        else{
-            //save ok
-            self.title = self.dataModel.desc;
-            if(self.mapViewController!=nil) {
-                [self.mapViewController updateAnnotationTitle:self.title forModel:self.dataModel];
-            }
-            
-            
-            //TODO NEXT update the map annotations if any
-            //when reading the model and creating the annotation, check teh desc
-        }  
-    }
+    
     
     
     

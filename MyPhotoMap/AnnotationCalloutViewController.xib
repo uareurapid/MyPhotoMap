@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -18,28 +18,15 @@
             <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
             <subviews>
-                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Izk-hx-Avf">
-                    <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
-                    <items>
-                        <barButtonItem title="Create album" id="UYr-6b-DSd">
-                            <color key="tintColor" systemColor="systemOrangeColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </barButtonItem>
-                    </items>
-                    <color key="barTintColor" systemColor="systemTealColor" red="0.35294117650000001" green="0.7843137255" blue="0.98039215690000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                </toolbar>
-                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" adjustsImageSizeForAccessibilityContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HpL-CG-nBb">
-                    <rect key="frame" x="0.0" y="44" width="414" height="692"/>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" adjustsImageSizeForAccessibilityContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HpL-CG-nBb">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                 </imageView>
             </subviews>
             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
             <constraints>
-                <constraint firstItem="HpL-CG-nBb" firstAttribute="top" secondItem="Izk-hx-Avf" secondAttribute="bottom" id="2X6-oh-aoz"/>
-                <constraint firstItem="Izk-hx-Avf" firstAttribute="top" secondItem="1Hv-J6-oot" secondAttribute="topMargin" id="CcF-n5-bTU"/>
                 <constraint firstItem="HpL-CG-nBb" firstAttribute="leading" secondItem="1Hv-J6-oot" secondAttribute="leading" id="GAN-kL-k9P"/>
                 <constraint firstAttribute="bottom" secondItem="HpL-CG-nBb" secondAttribute="bottom" id="OLQ-1F-5W0"/>
-                <constraint firstItem="Izk-hx-Avf" firstAttribute="leading" secondItem="1Hv-J6-oot" secondAttribute="leading" id="apH-yW-Zy2"/>
                 <constraint firstAttribute="trailing" secondItem="HpL-CG-nBb" secondAttribute="trailing" id="tXX-qk-jdG"/>
-                <constraint firstAttribute="trailing" secondItem="Izk-hx-Avf" secondAttribute="trailing" id="vvi-vu-PAq"/>
             </constraints>
             <point key="canvasLocation" x="766.66666666666674" y="-886.14130434782612"/>
         </view>
