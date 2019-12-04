@@ -9,8 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "MapViewAnnotationPoint.h"
 #import "FPPopoverController.h"
+#import "BHPhotoAlbumView.h"
 
 @interface AnnotationCalloutViewController : UIViewController /*<UIPopoverPresentationControllerDelegate> */ <FPPopoverControllerDelegate>
+- (IBAction)closeClicked:(id)sender;
+@property (weak, nonatomic) IBOutlet UILabel *imgTitle;
 
 //it appears as a list of 1-n images
 @property (strong,nonatomic) NSMutableArray *calloutAnnotations;
@@ -21,5 +24,6 @@
 @property (assign, nonatomic) NSInteger currentIndex;
 @property (assign, nonatomic) NSInteger currentSecondaryIndex; //used when we have multiple photos urls in 1 annotation (an album?)
 
+@property (retain, nonatomic) IBOutlet BHPhotoAlbumView *photoCellView;
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle annotations:(NSMutableArray*) annots;
 @end

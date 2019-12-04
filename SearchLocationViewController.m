@@ -409,27 +409,33 @@
         NSLog(@"FAKE ?%d images: %ld", isFakeAlbum, (long)selectedAlbum.photosURLs.count);
         
         //Update all the images inside the album with the same location of the album
+        NSUInteger albumPhotosIndex = -1;
         if(selectedAlbum.photosURLs.count > 0) {
             for(NSString *photoURL in selectedAlbum.photosURLs) {
                 
                 NSLog(@"ASSET/PHOTO URL IS %@", photoURL);
                 if(photoURL) {
                     
+                    albumPhotosIndex++;
                     //update also the model for these photos
                     //TODO add also annotations for individual photos or not???
                     //already saved this before? just update then!
                     NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: photoURL ];
                     if(photoModels!=nil && photoModels.count==1) {
                         
-                        NSLog(@"WILL UPDATE PHOTO MODEL ");
+                        
                         LocationDataModel *model = [photoModels objectAtIndex:0];
                         model.latitude = location.latitude;
                         model.longitude= location.longitude;
-                        //no override if exists
+                        //no override if exists, if is album and the first photo of it append the location
+                        //if(model.desc == nil || ( [model.desc rangeOfString:@"IMG-"].location != NSNotFound && albumPhotosIndex == 0) ) {
+                        //   model.desc = [NSString stringWithFormat:@"(%@) %@",location.location, model.desc];
+                        //}
                         if(model.desc == nil) {
                            model.desc = location.location;
                         }
                         
+                        NSLog(@"WILL UPDATE PHOTO MODEL DESC %@", model.desc);
                         model.type = TYPE_PHOTO;
                         
                         if(![managedObjectContext save:&error]){
@@ -640,8 +646,8 @@
      
      PHFetchOptions *options = [PHFetchOptions new];
      options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
-     NSLog(@"will try load asset thumnail %@", theURL);
-     PHFetchResult <PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: assetURL,nil] options:options];
+     NSLog(@"will try load asset thumnail %@ is album ?%d", theURL, [model.type isEqualToString: TYPE_ALBUM]);
+     PHFetchResult <PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: theURL,nil] options:options];
      if(assets!=nil && assets.count >0) {
          
          PHAsset *asset = [assets firstObject];

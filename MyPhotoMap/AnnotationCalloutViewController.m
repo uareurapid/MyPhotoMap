@@ -18,7 +18,7 @@
 
 @implementation AnnotationCalloutViewController
 
-@synthesize calloutAnnotations,imageView, previousAssetURL;
+@synthesize calloutAnnotations,imageView, previousAssetURL, photoCellView, imgTitle;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle  {
     self = [super initWithNibName:nibName bundle:nibBundle];
@@ -76,6 +76,33 @@
     NSLog(@"Annotations size is %lu",(unsigned long)calloutAnnotations.count);
     
     
+    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
+    photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
+    photoCellView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    photoCellView.imageView.userInteractionEnabled = YES;
+    
+    //initWithFrame:CGRectMake(-10, 70, 320, 480)];
+    
+    [self.view addSubview:photoCellView];
+    
+    [self.view bringSubviewToFront:photoCellView];
+    
+    //UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageThumbnailWithGesture:)];
+    //[photoCellView.imageView addGestureRecognizer:tapGesture];
+    
+    // Do any additional setup after loading the view from its nib.
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    
+    [photoCellView.imageView setUserInteractionEnabled:true];
+    // Setting the swipe direction.
+    [swipeLeft setDirection:UISwipeGestureRecognizerDirectionLeft];
+    [swipeRight setDirection:UISwipeGestureRecognizerDirectionRight];
+    
+    [photoCellView.imageView addGestureRecognizer:swipeLeft];
+    [photoCellView.imageView addGestureRecognizer:swipeRight];
+    
+    
     if(self.calloutAnnotations.count>0) {
       
      
@@ -88,6 +115,9 @@
         NSLog(@"IMAGE SIZE %fl %fl", image.size.width,image.size.height);
         
         BOOL hasModel = (myAnnotation.dataModel != nil && myAnnotation.dataModel.assetURL!=nil);
+        
+        
+        self.imgTitle.text = (myAnnotation.title!=nil ? myAnnotation.title: @"");
         
         //this is the thumbnail image
         if(myAnnotation.image!=nil) {
@@ -124,9 +154,9 @@
                     dispatch_async(dispatch_get_main_queue(), ^{
                         
                         //this is the full screen image, maybe it should be restricted?
-                        NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
+                        NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.photoCellView.imageView.frame.size.width, self.photoCellView.imageView.frame.size.height);
                         [PCImageUtils getImageFromPHAsset:asset
-                                           withTargetSize: CGSizeMake(self.imageView.frame.size.width, self.imageView.frame.size.height)
+                                           withTargetSize: CGSizeMake(self.photoCellView.imageView.frame.size.width, self.photoCellView.imageView.frame.size.height)
                                                completion:^(UIImage *image) {
                             
                             if(image!=nil) {
@@ -135,7 +165,7 @@
                                     // Update the UI
                                     //but i also have the asset URL here, so maybe i´ll use that
                                     //self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-                                    self.imageView.image = image;
+                                    self.photoCellView.imageView.image = image;
                                     self.previousAssetURL = asset.localIdentifier;
                             }
                             else {
@@ -156,11 +186,14 @@
         }
         
         
+    } else {
+        
+        self.imgTitle.text = @"";
     }
     
     
     //SWIP BETWEEN IMAGES IN ANOTTATIONS
-    [imageView setUserInteractionEnabled:YES];
+    /*[imageView setUserInteractionEnabled:YES];
     // Do any additional setup after loading the view from its nib.
     UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
     UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -171,7 +204,7 @@
     
     // Adding the swipe gesture on image view
     [imageView addGestureRecognizer:swipeLeft];
-    [imageView addGestureRecognizer:swipeRight];
+    [imageView addGestureRecognizer:swipeRight];*/
 }
 
 -(IBAction)create: (id)sender {
@@ -208,7 +241,7 @@
         
         MapViewAnnotationPoint *myAnnotation = [calloutAnnotations objectAtIndex:self.currentIndex];
         
-        
+        self.imgTitle.text = (myAnnotation.title!=nil ? myAnnotation.title: @"");
         
         BOOL hasModel = (myAnnotation.dataModel != nil && myAnnotation.dataModel.assetURL!=nil);
             
@@ -258,13 +291,20 @@
                         
                         
                         if(self.previousAssetURL == nil || ( self.previousAssetURL!=nil && ![self.previousAssetURL isEqualToString:asset.localIdentifier]) ) {
+                            
+                            [UIView beginAnimations:nil context:NULL];
+                            [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:self.photoCellView.imageView cache:YES];
+                            [UIView setAnimationDuration:1.5];
+                            /// ----> [YourView CodeTo Be Done];
+                            [UIView commitAnimations];
+                            
                             NSLog(@"FETCH IMAGE FULLSCREEN SIZE, because it is different");
                             dispatch_async(dispatch_get_main_queue(), ^{
                                   
                                   //this is the full screen image, maybe it should be restricted?
-                                  NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.imageView.frame.size.width, self.imageView.frame.size.height);
+                                  NSLog(@" CONTAINER WIDTH %lf HEIGHT %lf", self.photoCellView.imageView.frame.size.width, self.imageView.frame.size.height);
                                   [PCImageUtils getImageFromPHAsset:asset
-                                                     withTargetSize:CGSizeMake(self.imageView.frame.size.width, self.imageView.frame.size.height)
+                                                     withTargetSize:CGSizeMake(self.photoCellView.imageView.frame.size.width, self.photoCellView.imageView.frame.size.height)
                                                          completion:^(UIImage *image) {
                                       
                                       if(image!=nil) {
@@ -273,7 +313,7 @@
                                               // Update the UI
                                               //but i also have the asset URL here, so maybe i´ll use that
                                               //self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-                                              self.imageView.image = image;
+                                              self.photoCellView.imageView.image = image;
                                               self.previousAssetURL = asset.localIdentifier;
                                       }
                                       else {
@@ -425,4 +465,7 @@
     return newImage;
 }
 
+- (IBAction)closeClicked:(id)sender {
+    [self dismissViewControllerAnimated:true completion:nil];
+}
 @end

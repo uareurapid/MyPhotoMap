@@ -987,38 +987,49 @@
     UIImageView *imageView = (UIImageView*)tapGesture.view;
     NSInteger tag = imageView.tag;
     
-    
+    BOOL isSameAlbumAsBefore = false;
     if(tag<albums.count) {
         //valid index
         BHAlbum *selectedOne = [albums objectAtIndex:tag];
+        NSLog(@"selected one : %@", selectedOne.name);
         
         //TODO IT IS HERE (i am not copying everything??)
         albumViewController.title = selectedOne.name;
+        
+        isSameAlbumAsBefore = (albumViewController.selectedAlbum!=nil && [albumViewController.selectedAlbum.name isEqualToString:selectedOne.name]);
+        
         albumViewController.selectedAlbum = selectedOne;
         albumViewController.selectedAlbumIndex = tag;
         
+        if(!isSameAlbumAsBefore) {
+               
+               NSMutableArray *arrayOfNames = [[NSMutableArray alloc] init];
+               //not the fake ones
+               NSMutableArray *albumsWhereWeCanAddPhotos = [[NSMutableArray alloc] init];
+               
+               for(BHAlbum *album in albums) {
+                   NSLog(@"adding ALBUM %@",album);
+                   [arrayOfNames addObject:album.name];
+                   if(![album isFakeAlbum]) {
+                       [albumsWhereWeCanAddPhotos addObject:album.name];
+                   }
+               }
+               //TODO NEXT do not add fake ones as we cannot save photo to those (they show on the list of options)
+               [albumViewController addAlbumsNamesFromArray:albumsWhereWeCanAddPhotos];
+           }
+        
+           
+           
+           
+           //remove the one on the left , leaving only the back button
+           albumViewController.navigationItem.leftBarButtonItem=nil;
+           //pass this one so i can call some things back, like deleteAlbum
+           albumViewController.rootViewController = self;
+           [self.navigationController pushViewController: albumViewController animated:NO];
+        
     }
     
- 
-    NSMutableArray *arrayOfNames = [[NSMutableArray alloc] init];
-    //not the fake ones
-    NSMutableArray *albumsWhereWeCanAddPhotos = [[NSMutableArray alloc] init];
     
-    for(BHAlbum *album in albums) {
-        NSLog(@"adding ALBUM %@",album);
-        [arrayOfNames addObject:album.name];
-        if(![album isFakeAlbum]) {
-            [albumsWhereWeCanAddPhotos addObject:album.name];
-        }
-    }
-    //TODO NEXT do not add fake ones as we cannot save photo to those (they show on the list of options)
-    [albumViewController addAlbumsNamesFromArray:albumsWhereWeCanAddPhotos];
-    
-    //remove the one on the left , leaving only the back button
-    albumViewController.navigationItem.leftBarButtonItem=nil;
-    //pass this one so i can call some things back, like deleteAlbum
-    albumViewController.rootViewController = self;
-    [self.navigationController pushViewController: albumViewController animated:NO];
   
     
     

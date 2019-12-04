@@ -148,6 +148,8 @@
     /// ----> [YourView CodeTo Be Done];
     [UIView commitAnimations];
     
+    [self updateTitle];
+    
     [self readFullSizeImageAndThumbnail];
     
     

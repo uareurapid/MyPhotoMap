@@ -130,4 +130,120 @@
     return mutableFetchResults;
 }
 
+#pragma SAVE LOCATION RECORD
+
++(LocationDataModel *)saveOrUpdateLocationRecord:(NSString*)assetURL withDate:(NSDate*) date andLocation:(CLLocation*) imageLocation andAssetType: (NSString *) type andDescription: (NSString *) description {
+    
+    
+    NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+    BOOL __block OK = YES;
+    NSError __block *error;
+    
+    NSMutableArray *results = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:assetURL];
+    //check if a record with this assetURL already exists on DB
+    if(results==nil || results.count == 0) {
+        //we only add the ones that do not exist
+        
+        LocationDataModel *locationObject = (LocationDataModel *)[NSEntityDescription insertNewObjectForEntityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+        //current date
+        if(date!=nil) {
+            [locationObject setTimestamp: date];
+        }
+        else {
+            [locationObject setTimestamp: [NSDate date]];
+        }
+        
+        //TODO THE NAME SAME OF ASSET? WHY??? THERE IS A PROPER FIELD
+        [locationObject setName: assetURL];
+        [locationObject setDesc:description];//TODO pass this to the annotation title
+        
+        
+        bool isAlbumType = false;
+        
+        if([type isEqualToString:TYPE_PHOTO])
+        {
+            //it is an image
+            locationObject.type = TYPE_PHOTO;
+            isAlbumType = false;
+        }
+        else {
+            //TODO if it is an album, i need to show it on that location
+            locationObject.type = TYPE_ALBUM;
+            isAlbumType = true;
+        }
+        
+        locationObject.assetURL = assetURL;
+        locationObject.thumbnailURL = assetURL;//need to save it as a string
+    
+        
+        if(imageLocation!=nil) {
+            CLLocationCoordinate2D coordinate = imageLocation.coordinate;
+            locationObject.latitude = [[NSString alloc] initWithFormat:@"%f", coordinate.latitude];
+            locationObject.longitude= [[NSString alloc] initWithFormat:@"%f", coordinate.longitude];
+        }
+        else {
+            locationObject.latitude = @"0000";
+            locationObject.longitude= @"0000";
+            
+            
+        }
+        
+        if(![managedObjectContext save:&error]){
+            NSLog(@"Unable to save object error is: %@",error.description);
+            OK= NO;
+            //This is a serious error saying the record
+            //could not be saved. Advise the user to
+            //try again or restart the application.
+        }
+        
+        if(OK==YES) {
+            NSLog(@"saved model location: %@", locationObject.description);
+            return locationObject;
+        }
+        
+        
+    } else if(results!=nil && results.count == 1) {
+        //UPDATE
+        NSLog(@"IT IS AN UPDATE, NOT INSERT");
+        LocationDataModel *locationObject = [results firstObject];
+        if(date!=nil) {
+            [locationObject setTimestamp: date];
+        }
+        else {
+            [locationObject setTimestamp: [NSDate date]];
+        }
+
+        if(description!=nil && locationObject.desc == nil) {
+           [locationObject setDesc:description];//TODO pass this to the annotation title
+        }
+        
+        locationObject.type = type;
+        if(imageLocation!=nil) {
+            CLLocationCoordinate2D coordinate = imageLocation.coordinate;
+            locationObject.latitude = [[NSString alloc] initWithFormat:@"%f", coordinate.latitude];
+            locationObject.longitude= [[NSString alloc] initWithFormat:@"%f", coordinate.longitude];
+        }
+        
+        NSManagedObjectContext *managedObjectContext = [(PCAppDelegate *)[[UIApplication sharedApplication] delegate] managedObjectContext];
+        
+        if(![managedObjectContext save:&error]){
+            NSLog(@"Unable to update object error is: %@",error.description);
+            OK= NO;
+            //This is a serious error saying the record
+            //could not be saved. Advise the user to
+            //try again or restart the application.
+        }
+        
+        if(OK==YES) {
+            NSLog(@"Updated model %@ with location: %@", assetURL, locationObject.description);
+            return locationObject;
+        }
+        
+    }
+    
+    return nil;
+    
+    
+}
+
 @end

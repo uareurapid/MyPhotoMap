@@ -16,4 +16,5 @@
 + (NSMutableArray *)fetchLocationRecordsFromDatabase;
 + (NSMutableArray *)fetchLocationRecordsFromDatabaseWithDescription: (NSString *) description;
 + (NSMutableArray *)fetchLocationRecordsFromDatabaseWithAssetURL: (NSString *) assetURL;
++(LocationDataModel *)saveOrUpdateLocationRecord:(NSString*)assetURL withDate:(NSDate*) date andLocation:(CLLocation*) imageLocation andAssetType: (NSString *) type andDescription: (NSString *) description;
 @end

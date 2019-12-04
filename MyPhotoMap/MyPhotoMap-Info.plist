@@ -34,7 +34,11 @@
 	<key>NSCameraUsageDescription</key>
 	<string>the app can take photos</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Allow use location services?</string>
+	<string>Program requires location services to out photos on the map</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Program requires location services to out photos on the map</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Program requires location services to out photos on the map</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>the app organizes your photos</string>
 	<key>UIRequiredDeviceCapabilities</key>

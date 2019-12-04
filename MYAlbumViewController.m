@@ -497,6 +497,7 @@
         //assign the correct photo
         if(searchView.selectedAlbum.photosURLs.count>0) {
             //TODO this photos is not being added
+            //TODO NEXT i have not loaded the images here, when adding new assets need to load the thumbnails
             BHPhoto *photo = [searchView.selectedAlbum.photos objectAtIndex:0];
             searchView.image = photo.image;
             //we save the thumbnail URL on the LocationDataModel
@@ -715,6 +716,10 @@
                                                 }
                                                 
                                         
+                                               if(![self.selectedAlbum.photosURLs containsObject: theURL]) {
+                                                  [self.selectedAlbum.photosURLs addObject:theURL];
+                                               }
+                                               
                                                
                                                 processed++;
                                                 
@@ -722,6 +727,10 @@
                                                 BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
                                                 photo.imageURL = theURL;
                                                 [albumSingle addPhoto:photo];
+                                               
+                                               if(![self.selectedAlbum.photos containsObject: photo]) {
+                                                  [self.selectedAlbum.photos addObject:photo];
+                                               }
                                                
                                                //save the URL of the asset Photo
                                                [albumSingle.photosURLs addObject: asset.localIdentifier];
@@ -731,10 +740,9 @@
                                                
                                                 //TODO check is only refreshing the view after all images have been processed, might want to do it every one or every 2 or 3 for instance
                                                 if(processed == count) {
-                                                    NSLog(@"PROCESSED %ld albums count: %ld", (long)processed , self.albums.count);
+                                                    NSLog(@"PROCESSED %ld albums count: %lu", (long)processed , (unsigned long)self.albums.count);
                                                     //NOTE the selected album only has 3 photos processed, so when reading the cell content we should get the pic from self.albums[section].photos[0]
                                                     self.selectedAlbum.photosCount = processed;
-                                                    
                                                     [self refreshCollection];
                                                 }
                                                
@@ -744,8 +752,8 @@
             }
         }
         
-       // [self refreshCollection]; //maybe invalidate layout too?
-        
+    } else {
+        [self refreshCollection]; //maybe invalidate layout too?
     }
    
     
@@ -1264,7 +1272,7 @@
 - (void)qb_imagePickerController:(QBImagePickerController *)imagePickerController didFinishPickingAssets:(NSArray *)assets {
     //first get the album
     PHAssetCollection *assetCollection = [self findAlbumByName:self.selectedAlbum.name];
-    if(assetCollection!=nil) {
+    if(assetCollection!=nil && assets.count > 0) {
         
         //PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
         //requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
@@ -1288,7 +1296,43 @@
                     NSLog(@"Error persistsing asset: %@", error);
                 } else {
                     NSLog(@"Persisted assets on new album");
+                    //read the thumbnails again
                     [self getAllPHAssetsFromAlbum:assetCollection];
+                    //TODO NEXT if the album has a location assigned, we should add the location to these assets as well
+                    //TODO NEXT check duplication of annotations on load (timing issue??)
+                    
+                    NSUInteger i = -1;
+                    if(self.selectedAlbum!=nil && self.selectedAlbum.assetURL!=nil) {
+                        NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:self.selectedAlbum.assetURL];
+                        NSLog(@"WILL persist also the images location if the album has it...");
+                        //the album already has a location record, add these images on the same location too
+                        if(records!=nil && records.count==1) {
+                            LocationDataModel *model = [records objectAtIndex:0];
+                            for(PHAsset* asset in assets) {
+                                NSString *identifier = asset.localIdentifier;
+                                i++;
+                                NSString *desc = nil;
+                                if(model.desc!=nil) {
+                                    desc = model.desc; //same description as the album itself
+                                } else {
+                                    desc = [NSString stringWithFormat:@"IMG-%lu",(long)i];
+                                }
+                                
+                                NSLog(@"asset identifier: %@ , desc %@  and MODEL IS %@", identifier, desc, model.description);
+                                
+                                CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
+                                NSDate *now = [NSDate date];
+                                LocationDataModel *model = [CoreDataUtils saveOrUpdateLocationRecord: identifier withDate:now andLocation:location andAssetType:TYPE_PHOTO andDescription:desc];
+                                NSLog(@"persistsing also image %@ with album location %@",identifier, location.description);
+                                if(model!=nil) {
+                                    NSLog(@"Adding image location to the map from album location");
+                                    NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:identifier, nil];
+                                    [self.mapViewController addLocation:location withImage: nil  andTitle: desc forModel:model containingURLS:urls];
+                                } 
+                            }
+                        }
+                    }
+                    
                 }
             [self dismissViewControllerAnimated:YES completion:NULL];
         }];

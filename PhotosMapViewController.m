@@ -20,7 +20,6 @@
 
 @synthesize mapView;
 @synthesize annotationsArray;
-@synthesize annotationsPopoverControl;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -409,14 +408,19 @@
         AnnotationCalloutViewController *calloutController = [[AnnotationCalloutViewController alloc]
           initWithNibName:@"AnnotationCalloutViewController" bundle:nil annotations:annotsOnSameLocation];
         
+        //[self.navigationController pushViewController:calloutController animated:true];
+     
+        
+        [self presentViewController:calloutController animated:true completion:nil];
         //our popover
-           FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
-           popover.delegate = calloutController;
+        //   FPPopoverController *popover = [[FPPopoverController alloc] initWithViewController:calloutController];
+        //   popover.delegate = calloutController;
            
-           popover.contentSize = CGSizeMake(300,400);
+        //   popover.contentSize = CGSizeMake(300,400);
            
            //the popover will be presented from the ok Button view
-           [popover presentPopoverFromView:view];
+        //   [popover presentPopoverFromView:view];
+        
     }
     
     
