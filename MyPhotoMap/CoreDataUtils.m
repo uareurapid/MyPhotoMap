@@ -130,6 +130,33 @@
     return mutableFetchResults;
 }
 
++ (NSMutableArray *)fetchLocationRecordsFromDatabaseWithAssetURL: (NSString *) assetURL withManagedContext: (NSManagedObjectContext *) managedObjectContext{
+    
+    
+    // Define our table/entity to use
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"LocationDataModel" inManagedObjectContext:managedObjectContext];
+    // Setup the fetch request
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    [request setEntity:entity];
+    //this is equivalent to SELECT * FROM `LocationEntity`
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(assetURL = %@)",assetURL];
+    
+    [request setPredicate:predicate];
+    
+    // Define how we will sort the records
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"assetURL" ascending:NO];
+    NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+    [request setSortDescriptors:sortDescriptors];
+    //[sortDescriptor release];
+    // Fetch the records and handle an error
+    NSError *error;
+    NSMutableArray *mutableFetchResults = [[managedObjectContext executeFetchRequest:request error:&error] mutableCopy];
+    
+    
+    return mutableFetchResults;
+}
+
 #pragma SAVE LOCATION RECORD
 
 +(LocationDataModel *)saveOrUpdateLocationRecord:(NSString*)assetURL withDate:(NSDate*) date andLocation:(CLLocation*) imageLocation andAssetType: (NSString *) type andDescription: (NSString *) description {

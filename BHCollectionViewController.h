@@ -13,6 +13,8 @@
 #import "BHPhotoAlbumLayout.h"
 #import  <CoreLocation/CoreLocation.h>
 
+#define MAX_PHOTO_THUMBNAILS_PER_ALBUM 3
+
 static NSString * const PhotoCellIdentifier = @"PhotoCell";
 static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
@@ -54,7 +56,9 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 @property (strong, nonatomic) IBOutlet UITextField *albumTextField;
 @property (strong,nonatomic) IBOutlet UIBarButtonItem *addAlbumButton;
 
-//@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+@property BOOL isLoaded;
 
 
 @end

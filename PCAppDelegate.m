@@ -50,8 +50,8 @@
                                                            [UIFont fontWithName:@"AmericanTypewriter" size:30.0f], NSFontAttributeName,
                                                            nil] forState:UIControlStateSelected];
     }
-    
-    
+    //TODO CHECK
+    self.collectionController.managedObjectContext = [self managedObjectContext];
     
     //set the navigation controller as the root view
     self.window.rootViewController = tabBarController;
