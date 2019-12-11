@@ -17,7 +17,7 @@
 
 @interface BHCollectionViewController ()
 
-
+@property NSInteger COUNTER;
 
 @end
 
@@ -35,6 +35,8 @@
 @synthesize albumsYears;
 @synthesize managedObjectContext, isLoaded;
 
+
+
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle {
     self = [super initWithNibName:nibName bundle:nibBundle];
     if(self) {
@@ -45,19 +47,19 @@
         
         self.title = @"Your Albums";
         
-        addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
-                          style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
+        //addAlbumButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
+        //                  style:UIBarButtonItemStyleDone target:self action:@selector(settingsClicked:)];
         
-        self.navigationItem.rightBarButtonItem = addAlbumButton;
+        //self.navigationItem.rightBarButtonItem = addAlbumButton;
         
         
         
-        UIBarButtonItem *left = [[UIBarButtonItem alloc] initWithTitle:@"Add"
+        UIBarButtonItem *add = [[UIBarButtonItem alloc] initWithTitle:@"Add"
                                                           style:UIBarButtonItemStyleDone target:self action:@selector(addAlbumClicked:)];
         
  
        
-        self.navigationItem.leftBarButtonItem = left;
+        self.navigationItem.rightBarButtonItem = add;//leftBarButtonItem
         
         
         
@@ -83,6 +85,7 @@
     UIImage *patternImage = [UIImage imageNamed:@"concrete_wall"];
     self.collectionView.backgroundColor = [UIColor colorWithPatternImage:patternImage];
     numExistingAlbums=0;
+    self.COUNTER = 0;
     
     [self.collectionView registerClass:[BHAlbumPhotoCell class]
             forCellWithReuseIdentifier:PhotoCellIdentifier];
@@ -118,7 +121,7 @@
     }
     
 }
-
+//will also read albums and photos data
 -(void) checkAuthorizationStatus {
     
     PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
@@ -172,13 +175,9 @@
         NSInteger count = 0;
         NSLog(@"LOADED %ld RECorDS FroM DB",databaseRecords.count);
         for(LocationDataModel *entity in databaseRecords) {
-            //load the thumbnail
-            //if(entity.assetURL!=nil) {
-                count++;
-                [self loadAssetInfoFromDataModelIntoMap:entity];
-            //} else if {
-            //    NSLog(@"TODFOSSOSOOSOSOSOSOSOSOOSOO FAKE ALBUM STUPID!!1 %@ %@", entity.thumbnailURL, entity.type);
-            //}
+          //load the thumbnail or not? takes forever
+          count++;
+          [self loadAssetInfoFromDataModelIntoMap:entity];
         }
         NSLog(@"PROCESSED %ld", (long)count);
     }
@@ -214,6 +213,8 @@
     
     //get the thumbnail
     if(assetURL!=nil) {
+        
+         
         PHFetchOptions *options = [PHFetchOptions new];
         options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
         
@@ -221,12 +222,14 @@
         
         if(assets!=nil && assets.count > 0) {
             
+            NSMutableArray *processed = [[NSMutableArray alloc] initWithCapacity:assets.count];
+
             PHAsset *asset = [assets firstObject];
             PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
             requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
             requestOptions.networkAccessAllowed = true;
             requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-            requestOptions.synchronous = true;
+            requestOptions.synchronous = false;
               
             PHImageManager *imageManager = [PHImageManager defaultManager];
             
@@ -235,7 +238,10 @@
                                     contentMode:PHImageContentModeDefault
                                         options:requestOptions
                                   resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                      if(thumbnail!=nil) {
+                                      if(thumbnail!=nil && ![processed containsObject:asset.localIdentifier]) {
+                                          
+                                          //it can be called multiple times
+                                          [processed addObject:asset.localIdentifier];
                                           
                                           //alwyas update the UI in the main thread
                                           dispatch_async(dispatch_get_main_queue(), ^{
@@ -600,6 +606,9 @@
         //parse image
         NSUInteger *i = 0;
         //load the thumbnails for the first 3, and just add the url for the remaining
+        
+        NSMutableArray *processed = [[NSMutableArray alloc] initWithCapacity:assets.count];
+        
         for(PHAsset *asset in assets) {
               if(asset!=nil) {
                   //grab the location if any
@@ -659,8 +668,9 @@
                    }
                    //------------------------------------------------------------------------------------
                        
-                  /**
-                    if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
+                  __block UIImage *thumbnailImage = nil;
+                  
+                    if( (album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) || (auxiliar!=nil && auxiliar.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM)  ) {
                         
                         PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                         requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
@@ -674,14 +684,20 @@
                                                 contentMode:PHImageContentModeDefault
                                                     options:requestOptions
                                               resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                                  if(thumbnail!=nil) {
+                                                  if(thumbnail!=nil && ![processed containsObject:assetPhotoURL]) {
+                                                      
+                                                      [processed addObject:assetPhotoURL];
+                                                      
+                                                      thumbnailImage = thumbnail;
                                                       
                                                      //add the photo and reload the collection view
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                           
-                                                          BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                                          photo.imageURL = assetPhotoURL;
-                                                          [album addPhoto:photo];
+                                                          if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
+                                                              BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                                              photo.imageURL = assetPhotoURL;
+                                                              [album addPhoto:photo];
+                                                          }
                                                           
                                                           //also add to the auxiliar album
                                                           if(auxiliar!=nil && auxiliar.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
@@ -703,7 +719,7 @@
                         
                             
                         //---------------------------
-                    }*/
+                    }
                   
                   
                   
@@ -713,7 +729,7 @@
                   
                     //TODO for each album i only need 3 thumbnails, so i do not need this loop
                   
-                    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+                    /*PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                     requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                     requestOptions.networkAccessAllowed = true;
                     requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
@@ -724,11 +740,11 @@
                                             contentMode:PHImageContentModeDefault
                                                 options:requestOptions
                                           resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                              if(thumbnail!=nil) {
+                                              if(thumbnail!=nil) {*/
                                                   
                                                   //ONLY process maximum of 3 images per album
                                                   //the rest only need to be processed when we present the album details
-                                                  if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
+                                                  /*if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
                                      
                                                       
                                                       //add the photo and reload the collection view
@@ -771,7 +787,7 @@
                                                       });
                                                       
                                                       //NSLog(@"PROCESSED YEAR ALBUM %@ IMAGES %ld", auxiliar.name, (long) processedImagesInYearlyAlbum);
-                                                  }
+                                                  }*/
                                                   
                                                   
                                                   //SEE IF WE ALREADY HAVE A CUSTOME RECORD FOR THIS (TAKES PRECEDENCE)
@@ -791,7 +807,7 @@
                                                               
                                                               //NSLog(@"Adding image location to the map from pre-existing album location");
                                                               NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                             [self.mapViewController addLocation:albumlocation withImage: thumbnail  andTitle: albumLocationModel.desc forModel:albumLocationModel containingURLS:urls];
+                                                             [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: albumLocationModel.desc forModel:albumLocationModel containingURLS:urls];
                                                               
                                                           } else if(albumlocation!=nil) { //no data modelk but coordinates exist
                                                               
@@ -802,7 +818,7 @@
                                                               if(model!=nil) {
                                                                   //NSLog(@"Adding image location to the map from album location");
                                                                   NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                              [self.mapViewController addLocation:albumlocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
+                                                              [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
                                                               }
                                                           }//else do  nothing, no location is known, neither for the photo or the album
                                                           
@@ -822,7 +838,7 @@
                                                           if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
                                                               //NSLog(@"Adding image location to the map from image exif data");
                                                               NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                            [self.mapViewController addLocation:imageLocation withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
+                                                            [self.mapViewController addLocation:imageLocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
                                                           }
                                                           
                                                       }
@@ -837,14 +853,14 @@
                                                         NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                             
                                                         CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
-                                                       [self.mapViewController addLocation:location withImage: thumbnail  andTitle: model.desc forModel:model containingURLS:urls];
+                                                       [self.mapViewController addLocation:location withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
                                                       }
                              
                                                   }//end else, location already previously saved
                                                  
-                                              }
+                          // end resultHandler }
                                               
-                        }];
+                       // }];
                   //---------------------------------------------------------
 
                     
@@ -953,48 +969,8 @@
         BHAlbum *album = self.albums[row];
         NSInteger tag = row;
         
-        /*
-        if(photoIndex < album.photos.count) {
-                  //photoIndex gives me the album
-                  BHPhoto *photo = album.photos[photoIndex];
-                  
-                  // load photo images in the background
-                  __weak BHCollectionViewController *weakSelf = self;
-                  NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-                      
-                      //UIImage *image = [UIImage imageWithCGImage:[photo.rawImage fullScreenImage]];
-                      UIImage *image = [photo image];
-                      
-                      dispatch_async(dispatch_get_main_queue(), ^{
-                          // then set them via the main queue if the cell is still visible.
-                          if ([weakSelf.collectionView.indexPathsForVisibleItems containsObject:indexPath]) {
-                              
-                              //BHAlbumPhotoCell *cell =
-                              //(BHAlbumPhotoCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
-                     
-                              //dispatch_async(dispatch_get_main_queue(), ^{
-                                   photoCell.imageView.image = image;
-                                  
-                              //});
-                  
-                              photoCell.imageView.userInteractionEnabled = YES;
-                              photoCell.imageView.tag = tag;
-                              UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapAlbumWithGesture:)];
-                              [photoCell.imageView addGestureRecognizer:tapGesture];
-        
-                          }
-                      });
-                  }];
-                  
-                  operation.queuePriority = (indexPath.item == 0) ?
-                  NSOperationQueuePriorityHigh : NSOperationQueuePriorityNormal;
-                  
-                  [self.thumbnailQueue addOperation:operation];
-              }*/
-        
-        
-        if(photoIndex < album.photos.count) {
-            NSLog(@"PHOTO INDEX %ld", photoIndex);
+        if(photoIndex < album.photos.count && photoIndex < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
+            //NSLog(@"PHOTO INDEX %ld", photoIndex);
             //photoIndex gives me the album
             BHPhoto *photo = album.photos[photoIndex];
             

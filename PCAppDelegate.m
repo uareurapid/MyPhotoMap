@@ -52,6 +52,7 @@
     }
     //TODO CHECK
     self.collectionController.managedObjectContext = [self managedObjectContext];
+    self.collectionController.albumViewController.managedObjectContext = [self managedObjectContext];
     
     //set the navigation controller as the root view
     self.window.rootViewController = tabBarController;

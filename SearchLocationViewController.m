@@ -128,83 +128,96 @@
     NSLog(@"Requesting %@",requestURL);
     NSData* data = [NSData dataWithContentsOfURL: requestURL];
     
-    
-    // convert to JSON
-    NSError *myError = nil;
-    NSDictionary *res = [NSJSONSerialization JSONObjectWithData: data options:NSJSONReadingMutableLeaves error:&myError];
-    
-    NSMutableArray *placemarks;
-    
-    // show all values
-    for(id key in res) {
+    //NOTE IF OFFLINE DATA IS NIL AND IT CRASHES!!!
+    if(data !=nil) {
+        // convert to JSON
+        NSError *myError = nil;
+        NSDictionary *res = [NSJSONSerialization JSONObjectWithData: data options:NSJSONReadingMutableLeaves error:&myError];
         
-        id value = [res objectForKey:key];
+        NSMutableArray *placemarks;
         
-        NSString *keyAsString = (NSString *)key;
-        //NSString *valueAsString = (NSString *)value;
-        
-        if([keyAsString isEqualToString:@"results"])
-        {
-            NSArray * components = (NSArray *) value;
-             NSLog(@"number of results in geocode requests is %lu",(unsigned long)components.count);
+        // show all values
+        for(id key in res) {
             
-            placemarks = [[NSMutableArray alloc] initWithCapacity:components.count];
+            id value = [res objectForKey:key];
             
+            NSString *keyAsString = (NSString *)key;
+            //NSString *valueAsString = (NSString *)value;
             
-            for(id elem in components)
+            if([keyAsString isEqualToString:@"results"])
             {
+                NSArray * components = (NSArray *) value;
+                 NSLog(@"number of results in geocode requests is %lu",(unsigned long)components.count);
                 
-                MyGPSPosition *place  =[[MyGPSPosition alloc ] init];
-
+                placemarks = [[NSMutableArray alloc] initWithCapacity:components.count];
                 
-                NSDictionary * component = (NSDictionary *) elem;
-                for(id innerKey in component)
+                
+                for(id elem in components)
                 {
-                    keyAsString = (NSString *)innerKey;
-                    if([keyAsString isEqualToString:GOOGLE_KEY_DATA_FORMATED_ADDRESS])
+                    
+                    MyGPSPosition *place  =[[MyGPSPosition alloc ] init];
+
+                    
+                    NSDictionary * component = (NSDictionary *) elem;
+                    for(id innerKey in component)
                     {
-                        NSString *formatedAddress = [component objectForKey:innerKey];
-                        NSLog(@"The formatedAddress is %@", formatedAddress);
-                        place.location = formatedAddress;
+                        keyAsString = (NSString *)innerKey;
+                        if([keyAsString isEqualToString:GOOGLE_KEY_DATA_FORMATED_ADDRESS])
+                        {
+                            NSString *formatedAddress = [component objectForKey:innerKey];
+                            NSLog(@"The formatedAddress is %@", formatedAddress);
+                            place.location = formatedAddress;
+                        }
+                        else if([keyAsString isEqualToString:GOOGLE_KEY_DATA_GEOMETRY])
+                        {
+                            NSDictionary *location = [component objectForKey:innerKey];
+                            NSLog(@"The location object is %@", location);
+                            
+                            
+                            NSDictionary *locationCoords = [location objectForKey:PARAMETER_LOCATION];
+                            
+                            NSNumber *lat = [locationCoords objectForKey:PARAMETER_LATITUDE];
+                            NSNumber *lg = [locationCoords objectForKey:PARAMETER_LONGITUDE];
+                            
+                            //need to convert them to NSSTring
+                            place.longitude = [NSString stringWithFormat:@"%@",lg];
+                            place.latitude = [NSString stringWithFormat:@"%@",lat];
+                            
+                            CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[place.latitude doubleValue]
+                                                                  longitude:[place.longitude doubleValue]];
+                            
+                            place.clLocation = locationCL;
+                            
+                            
+                            
+                        }
+                        
                     }
-                    else if([keyAsString isEqualToString:GOOGLE_KEY_DATA_GEOMETRY])
-                    {
-                        NSDictionary *location = [component objectForKey:innerKey];
-                        NSLog(@"The location object is %@", location);
-                        
-                        
-                        NSDictionary *locationCoords = [location objectForKey:PARAMETER_LOCATION];
-                        
-                        NSNumber *lat = [locationCoords objectForKey:PARAMETER_LATITUDE];
-                        NSNumber *lg = [locationCoords objectForKey:PARAMETER_LONGITUDE];
-                        
-                        //need to convert them to NSSTring
-                        place.longitude = [NSString stringWithFormat:@"%@",lg];
-                        place.latitude = [NSString stringWithFormat:@"%@",lat];
-                        
-                        CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[place.latitude doubleValue]
-                                                              longitude:[place.longitude doubleValue]];
-                        
-                        place.clLocation = locationCL;
-                        
-                        
-                        
+                    
+                    //add to the list
+                    if(![placemarks containsObject:place]) {
+                        [placemarks addObject:place];
                     }
                     
                 }
                 
-                //add to the list
-                if(![placemarks containsObject:place]) {
-                    [placemarks addObject:place];
-                }
-                
             }
-            
         }
+        
+        
+        [self displayPlacemarks:placemarks];
+    } else {
+        
+      UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Unable to get location!"
+                                                      message:@"We´re sorry, but we could not get any geolocation data. Please make sure that you´re connected to the Internet and that you typed the address correctly"
+                                                     delegate:nil
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:nil];
+      [alert show];
     }
     
     
-    [self displayPlacemarks:placemarks];
+    
     
     
     

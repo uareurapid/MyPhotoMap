@@ -60,6 +60,9 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property (assign, nonatomic) ALAssetsLibrary* assetslibrary;
 
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+
 @property BOOL isFirstLoad;
 
 //- (void)showDetailView: (NSString *) imgURL;

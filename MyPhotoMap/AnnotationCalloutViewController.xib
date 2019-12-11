@@ -20,14 +20,14 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="bottom" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="lsi-Uf-Th3">
-                    <rect key="frame" x="0.0" y="10" width="414" height="26"/>
+                    <rect key="frame" x="0.0" y="20" width="414" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
-                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uuj-ie-VUi" userLabel="PhotoCellView" customClass="BHPhotoAlbumView">
-                    <rect key="frame" x="0.0" y="37" width="414" height="659"/>
+                <view contentMode="scaleToFill" ambiguous="YES" preservesSuperviewLayoutMargins="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uuj-ie-VUi" userLabel="PhotoCellView" customClass="BHPhotoAlbumView">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="659"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                 </view>
                 <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bxx-zF-mjO">
@@ -44,9 +44,9 @@
             </subviews>
             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
             <constraints>
-                <constraint firstAttribute="bottomMargin" secondItem="Uuj-ie-VUi" secondAttribute="bottom" constant="40" id="1yk-bp-6NQ"/>
+                <constraint firstAttribute="bottomMargin" secondItem="Uuj-ie-VUi" secondAttribute="bottom" constant="20" id="1yk-bp-6NQ"/>
                 <constraint firstItem="lsi-Uf-Th3" firstAttribute="top" secondItem="1Hv-J6-oot" secondAttribute="topMargin" id="qSO-va-vFz"/>
-                <constraint firstItem="Uuj-ie-VUi" firstAttribute="top" secondItem="lsi-Uf-Th3" secondAttribute="bottom" id="zzT-4T-fpO"/>
+                <constraint firstItem="Uuj-ie-VUi" firstAttribute="top" secondItem="lsi-Uf-Th3" secondAttribute="bottom" constant="10" id="zzT-4T-fpO"/>
             </constraints>
             <point key="canvasLocation" x="766.66666666666674" y="-886.14130434782612"/>
         </view>

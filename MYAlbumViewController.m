@@ -24,6 +24,8 @@
 
 #define ACTION_PERSIST_ALBUM 7
 
+#define ACTION_REMOVE_FROM_ALBUM 8 //remove photos from album
+
 @interface MYAlbumViewController ()
 
 @end
@@ -41,7 +43,7 @@
 @synthesize isFirstLoad;
 @synthesize location;
 @synthesize albums;
-@synthesize rootViewController, previouslySelectedAlbum;
+@synthesize rootViewController, previouslySelectedAlbum, managedObjectContext;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -80,7 +82,7 @@
     //self.thumbnailQueue = [[NSOperationQueue alloc] init];
     //self.thumbnailQueue.maxConcurrentOperationCount = 3;
 
-    selectedItems = 0;
+    self.selectedItems = 0;
     self.isFirstLoad = true;
 	// Do any additional setup after loading the view.
     
@@ -90,25 +92,10 @@
     
     NSLog(@"viewWillAppear, album");
     self.selectedAction = 0;
-    /*
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if(![defaults boolForKey:@"was_dismissed"]) {
-        if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name]) ) {
+    if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
             //is a different album so do this too
             [self readAlbumThumbnails];
-        }
-        //else same album, ignore
-        
-    } else {*/
-       // [defaults setBool:false forKey:@"was_dismissed"];
-        
-        if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
-            //is a different album so do this too
-            [self readAlbumThumbnails];
-        }
-    //}
-    
-    
+    }
     
 }
 
@@ -277,56 +264,84 @@
         //will show a lit with two options
         //edit location and take photo
         
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Album actions"
+        UIAlertController *alertActions = [UIAlertController alertControllerWithTitle:@"Album actions"
                                                                        message:@"Select one option:"
                                                                 preferredStyle:UIAlertControllerStyleActionSheet];
       
         
-        UIAlertAction *editAlbumAction = [UIAlertAction actionWithTitle:@"Edit album location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            // this block runs when the driving option is selected
-            self.selectedAction = ACTION_ADD_LOCATION;
-            [self addLocation:nil];
-        }];
-        UIAlertAction *takePhotoAction = [UIAlertAction actionWithTitle:@"Take photo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            // this block runs when the walking option is selected
-            self.selectedAction = ACTION_TAKE_PHOTO;
-            [self takePhoto:nil];
-        }];
-        UIAlertAction *deleteAlbumAction = [UIAlertAction actionWithTitle:@"Delete album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            self.selectedAction = ACTION_DELETE_ALBUM;
-            [self deleteAlbum:nil];
-        }];
         
-        UIAlertAction *addPhotosAction = [UIAlertAction actionWithTitle:@"Add photos to album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            self.selectedAction = ACTION_ADD_TO_ALBUM;
-            [self addPhotosToCurrentAlbum:nil];
-        }];
+        
         
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
         
-        [alert addAction:editAlbumAction];
-        [alert addAction:takePhotoAction];
-        [alert addAction:deleteAlbumAction];
-        [alert addAction:addPhotosAction];
-        [alert addAction:cancelAction];
-        if(self.selectedAlbum!=nil && [self.selectedAlbum isFakeAlbum]) {
-           //add option to persist on cameral rool, will use the same code of create album + will add all the assets currently inside this fake container
-            UIAlertAction *persistAlbumAction = [UIAlertAction actionWithTitle:@"Persist album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                // this block runs when the driving option is selected
-                self.selectedAction = ACTION_PERSIST_ALBUM;
-                [self persistAlbumClicked: nil];
+        
+        [alertActions  addAction:cancelAction];
+        
+        
+        if(self.selectedItems > 0 && (self.selectedAlbum!=nil && self.selectedAlbum.photos.count > 0)) {
+            //only remove from album option if have something selected and album not fake
+            UIAlertAction *removePhotosAction = [UIAlertAction actionWithTitle:@"Remove photos from album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                  self.selectedAction = ACTION_REMOVE_FROM_ALBUM;
+                
+                if([self.selectedAlbum isFakeAlbum]) {
+                    //alert
+                } else {
+                   //do it
+                }
                 
             }];
             
-            [alert addAction:persistAlbumAction];
+            [alertActions  addAction:removePhotosAction];
+        } else if(self.selectedAlbum!=nil) {
+            
+            //all the others
+            UIAlertAction *editAlbumAction = [UIAlertAction actionWithTitle:@"Edit album location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                // this block runs when the driving option is selected
+                self.selectedAction = ACTION_ADD_LOCATION;
+                [self addLocation:nil];
+            }];
+            UIAlertAction *takePhotoAction = [UIAlertAction actionWithTitle:@"Take photo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                // this block runs when the walking option is selected
+                self.selectedAction = ACTION_TAKE_PHOTO;
+                [self takePhoto:nil];
+            }];
+            UIAlertAction *deleteAlbumAction = [UIAlertAction actionWithTitle:@"Delete album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                self.selectedAction = ACTION_DELETE_ALBUM;
+                [self deleteAlbum:nil];
+            }];
+            
+            UIAlertAction *addPhotosAction = [UIAlertAction actionWithTitle:@"Add photos to album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                self.selectedAction = ACTION_ADD_TO_ALBUM;
+                [self addPhotosToCurrentAlbum:nil];
+            }];
+            
+            if(self.selectedAlbum!=nil && [self.selectedAlbum isFakeAlbum]) {
+               //add option to persist on cameral rool, will use the same code of create album + will add all the assets currently inside this fake container
+                UIAlertAction *persistAlbumAction = [UIAlertAction actionWithTitle:@"Persist album to library" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    // this block runs when the driving option is selected
+                    self.selectedAction = ACTION_PERSIST_ALBUM;
+                    [self persistAlbumClicked: nil];
+                    
+                }];
+                
+                [alertActions addAction:persistAlbumAction];
+            }
+            
+            [alertActions  addAction:editAlbumAction];
+            [alertActions  addAction:takePhotoAction];
+            [alertActions  addAction:deleteAlbumAction];
+            [alertActions  addAction:addPhotosAction];
         }
         
-        alert.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
-        [self presentViewController:alert animated:YES completion:nil];
+        alertActions.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
+        [self presentViewController:alertActions  animated:YES completion:nil];
         
         /*AlbumOptionsTableViewController *optionsController = [[AlbumOptionsTableViewController alloc] initWithNibName:@"AlbumOptionsTableViewController" bundle:nil controller:self];
         [self.navigationController pushViewController:optionsController animated:YES];*/
     }
+    /*
+     TODO NEXT CHECK
+   
     else if(tag == SELECT_ALL_TAG) {
         [self selectAllAlbumThumbnails: true];
         self.navigationItem.rightBarButtonItem.tag = UNSELECT_ALL_TAG;
@@ -341,14 +356,25 @@
         [self selectAllAlbumThumbnails: false];
         self.navigationItem.rightBarButtonItem.tag = ACTIONS_TAG;
         self.navigationItem.rightBarButtonItem.title = @"Actions";
-    }
+    }*/
     
   
 }
 
+-(void) showAlertAboutPersistFakeAlbum: (NSUInteger) tag {
+    
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                  message:@"This is a fake album (only exists inside the app), you must persist it to the phone first, before adding new content to it!"
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  alert.tag = tag;
+  alert.delegate = self;
+  [alert show];
+}
 -(IBAction)addPhotosToCurrentAlbum:(id)sender {
     //TODO actual theyr are already in this album, so need to ask for other or create a new one!!!
-    NSLog(@"start selecting photos");
+    //NSLog(@"start selecting photos");
     //TODO disable the button or change it´s label to select
     //add another one to select all
     
@@ -356,13 +382,22 @@
     //self.navigationItem.rightBarButtonItem.title = @"Select All";
     
     if(self.selectedAlbum!=nil) {
-        QBImagePickerController *imagePickerController = [QBImagePickerController new];
-        imagePickerController.delegate = self;
-        imagePickerController.allowsMultipleSelection = YES;
-        imagePickerController.maximumNumberOfSelection = 50;
-        imagePickerController.showsNumberOfSelectedAssets = YES;
+        
+        if([selectedAlbum isFakeAlbum]) {
+            [self showAlertAboutPersistFakeAlbum: DELETE_ABUM_TAG];
+            
+        } else {
+            QBImagePickerController *imagePickerController = [QBImagePickerController new];
+            imagePickerController.delegate = self;
+            imagePickerController.allowsMultipleSelection = YES;
+            imagePickerController.maximumNumberOfSelection = 50;
+            imagePickerController.showsNumberOfSelectedAssets = YES;
 
-        [self presentViewController:imagePickerController animated:YES completion:NULL];
+            [self presentViewController:imagePickerController animated:YES completion:NULL];
+        }
+        
+        
+        
     }
     
     
@@ -665,8 +700,6 @@
     
     [self.albums removeAllObjects];
     
-
-    
     if(count > 0) {
         PHImageManager *imageManager = [PHImageManager defaultManager];
         PHFetchOptions *options = [PHFetchOptions new];
@@ -675,21 +708,25 @@
         PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:self.selectedAlbum.photosURLs options:options];
         if(assets!=nil && assets.count > 0) {
             
+            NSMutableArray *processedURLS = [[NSMutableArray alloc] initWithCapacity:assets.count];
+            
             for(PHAsset *asset in assets){
                 if(asset!=nil){
+                
                    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                    requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                    requestOptions.networkAccessAllowed = true;
                    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-                   requestOptions.synchronous = true;
+                   requestOptions.synchronous = true;//not synchronous
                    
                    [imageManager requestImageForAsset:asset
                                           targetSize:CGSizeMake(125.0f, 125.0f)
                                          contentMode:PHImageContentModeDefault
                                              options:requestOptions
                                        resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                           if(thumbnail!=nil) {
-                                               
+                                           if(thumbnail!=nil && ![processedURLS containsObject:asset.localIdentifier]) {
+                                               //it can be called multiple times
+                                               [processedURLS addObject:asset.localIdentifier];
                                                //NSLog(@"loaded thumbnail %ld", processed +1);
                                                BHAlbum *albumSingle = [[BHAlbum alloc] init];
                                                albumSingle.photosURLs = [[NSMutableArray alloc] init];
@@ -697,7 +734,7 @@
                                                 //if the record exists on DB, try get the title name from the album/pic description
                                                 NSString *theURL = asset.localIdentifier;
                                                 if(theURL!=nil) {
-                                                    NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theURL];
+                                                    NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theURL withManagedContext:self.managedObjectContext];
                                                     if(records!=nil && records.count==1) {
                                                         LocationDataModel *model = [records objectAtIndex:0];
                                                         if(![model.desc isEqualToString:@"NA"]) {
@@ -827,26 +864,33 @@
         
         if(select) {
             
-            BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
-            photo.isSelected = select;
+            //BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
+            //photo.isSelected = select;
             //TODO the button should not be called select all anymore
-            self.selectedAction = ACTION_ADD_TO_ALBUM;
-            self.navigationItem.rightBarButtonItem.tag = ACTION_ADD_TO_ALBUM;
-            self.navigationItem.rightBarButtonItem.title = @"Add to album";
-            selectedItems+=1;
+            //self.selectedAction = action;// ACTION_ADD_TO_ALBUM;
+            //self.navigationItem.rightBarButtonItem.tag = action; // ACTION_ADD_TO_ALBUM;
+            //self.navigationItem.rightBarButtonItem.title = @"Add to album";
+            self.selectedItems+=1;
         }
         else {
-            BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
-            photo.isSelected = select;
+            //BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
+            //photo.isSelected = select;
             self.selectedPhoto = nil;
-            selectedItems-=1;
+            self.selectedItems-=1;
             if(selectedItems < 0) {
                selectedItems = 0;
             }
         }
+        //just refresh this cell, not the entire collection
+        NSIndexPath *indexPath = [NSIndexPath indexPathWithIndex:index];
+        NSMutableArray *paths = [[NSMutableArray alloc] initWithObjects:indexPath, nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.collectionView reloadItemsAtIndexPaths:paths];
+           
+        });
         
         //make the table refresh
-        [self refreshCollection];
+        //[self refreshCollection];
     }
     
 }
@@ -926,8 +970,17 @@
             [photoCell setPhotoSelected:isSelected];
             //TODO do i need to have this alos on the main thread?? probably just update the image no???
             photoCell.imageView.tag = tag;
+            
+            //normal press
             UITapGestureRecognizer *tapGesture =[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithGesture:)];
             [photoCell.imageView addGestureRecognizer:tapGesture];
+            //long press, for selection
+            UILongPressGestureRecognizer *longTapGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(didTapImageWithLongGesture:)];
+            [longTapGesture setNumberOfTapsRequired:0]; // Set your own number here
+            [longTapGesture setMinimumPressDuration:1.5];
+           
+            [photoCell.imageView addGestureRecognizer:longTapGesture];
+            
          
         } else {
             NSLog(@"WTF");
@@ -983,6 +1036,43 @@
 
 
 //the user tapped on the image
+- (void)didTapImageWithLongGesture:(UITapGestureRecognizer *)tapGesture{
+    
+    UIImageView *imageView = (UIImageView*)tapGesture.view;
+    NSInteger tag = imageView.tag; // this is the index on the select album
+    
+    NSLog(@"long selected image/album is %ld %ld",(long)tag, (long)tapGesture.state);
+    
+    
+    if(tag < self.albums.count && tapGesture.state == UIGestureRecognizerStateBegan) {
+       
+        //represents here an album with just one image
+        BHAlbum *albumTap = [self.albums objectAtIndex:tag];
+        
+        //these "albums" are made of only 1 image
+        BHPhoto *photo = [albumTap.photos objectAtIndex:0];
+        
+        photo.isSelected = !photo.isSelected;
+        //nothing selected yet, select it now
+        //if(self.selectedAction==ACTION_ADD_TO_ALBUM || self.selectedAction == ACTION_REMOVE_FROM_ALBUM) {
+            
+            
+        if(photo.isSelected) {
+                
+            [self selectAlbumPhoto:YES atIndex:tag];
+            NSLog(@"select now at position %ld",(long)tag);
+        }
+        else {
+            [self selectAlbumPhoto:NO atIndex:tag];
+            NSLog(@"Unselect now at position %ld",(long)tag);
+        }
+        
+    }
+
+    
+}
+
+//the user tapped on the image
 - (void)didTapImageWithGesture:(UITapGestureRecognizer *)tapGesture{
     
     UIImageView *imageView = (UIImageView*)tapGesture.view;
@@ -999,47 +1089,30 @@
         //these "albums" are made of only 1 image
         BHPhoto *photo = [albumTap.photos objectAtIndex:0];
         
-        //nothing selected yet, select it now
-        if(self.selectedAction==ACTION_ADD_TO_ALBUM) {
-            
-            
-            if(!photo.isSelected) {
-                
-                [self selectAlbumPhoto:YES atIndex:tag];
-                NSLog(@"select now at position %ld",(long)tag);
-            }
-            else {
-                [self selectAlbumPhoto:NO atIndex:tag];
-                NSLog(@"Unselect now at position %ld",(long)tag);
-            }
-            
-
-        }
-        else {
-            //JUST SHOW DETAIL
-            detailViewController.title = albumTap.name;
-            //each of these albums only has one image
-            NSLog(@"SHOW DETAIL: The url here is : %@, just to make sure num photos is : %ld",[albumTap.photosURLs objectAtIndex:0],(long)albumTap.photosURLs.count);
-            NSLog(@"ALBUMS COUNT:  %ld",(long) self.albums.count);
-            detailViewController.enclosingAlbum = selectedAlbum;
-            detailViewController.selectedIndex = tag;
-            /************************************************************/
-            //here the single "albums"
-            //WAS OK detailViewController.singleAlbums = [[NSMutableArray alloc] initWithArray:self.albums];
-            
-            [detailViewController resetAlbumsListFromList: self.albums];
-            
-            //pass the map too
-            detailViewController.mapViewController = self.mapViewController;
-            
-            NSLog(@"2nd ALBUMS COUNT:  %ld",(long) detailViewController.singleAlbums.count);
-            //**********************************
-            //the albumTap has just one image
-            detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
-            NSLog(@"pushing now: with assetURL %@ index > %ld",detailViewController.assetURL,tag);
-            [self.navigationController pushViewController:detailViewController animated:NO];
-        }
         
+        //JUST SHOW DETAIL
+        detailViewController.title = albumTap.name;
+        //each of these albums only has one image
+        NSLog(@"SHOW DETAIL: The url here is : %@, just to make sure num photos is : %ld",[albumTap.photosURLs objectAtIndex:0],(long)albumTap.photosURLs.count);
+        NSLog(@"ALBUMS COUNT:  %ld",(long) self.albums.count);
+        detailViewController.enclosingAlbum = selectedAlbum;
+        detailViewController.selectedIndex = tag;
+        /************************************************************/
+        //here the single "albums"
+        //WAS OK detailViewController.singleAlbums = [[NSMutableArray alloc] initWithArray:self.albums];
+            
+        [detailViewController resetAlbumsListFromList: self.albums];
+            
+        //pass the map too
+        detailViewController.mapViewController = self.mapViewController;
+            
+        NSLog(@"2nd ALBUMS COUNT:  %ld",(long) detailViewController.singleAlbums.count);
+        //**********************************
+        //the albumTap has just one image
+        detailViewController.assetURL = [albumTap.photosURLs objectAtIndex:0];
+        NSLog(@"pushing now: with assetURL %@ index > %ld",detailViewController.assetURL,tag);
+        [self.navigationController pushViewController:detailViewController animated:NO];
+
     }
     
       
@@ -1303,7 +1376,7 @@
                     
                     NSUInteger i = -1;
                     if(self.selectedAlbum!=nil && self.selectedAlbum.assetURL!=nil) {
-                        NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:self.selectedAlbum.assetURL];
+                        NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:self.selectedAlbum.assetURL withManagedContext:self.managedObjectContext];
                         NSLog(@"WILL persist also the images location if the album has it...");
                         //the album already has a location record, add these images on the same location too
                         if(records!=nil && records.count==1) {

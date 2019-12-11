@@ -10,7 +10,9 @@
 #import "AnnotationCalloutViewController.h"
 #import "FPPopoverController.h"
 #import <AssetsLibrary/AssetsLibrary.h>
-
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/PHAssetCollectionChangeRequest.h>
+#import <Photos/Photos.h>
 
 @interface PhotosMapViewController ()
 
@@ -332,7 +334,8 @@
     if([annotation isKindOfClass: [MapViewAnnotationPoint class]])
     {
         MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)annotation;
-        if(myAnnotation!=nil) {
+        if(myAnnotation!=nil && [self isCoordinateInMapView:myAnnotation.coordinate] ) {
+            
             NSMutableArray *samePointAnnotations = [self getAnnotationsOnSameLocation:myAnnotation];
             NSUInteger count = samePointAnnotations.count;
             
@@ -340,9 +343,9 @@
             for(MapViewAnnotationPoint *other in samePointAnnotations) {
                 if(other!=nil) {
                     LocationDataModel *data = (LocationDataModel*)other.dataModel;
-                    if(data!=nil && data.type == nil) {
-                        NSLog(@"WATATFUCKK");
-                    }
+                    //if(data!=nil && data.type == nil) {
+                    //    NSLog(@"WATATFUCKK");
+                    //}
                     if(data!=nil && [data.type isEqualToString: TYPE_ALBUM]) {
                         count--;
                     }
@@ -353,7 +356,7 @@
                 //because it contains this
                 if(myAnnotation.title!=nil) {
                     NSMutableString *str = [[NSMutableString alloc] initWithString:myAnnotation.title];
-                    [str appendString: [NSString stringWithFormat:@" and %lu more",count - 1]];
+                    [str appendString: [NSString stringWithFormat:@" and %ld more",(long)count - 1]];
                     myAnnotation.title = str;
                 }
                
@@ -363,19 +366,72 @@
             
             UIImage *backImage = [self getBackgroundImage:nil];
             
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
                 // Update the UI
                 
                 __block UIImage *image = myAnnotation.image;
-                if(image.size.width!=image.size.height) {
-                    //make it round square
-                    image = [self getResizedImage:image];
+            
+                if(image == nil && myAnnotation.assetURL!=nil ) {
+                 
+                    PHImageManager *imageManager = [PHImageManager defaultManager];
+                    
+                    PHFetchOptions *options = [PHFetchOptions new];
+                    options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
+                    
+                    PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: myAnnotation.assetURL,nil] options:options];
+                    
+                    if(assets!=nil && assets.count > 0) {
+                        PHAsset *asset = [assets firstObject];
+                        
+                        NSMutableArray *processedURLS = [[NSMutableArray alloc] initWithCapacity:1];
+
+                          PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+                          requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
+                          requestOptions.networkAccessAllowed = true;
+                          requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+                          requestOptions.synchronous = false;
+                            
+                          //---------------- PARSE THUMBNAIL
+                          [imageManager requestImageForAsset:asset
+                                                   targetSize:CGSizeMake(125.0f, 125.0f)
+                                                  contentMode:PHImageContentModeDefault
+                                                      options:requestOptions
+                                                resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
+                                                    if(thumbnail!=nil && ![processedURLS containsObject:asset.localIdentifier]) {
+                                      
+                                                       [processedURLS addObject:asset.localIdentifier];
+                                                       image = thumbnail;
+                                                       myAnnotation.image = thumbnail;
+                                                        
+                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                       
+                                                           if(thumbnail.size.width!=thumbnail.size.height) {
+                                                               //make it round square
+                                                               image = [self getResizedImage:thumbnail];
+                                                           }
+                                                           
+                                                           UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image countSameLocation: count];
+                                                           annotationView.image = overlayedImage;
+                                                       });
+                                                    }
+                        }];
+                    }
+                    
+                        
+                } else {
+                      
+                    //already have the image
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                        if(image.size.width!=image.size.height) {
+                            //make it round square
+                            image = [self getResizedImage:image];
+                        }
+                        
+                        UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image countSameLocation: count];
+                        annotationView.image = overlayedImage;
+                    });
                 }
                 
-                UIImage *overlayedImage = [self getOverlayMarkerImage:backImage overlay:image];
-                annotationView.image = overlayedImage;
-            });
             
             //set the callout button
             UIButton *disclosure = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
@@ -538,14 +594,48 @@
 
 
 //will build the overlayed image
-- (UIImage *) getOverlayMarkerImage: (UIImage *)backImage overlay: (UIImage *) topImage {
+- (UIImage *) getOverlayMarkerImage: (UIImage *)backImage overlay: (UIImage *) topImage countSameLocation: (NSUInteger) count {
     
     CGSize finalSize = [backImage size];
     UIGraphicsBeginImageContext(finalSize);
     [backImage drawInRect:CGRectMake(0,0,finalSize.width,finalSize.height)];
     [topImage drawInRect:CGRectMake(5,5,67,66)];//x,y position
+    
+
+    if(count == 0 ) {
+        count = 1;
+    }
+    UIImage * circle = [UIImage imageNamed:@"circle"];
+    //circle is top too
+    [circle drawInRect:CGRectMake(finalSize.width-25,0,24,24)]; //image is 24px
+        
+    NSDictionary *attrDict = @{
+           NSFontAttributeName : [UIFont fontWithName:@"Helvetica-Bold" size:12.0],
+           NSForegroundColorAttributeName : [UIColor whiteColor]
+    };
+        
+    NSString *text = @"";
+    if(count > 99) {
+       text = @"99+";
+    } else {
+       text = [NSString stringWithFormat:@"%lu", (unsigned long)count];
+    }
+    
+    NSMutableAttributedString *stringText = [[NSMutableAttributedString alloc] initWithString:text attributes:attrDict];
+        
+    //label
+    UILabel *label = [[UILabel alloc] init];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor whiteColor];
+    label.attributedText = stringText;
+    [label drawTextInRect:CGRectMake(finalSize.width-25,2,24,20)];//x,y position
+    
+    //the final image
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
     UIGraphicsEndImageContext();
+    
+    
     return newImage;
     
 }
