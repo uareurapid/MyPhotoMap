@@ -50,7 +50,7 @@
     
     //selectedIndex = 0;
     
-    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
+    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-100);
     photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
     photoCellView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     photoCellView.imageView.userInteractionEnabled = YES;
@@ -186,6 +186,11 @@
         }
     }*/
     //NSLog(@" i have %d url: %@",self.navigationItem.leftBarButtonItems.count,assetURL);
+    
+    //these "albums" are made of only 1 image
+    BHPhoto *photo = [self.enclosingAlbum.photos objectAtIndex:0];
+    self.photoCellView.imageView.image = photo.image;
+    
     [self readFullSizeImageAndThumbnail];
     [self updateTitle];
 }
@@ -423,7 +428,7 @@
                PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                requestOptions.networkAccessAllowed = true;
-               requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
+               requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
                requestOptions.synchronous = true;
                
                NSLog(@"THE DETAIL URL IS %@", self.assetURL);
@@ -440,7 +445,7 @@
                                             
                                            });
                                        } else {
-                                           NSLog(@"NIL image");
+                                           NSLog(@"NIL image");//stay with the previous one
                                        }
                }];
         }

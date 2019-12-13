@@ -33,7 +33,7 @@
 
 #pragma mark - Lifecycle
 
-+ (BHPhoto *)photoWithImageURL:(NSURL *)imageURL
++ (BHPhoto *)photoWithImageURL:(NSString *)imageURL
 {
     return [[self alloc] initWithImageURL:imageURL];
 }
@@ -51,7 +51,7 @@
     return self;
 }
 
-- (id)initWithImageURL:(NSURL *)imageURL
+- (id)initWithImageURL:(NSString *)imageURL
 {
     self = [super init];
     if (self) {

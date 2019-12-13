@@ -43,7 +43,7 @@
 @synthesize isFirstLoad;
 @synthesize location;
 @synthesize albums;
-@synthesize rootViewController, previouslySelectedAlbum, managedObjectContext;
+@synthesize rootViewController, previouslySelectedAlbum, managedObjectContext, dictionary;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -82,8 +82,10 @@
     //self.thumbnailQueue = [[NSOperationQueue alloc] init];
     //self.thumbnailQueue.maxConcurrentOperationCount = 3;
 
-    self.selectedItems = 0;
+    self.selectedItems = [[NSMutableArray alloc] init];
     self.isFirstLoad = true;
+    
+    self.dictionary = [[NSMutableDictionary alloc] init];
 	// Do any additional setup after loading the view.
     
 }
@@ -92,6 +94,48 @@
     
     NSLog(@"viewWillAppear, album");
     self.selectedAction = 0;
+    [self.selectedItems removeAllObjects];
+    
+    if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
+            //is a different album so do this too
+        [self.albums removeAllObjects];
+        [self.dictionary removeAllObjects];
+        
+        for(NSString *url in self.selectedAlbum.photosURLs) {
+            if(url!=nil) {
+                
+                BHAlbum *albumSingle = [[BHAlbum alloc] init];
+                albumSingle.photosURLs = [[NSMutableArray alloc] init];
+                
+                //save the URL of the asset Photo
+                [albumSingle.photosURLs addObject:url];
+                
+                //save the url on the dictionary, then just grab the image when ready
+                BHPhoto *photo = [[BHPhoto alloc] initWithImageURL:url];
+                photo.image = [UIImage imageNamed:@"concrete"];
+                
+                [albumSingle addPhoto:photo];
+                
+                
+                                                              
+                 if(![self.selectedAlbum.photos containsObject: photo]) {
+                     [self.selectedAlbum.photos addObject:photo];
+                 }
+            
+                
+                //add to the list of albums (each of these albums has just one image)
+                [self.albums addObject:albumSingle];
+                [self.dictionary setValue:albumSingle forKey:url];
+            }
+        }
+    }
+    
+}
+
+-(void) viewDidAppear:(BOOL)animated {
+    
+    NSLog(@"viewDidAppear, album");
+  
     if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
             //is a different album so do this too
             [self readAlbumThumbnails];
@@ -278,15 +322,16 @@
         [alertActions  addAction:cancelAction];
         
         
-        if(self.selectedItems > 0 && (self.selectedAlbum!=nil && self.selectedAlbum.photos.count > 0)) {
+        if(self.selectedItems.count > 0 && (self.selectedAlbum!=nil && self.selectedAlbum.photos.count > 0)) {
             //only remove from album option if have something selected and album not fake
             UIAlertAction *removePhotosAction = [UIAlertAction actionWithTitle:@"Remove photos from album" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                   self.selectedAction = ACTION_REMOVE_FROM_ALBUM;
                 
                 if([self.selectedAlbum isFakeAlbum]) {
                     //alert
-                } else {
+                } else if([self.selectedAlbum.type isEqualToString: ALBUM_TYPE_USER] || [self.selectedAlbum.type isEqualToString: ALBUM_TYPE_SMART]) {
                    //do it
+                    [self removePhotosFromAlbum];
                 }
                 
             }];
@@ -616,6 +661,43 @@
     }
 }
 
+-(void) removePhotosFromAlbum {
+    
+    //TODO next refresh this album, need to call readAllAlbumThumnailsAgain
+    
+    PHFetchResult *assets = [PHAsset fetchAssetsWithLocalIdentifiers: self.selectedItems options:nil];
+    
+    if(assets!=nil && assets.count > 0) {
+        
+        
+        //otherwise continue
+        PHFetchOptions *fetchOptions = [[PHFetchOptions alloc] init];
+        //now get the album
+        fetchOptions.predicate = [NSPredicate predicateWithFormat:@"localizedTitle = %@", selectedAlbum.name];
+         PHFetchResult *fetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAny options:fetchOptions];
+        if(fetchResult.count == 1) {
+         
+            PHAssetCollection *album = [fetchResult firstObject];
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                PHAssetCollectionChangeRequest *request = [PHAssetCollectionChangeRequest
+                    changeRequestForAssetCollection: album];
+                [request removeAssets:assets];
+
+            } completionHandler:^(BOOL success, NSError *error) {
+                NSLog(@"Finished removing asset from the album. %@", (success ? @"Success" : error));
+                
+                
+                [self.selectedAlbum.photosURLs removeObjectsInArray:self.selectedItems];
+                self.selectedAlbum.photosCount = self.selectedAlbum.photosURLs.count;
+                [self.albums removeAllObjects];
+                [self.selectedItems removeAllObjects];
+                //ALMOST, not showing thumbnails, only blanks
+                [self readAlbumThumbnails];
+            }];
+        }
+    }
+    
+}
 
 #pragma mark Image picker delegate methdos
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
@@ -698,7 +780,7 @@
     NSLog(@"IMAGES COUNT %ld", (long)count);
     //only if not the same
     
-    [self.albums removeAllObjects];
+    //[self.albums removeAllObjects];
     
     if(count > 0) {
         PHImageManager *imageManager = [PHImageManager defaultManager];
@@ -712,27 +794,38 @@
             
             for(PHAsset *asset in assets){
                 if(asset!=nil){
+                    
+                   //if the record exists on DB, try get the title name from the album/pic description
+                   NSString *theURL = asset.localIdentifier;
                 
                    PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                    requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
                    requestOptions.networkAccessAllowed = true;
                    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-                   requestOptions.synchronous = true;//not synchronous
+                   requestOptions.synchronous = false;//not synchronous
                    
                    [imageManager requestImageForAsset:asset
                                           targetSize:CGSizeMake(125.0f, 125.0f)
                                          contentMode:PHImageContentModeDefault
                                              options:requestOptions
                                        resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                           if(thumbnail!=nil && ![processedURLS containsObject:asset.localIdentifier]) {
+                                           if(thumbnail!=nil && ![processedURLS containsObject:theURL]) {
+                                               
+                                               
+                                               
+                                               //BHPhoto *photo = [self.dictionary objectForKey:theURL];
+                                               
                                                //it can be called multiple times
-                                               [processedURLS addObject:asset.localIdentifier];
-                                               //NSLog(@"loaded thumbnail %ld", processed +1);
-                                               BHAlbum *albumSingle = [[BHAlbum alloc] init];
-                                               albumSingle.photosURLs = [[NSMutableArray alloc] init];
+                                               [processedURLS addObject:theURL];
+                                               
+                                               //should always exist
+                                               BHAlbum *albumSingle = [self.dictionary objectForKey:theURL];
+                                               
+                                              // BHAlbum *albumSingle = [[BHAlbum alloc] init];
+                                              // albumSingle.photosURLs = [[NSMutableArray alloc] init];
+                                               BHPhoto *photo = [albumSingle.photos objectAtIndex:0];
+                                               photo.image = thumbnail;
                                                 
-                                                //if the record exists on DB, try get the title name from the album/pic description
-                                                NSString *theURL = asset.localIdentifier;
                                                 if(theURL!=nil) {
                                                     NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theURL withManagedContext:self.managedObjectContext];
                                                     if(records!=nil && records.count==1) {
@@ -752,16 +845,17 @@
                                                      albumSingle.name = [NSString stringWithFormat:@"%lu",(unsigned long)self.albums.count ];
                                                 }
                                                 
-                                        
+                                               /*
                                                if(![self.selectedAlbum.photosURLs containsObject: theURL]) {
                                                   [self.selectedAlbum.photosURLs addObject:theURL];
-                                               }
+                                               }*/
                                                
                                                
                                                 processed++;
                                                 
 
-                                                BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                               /*BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
+                                               photo.image = thumbnail;
                                                 photo.imageURL = theURL;
                                                 [albumSingle addPhoto:photo];
                                                
@@ -772,7 +866,7 @@
                                                //save the URL of the asset Photo
                                                [albumSingle.photosURLs addObject: asset.localIdentifier];
                                                //add to the list of albums (each of these albums has just one image)
-                                               [self.albums addObject:albumSingle];
+                                               [self.albums addObject:albumSingle];*/
                                                
                                                
                                                 //TODO check is only refreshing the view after all images have been processed, might want to do it every one or every 2 or 3 for instance
@@ -807,8 +901,9 @@
     for(BHAlbum *album in self.albums) {
         BHPhoto *photo = [album.photos objectAtIndex:0];
         photo.isSelected = select;
+        [self.selectedItems addObject:photo.imageURL];
     }
-    selectedItems = select ? self.albums.count : 0;
+    //selectedItems = select ? self.albums.count : 0;
     
     //make the table refresh
     //[self.collectionView.collectionViewLayout invalidateLayout];
@@ -856,11 +951,12 @@
     //will also reload the view
 }
 
--(void)selectAlbumPhoto: (BOOL) select atIndex:(NSInteger) index {
+-(void)selectAlbumPhoto: (BOOL) select atIndex:(NSInteger) index  asset: (NSString *)assetURL {
 
     if(index < self.albums.count) {
         
         self.selectedPhoto  = [self.albums objectAtIndex:index];
+        //BHAlbum *selectedOne = [self.albums objectAtIndex:index];
         
         if(select) {
             
@@ -870,16 +966,22 @@
             //self.selectedAction = action;// ACTION_ADD_TO_ALBUM;
             //self.navigationItem.rightBarButtonItem.tag = action; // ACTION_ADD_TO_ALBUM;
             //self.navigationItem.rightBarButtonItem.title = @"Add to album";
-            self.selectedItems+=1;
+            if(![self.selectedItems containsObject: assetURL]) {
+                [self.selectedItems addObject:assetURL];
+            }
+            
         }
         else {
             //BHPhoto *photo = [self.selectedPhoto.photos objectAtIndex:0];
             //photo.isSelected = select;
             self.selectedPhoto = nil;
-            self.selectedItems-=1;
-            if(selectedItems < 0) {
-               selectedItems = 0;
+            if([self.selectedItems containsObject: assetURL]) {
+                [self.selectedItems removeObject:assetURL];
             }
+            //self.selectedItems-=1;
+            //if(selectedItems < 0) {
+            //   selectedItems = 0;
+            //}
         }
         //just refresh this cell, not the entire collection
         NSIndexPath *indexPath = [NSIndexPath indexPathWithIndex:index];
@@ -955,7 +1057,7 @@
         NSInteger tag = photoIndex;
         
         if(self.albums!=nil && photoIndex < self.albums.count) {
-            
+           
             BHAlbum *albumSelected = self.albums[photoIndex];
             
             BHPhoto *photo = albumSelected.photos[0];//which should only be 1indexPath.item
@@ -986,6 +1088,8 @@
             NSLog(@"WTF");
         }
         
+    } else {
+        NSLog(@"NOOOOOO");
     }
     
     
@@ -1049,8 +1153,12 @@
         //represents here an album with just one image
         BHAlbum *albumTap = [self.albums objectAtIndex:tag];
         
+        NSLog(@"ALBUM URL: %@", albumTap.assetURL);
+        
         //these "albums" are made of only 1 image
         BHPhoto *photo = [albumTap.photos objectAtIndex:0];
+        
+        NSLog(@"PHOTO URL: %@", photo.imageURL);
         
         photo.isSelected = !photo.isSelected;
         //nothing selected yet, select it now
@@ -1059,11 +1167,11 @@
             
         if(photo.isSelected) {
                 
-            [self selectAlbumPhoto:YES atIndex:tag];
+            [self selectAlbumPhoto:YES atIndex:tag asset: photo.imageURL];
             NSLog(@"select now at position %ld",(long)tag);
         }
         else {
-            [self selectAlbumPhoto:NO atIndex:tag];
+            [self selectAlbumPhoto:NO atIndex:tag asset: photo.imageURL];
             NSLog(@"Unselect now at position %ld",(long)tag);
         }
         
@@ -1085,9 +1193,6 @@
        
         //represents here an album with just one image
         BHAlbum *albumTap = [self.albums objectAtIndex:tag];
-        
-        //these "albums" are made of only 1 image
-        BHPhoto *photo = [albumTap.photos objectAtIndex:0];
         
         
         //JUST SHOW DETAIL

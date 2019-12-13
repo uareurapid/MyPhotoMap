@@ -76,9 +76,10 @@
     NSLog(@"Annotations size is %lu",(unsigned long)calloutAnnotations.count);
     
     
-    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-120);
+    CGRect rect = CGRectMake(self.view.bounds.origin.x+20, self.view.bounds.origin.y+40, self.view.bounds.size.width-40, self.view.bounds.size.height-100);
     photoCellView = [[BHPhotoAlbumView alloc ] initWithFrame: rect];
     photoCellView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    photoCellView.imageView.contentMode = UIViewContentModeScaleToFill;
     photoCellView.imageView.userInteractionEnabled = YES;
     
     //initWithFrame:CGRectMake(-10, 70, 320, 480)];

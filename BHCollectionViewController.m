@@ -114,10 +114,13 @@
         
         self.isLoaded = true;
         
+        [self fetchLocationRecordsFromDatabase];
+        
+        NSLog(@"PARSE ALBUMS ONLY NOW");
         [self checkAuthorizationStatus];
         
         //and now load all existing data from database
-        [self fetchLocationRecordsFromDatabase];
+        //[self fetchLocationRecordsFromDatabase];
     }
     
 }
@@ -166,12 +169,9 @@
 - (void) fetchLocationRecordsFromDatabase{
     [databaseRecords removeAllObjects];
     databaseRecords = [CoreDataUtils fetchLocationRecordsFromDatabase];
-    
-    if (!databaseRecords) {
-        // Handle the error.
-        // This is a serious error and should advise the user to restart the application
-    }
-    else {
+   
+    if (databaseRecords!=nil)
+    {
         NSInteger count = 0;
         NSLog(@"LOADED %ld RECorDS FroM DB",databaseRecords.count);
         for(LocationDataModel *entity in databaseRecords) {
@@ -181,8 +181,6 @@
         }
         NSLog(@"PROCESSED %ld", (long)count);
     }
-    
-
    
 }
 
@@ -228,7 +226,7 @@
             PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
             requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
             requestOptions.networkAccessAllowed = true;
-            requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+            requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
             requestOptions.synchronous = false;
               
             PHImageManager *imageManager = [PHImageManager defaultManager];
@@ -491,6 +489,14 @@
 }
 
 
+-(LocationDataModel *) getModelFromDatabaseRecords: (NSString *) assetURL {
+    for (LocationDataModel *model in databaseRecords) {
+        if(model!=nil && model.assetURL!=nil && [model.assetURL isEqualToString:assetURL]) {
+            return model;
+        }
+    }
+    return nil;
+}
 
 -(void) readAllAlbumsOnDevice {
     
@@ -514,22 +520,23 @@
             
             
             CLLocation *albumlocation = [collection approximateLocation];
-            //NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
             
             LocationDataModel *model;
+            BOOL addToMap = true;
             
             if(album.assetURL!=nil ) {
-                NSMutableArray *locationModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: album.assetURL withManagedContext:self.managedObjectContext ];
-                if(locationModels!= nil && locationModels.count > 0) {
-                    model = [locationModels objectAtIndex:0];
-                }
+                model = [self getModelFromDatabaseRecords:album.assetURL];
                 //TODO need to see if there is already a location model for this asset before adding a new entry
+                if(model!=nil) {
+                    addToMap = false; //already done
+                }
+                
             }
-            else if(albumlocation!=nil) {
+            else if(albumlocation!=nil && addToMap) {
                 model = [self saveLocationRecord:album.assetURL withDate:nil andLocation:albumlocation andAssetType:TYPE_ALBUM andDescription:album.name];
             }
             
-            if(model!=nil && album.photos.count > 0) {
+            if(model!=nil && album.photos.count > 0 && addToMap) {
                 BHPhoto *photo = [album.photos objectAtIndex:0];
                 //GET THE album and
                 [self.mapViewController addLocation:albumlocation withImage: photo.image  andTitle: model.desc forModel:model containingURLS:album.photosURLs];
@@ -557,17 +564,20 @@
             //NSLog(@"ADDING ALBUM NAME %@ for URL %@ LOCATION: %@", album.name, album.assetURL, albumlocation ? albumlocation.description : @"NOTHING");
             
             LocationDataModel *model;
+            BOOL addToMap = true;
             if(album.assetURL!=nil ) {
-                NSMutableArray *locationModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: album.assetURL withManagedContext:self.managedObjectContext];
-                if(locationModels!= nil && locationModels.count > 0) {
-                    model = [locationModels objectAtIndex:0];
+                
+                model = [self getModelFromDatabaseRecords:album.assetURL];
+                          
+                if(model!=nil) {
+                    addToMap = false; //already done
                 }
             }
-            else if(albumlocation!=nil) {
+            else if(albumlocation!=nil && addToMap) {
                 model = [self saveLocationRecord:album.assetURL withDate:nil andLocation:albumlocation andAssetType:TYPE_ALBUM andDescription:album.name];
             }
             
-            if(model!=nil && album.photos.count > 0) {
+            if(model!=nil && album.photos.count > 0 && addToMap) {
                 BHPhoto *photo = [album.photos objectAtIndex:0];
                 //GET THE album and
                 [self.mapViewController addLocation:albumlocation withImage: photo.image  andTitle: model.desc forModel:model containingURLS:album.photosURLs];
@@ -583,6 +593,7 @@
  */
 -(void) parseImagesForAlbum: (BHAlbum *) album fromCollection:(PHAssetCollection *) collection withLocationDataModel: (LocationDataModel *) albumLocationModel {
  
+    NSLog(@"PARSING IMAGES FOR %@", album.name);
     PHImageManager *imageManager = [PHImageManager defaultManager];
     
     PHFetchOptions *options = [PHFetchOptions new];
@@ -721,142 +732,74 @@
                         //---------------------------
                     }
                   
-                  
-                  
-                  
-                  
-                   //--------------------------------------------------------------------------------------
-                  
-                    //TODO for each album i only need 3 thumbnails, so i do not need this loop
-                  
-                    /*PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-                    requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
-                    requestOptions.networkAccessAllowed = true;
-                    requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-                    requestOptions.synchronous = true;
-                      
-                    [imageManager requestImageForAsset:asset
-                                             targetSize:CGSizeMake(125.0f, 125.0f)
-                                            contentMode:PHImageContentModeDefault
-                                                options:requestOptions
-                                          resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
-                                              if(thumbnail!=nil) {*/
+             
+                            //SEE IF WE ALREADY HAVE A CUSTOME RECORD FOR THIS (TAKES PRECEDENCE)
+                            LocationDataModel *photoModel = [self getModelFromDatabaseRecords:assetPhotoURL];
                                                   
-                                                  //ONLY process maximum of 3 images per album
-                                                  //the rest only need to be processed when we present the album details
-                                                  /*if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
-                                     
+                            //NO location info for this photo url is known yet
+                            if(photoModel == nil) {
                                                       
-                                                      //add the photo and reload the collection view
-                                                      dispatch_async(dispatch_get_main_queue(), ^{
-                                                          
-                                                          BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                                          photo.imageURL = assetPhotoURL;
-                                                          [album addPhoto:photo];
-                                                          
-                                                          //also add to the auxiliar album
-                                                          if(auxiliar!=nil && auxiliar.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
-                                                              
-                                                              BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                                              photo.imageURL = assetPhotoURL;
-                                                              [auxiliar addPhoto:photo];
-                                                          }
-                                                          
-                                                          //reload collectiuon view
-                                                          [self.collectionView reloadData];
-                                                          
-                                                          
-                                                      });
-                                                      
-                                                  }
-                                                  
-                                                  
-                                                  //insert max 3 thumbnails on the yearly album as well
-                                                  //ONLY process maximum of 3 images per album
-                                                  if( auxiliar!=nil && (auxiliar.photos.count <  MAX_PHOTO_THUMBNAILS_PER_ALBUM ) ) {
-                                               
-                                                      
-                                                      dispatch_async(dispatch_get_main_queue(), ^{
-                                                          
-                                                          BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
-                                                          photo.imageURL = assetPhotoURL;
-                                                          [auxiliar addPhoto:photo];
-                                                          [self.collectionView reloadData];
-                                                          
-                                                          
-                                                      });
-                                                      
-                                                      //NSLog(@"PROCESSED YEAR ALBUM %@ IMAGES %ld", auxiliar.name, (long) processedImagesInYearlyAlbum);
-                                                  }*/
-                                                  
-                                                  
-                                                  //SEE IF WE ALREADY HAVE A CUSTOME RECORD FOR THIS (TAKES PRECEDENCE)
-                                                  NSMutableArray *photoModels = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL: assetPhotoURL withManagedContext:self.managedObjectContext ];
-                                                  
-                                                  //NO location info for this photo url is known yet
-                                                  if(photoModels == nil || photoModels.count == 0) {
-                                                      
-                                                      //save the location of the record on the location model
-                                                      NSString *desc = nil;
-                                                      if(imageLocation==nil) {
-                                                          //no saved location for this photo, check if we have something for the album first
+                                //save the location of the record on the location model
+                                NSString *desc = nil;
+                                if(imageLocation==nil) {
+                                       //no saved location for this photo, check if we have something for the album first
                                                 
-                                                          desc = [NSString stringWithFormat:@"%lu",(long)i];
+                                       desc = [NSString stringWithFormat:@"%lu",(long)i];
                                                           
-                                                          if(albumLocationModel!=nil) {//ok, we have album location data model
+                                       if(albumLocationModel!=nil) {//ok, we have album location data model
                                                               
-                                                              //NSLog(@"Adding image location to the map from pre-existing album location");
-                                                              NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                             [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: albumLocationModel.desc forModel:albumLocationModel containingURLS:urls];
+                                            //NSLog(@"Adding image location to the map from pre-existing album location");
+                                            NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
+                                            [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: albumLocationModel.desc forModel:albumLocationModel containingURLS:urls];
                                                               
-                                                          } else if(albumlocation!=nil) { //no data modelk but coordinates exist
+                                        } else if(albumlocation!=nil) { //no data modelk but coordinates exist
                                                               
-                                                              //SAVE THE RECORD WITH THE ALBUM LOCATION
-                                                              //TODO pass description of image
-                                                              LocationDataModel *model = [self saveLocationRecord: assetPhotoURL withDate:theDate andLocation:albumlocation andAssetType:TYPE_PHOTO andDescription:desc];
+                                             //SAVE THE RECORD WITH THE ALBUM LOCATION
+                                             //TODO pass description of image
+                                             LocationDataModel *model = [self saveLocationRecord: assetPhotoURL withDate:theDate andLocation:albumlocation andAssetType:TYPE_PHOTO andDescription:desc];
                                                               
-                                                              if(model!=nil) {
-                                                                  //NSLog(@"Adding image location to the map from album location");
-                                                                  NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                              [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
-                                                              }
-                                                          }//else do  nothing, no location is known, neither for the photo or the album
+                                             if(model!=nil) {
+                                                    //NSLog(@"Adding image location to the map from album location");
+                                                    NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
+                                                    [self.mapViewController addLocation:albumlocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
+                                             }
+                                         }//else do  nothing, no location is known, neither for the photo or the album
                                                           
                                                           
-                                                      }
-                                                      else  {// imageLocation!=nil
+                                }
+                                else  {// imageLocation!=nil
                                                           
-                                                          //SAVE THE RECORD (not saving any images or pics) WITH THE PHOTO LOCATION
-                                                          //There is an exif cordinate???
-                                                          //if we have location data, add the annotation to the map
-                                                          desc = [NSString stringWithFormat:@"IMG-%lu",(long)i];
-                                                          //IF the record already exists keep the previous title/description on the model, not this new one
+                                     //SAVE THE RECORD (not saving any images or pics) WITH THE PHOTO LOCATION
+                                     //There is an exif cordinate???
+                                     //if we have location data, add the annotation to the map
+                                     desc = [NSString stringWithFormat:@"IMG-%lu",(long)i];
+                                     //IF the record already exists keep the previous title/description on the model, not this new one
                                                           
-                                                          //NSLog(@"SAVING %@ with photo own location %@",assetPhotoURL,imageLocation.description);
-                                                          LocationDataModel *model = [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation andAssetType:TYPE_PHOTO andDescription:desc];
+                                     //NSLog(@"SAVING %@ with photo own location %@",assetPhotoURL,imageLocation.description);
+                                     LocationDataModel *model = [self saveLocationRecord:assetPhotoURL withDate:theDate andLocation:imageLocation andAssetType:TYPE_PHOTO andDescription:desc];
                                                         
-                                                          if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
-                                                              //NSLog(@"Adding image location to the map from image exif data");
-                                                              NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                            [self.mapViewController addLocation:imageLocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
-                                                          }
+                                     if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
+                                         //NSLog(@"Adding image location to the map from image exif data");
+                                        NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
+                                        [self.mapViewController addLocation:imageLocation withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
+                                     }
                                                           
-                                                      }
-                                                  } else {
+                                 }
+                            }
+                                //else {
                                                       
-                                                     //we already have location data model
-                                                     LocationDataModel *model = [photoModels objectAtIndex:0];
-                                                      
-                                                      if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
-                                                          //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
-                                                          // NSLog(@"Adding image location to the map from image already existing location data");
-                                                        NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
+                                  //we already have location data model
+                                                    
+                                //  if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
+                                       //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
+                                       // NSLog(@"Adding image location to the map from image already existing location data");
+                                //      NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
                                                             
-                                                        CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
-                                                       [self.mapViewController addLocation:location withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
-                                                      }
+                                //      CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
+                                //      [self.mapViewController addLocation:location withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
+                                // }
                              
-                                                  }//end else, location already previously saved
+                        //}//end else, location already previously saved
                                                  
                           // end resultHandler }
                                               
@@ -868,7 +811,7 @@
               i++;
           }
             
-    
+        NSLog(@"DONE PARSING FOR ALBUM %@", album.name);
     }
     
 

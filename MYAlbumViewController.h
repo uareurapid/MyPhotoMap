@@ -53,7 +53,7 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (nonatomic, strong) NSMutableArray *albumsNames;
 
 @property (assign, nonatomic) NSInteger selectedAction;
-@property (assign, nonatomic) NSInteger selectedItems;
+@property (strong, nonatomic) NSMutableArray *selectedItems;
 @property (strong,nonatomic) CLLocation *location;
 
 @property (nonatomic, strong) NSMutableArray *albums;
@@ -61,6 +61,11 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 @property (assign, nonatomic) ALAssetsLibrary* assetslibrary;
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
+@property (strong,nonatomic) NSMutableDictionary *dictionary;
+
+
+//@property (nonatomic, strong) NSMutableArray *selectedPhotoItems;
 
 
 @property BOOL isFirstLoad;
