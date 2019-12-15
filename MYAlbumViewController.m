@@ -97,37 +97,8 @@
     [self.selectedItems removeAllObjects];
     
     if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
-            //is a different album so do this too
-        [self.albums removeAllObjects];
-        [self.dictionary removeAllObjects];
-        
-        for(NSString *url in self.selectedAlbum.photosURLs) {
-            if(url!=nil) {
-                
-                BHAlbum *albumSingle = [[BHAlbum alloc] init];
-                albumSingle.photosURLs = [[NSMutableArray alloc] init];
-                
-                //save the URL of the asset Photo
-                [albumSingle.photosURLs addObject:url];
-                
-                //save the url on the dictionary, then just grab the image when ready
-                BHPhoto *photo = [[BHPhoto alloc] initWithImageURL:url];
-                photo.image = [UIImage imageNamed:@"concrete"];
-                
-                [albumSingle addPhoto:photo];
-                
-                
-                                                              
-                 if(![self.selectedAlbum.photos containsObject: photo]) {
-                     [self.selectedAlbum.photos addObject:photo];
-                 }
-            
-                
-                //add to the list of albums (each of these albums has just one image)
-                [self.albums addObject:albumSingle];
-                [self.dictionary setValue:albumSingle forKey:url];
-            }
-        }
+         
+        [self prepareAlbums];
     }
     
 }
@@ -149,6 +120,41 @@
         self.previouslySelectedAlbum = self.selectedAlbum.name;
     }
   
+}
+
+-(void) prepareAlbums{
+    
+    //is a different album so do this too
+         [self.albums removeAllObjects];
+         [self.dictionary removeAllObjects];
+         
+         for(NSString *url in self.selectedAlbum.photosURLs) {
+             if(url!=nil) {
+                 
+                 BHAlbum *albumSingle = [[BHAlbum alloc] init];
+                 albumSingle.photosURLs = [[NSMutableArray alloc] init];
+                 
+                 //save the URL of the asset Photo
+                 [albumSingle.photosURLs addObject:url];
+                 
+                 //save the url on the dictionary, then just grab the image when ready
+                 BHPhoto *photo = [[BHPhoto alloc] initWithImageURL:url];
+                 photo.image = [UIImage imageNamed:@"concrete"];
+                 
+                 [albumSingle addPhoto:photo];
+                 
+                 
+                                                               
+                  if(![self.selectedAlbum.photos containsObject: photo]) {
+                      [self.selectedAlbum.photos addObject:photo];
+                  }
+             
+                 
+                 //add to the list of albums (each of these albums has just one image)
+                 [self.albums addObject:albumSingle];
+                 [self.dictionary setValue:albumSingle forKey:url];
+             }
+         }
 }
 
 //add the "real" existing albums" names
@@ -689,8 +695,9 @@
                 
                 [self.selectedAlbum.photosURLs removeObjectsInArray:self.selectedItems];
                 self.selectedAlbum.photosCount = self.selectedAlbum.photosURLs.count;
-                [self.albums removeAllObjects];
                 [self.selectedItems removeAllObjects];
+                self.selectedAction = 0;
+                [self prepareAlbums];
                 //ALMOST, not showing thumbnails, only blanks
                 [self readAlbumThumbnails];
             }];
@@ -1452,18 +1459,9 @@
     PHAssetCollection *assetCollection = [self findAlbumByName:self.selectedAlbum.name];
     if(assetCollection!=nil && assets.count > 0) {
         
-        //PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
-        //requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
-        //requestOptions.networkAccessAllowed = true;
-        //requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
-        
-        // this one is key
-        //requestOptions.synchronous = YES;
-        
         NSMutableArray *assetsArray = [NSMutableArray arrayWithArray:assets];
-        //PHImageManager *manager = [PHImageManager defaultManager];
       
-        //save them on group
+        //save them on album
         [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
                 //PHAssetChangeRequest *assetChangeRequest = [PHAssetChangeRequest cr:asset];
             PHAssetCollectionChangeRequest *assetCollectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:assetCollection];
@@ -1474,8 +1472,11 @@
                     NSLog(@"Error persistsing asset: %@", error);
                 } else {
                     NSLog(@"Persisted assets on new album");
-                    //read the thumbnails again
+                    //read all? the thumbnails again
+                    
+                    //TODO this is wrong i just need to add the new assets urls to the selectedAlbumPhotos URLs and to the dictionary
                     [self getAllPHAssetsFromAlbum:assetCollection];
+                    
                     //TODO NEXT if the album has a location assigned, we should add the location to these assets as well
                     //TODO NEXT check duplication of annotations on load (timing issue??)
                     
@@ -1588,29 +1589,21 @@
 //TODO REFACTOR NO ALA ASSETS STUFF
 -(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
     
-        
+    //TODO optimize, maybe i don´t need to read them all again?
     PHFetchResult *results = [PHAsset fetchAssetsInAssetCollection:albumCollection options:nil];
     if(results!=nil && results.count > 0) {
-    
-        NSMutableArray *assetsArray = [[NSMutableArray alloc] initWithCapacity:results.count];
         
         [self.selectedAlbum.photos removeAllObjects];
         [self.selectedAlbum.photosURLs removeAllObjects];
         
         for(PHAsset *asset in results) {
-            
-            NSLog(@"LOCAL IDENTIFIER IS %@", asset.localIdentifier);
+
             [self.selectedAlbum.photosURLs addObject: asset.localIdentifier];
-            
-            NSLog(@"TYPE IS %@",[asset valueForKey:@"uniformTypeIdentifier"]);
-            
-            [assetsArray addObject:asset];
         }
-        if(assetsArray.count > 0) {
-            [self readAlbumThumbnails];
-        }
+        [self prepareAlbums];
+        [self readAlbumThumbnails];
         
-        NSLog(@"GOT %lu Assets from album %@", (unsigned long)assetsArray.count, self.selectedAlbum.name);
+        
         //TODO reload the collection view
         //READ https://stackoverflow.com/questions/28887638/how-to-get-an-alasset-url-from-a-phasset
     }
