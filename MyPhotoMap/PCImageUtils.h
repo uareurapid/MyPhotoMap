@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 //get imageFromPHAssets
 +(void) getImageFromPHAsset: (PHAsset *) asset withTargetSize:(CGSize) size  completion:(void (^)(UIImage *))completionBlock;
-
++(UIAlertView *)showActivityIndicator :(NSString *)message;
 @end
 
 NS_ASSUME_NONNULL_END

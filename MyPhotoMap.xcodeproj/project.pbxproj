@@ -442,12 +442,6 @@
 				724E90E61768E1B8007E6939 /* CoreData.framework */,
 				724E8FA01768E0E6007E6939 /* InfoPlist.strings */,
 				724E8FBC1768E0E6007E6939 /* ShareKit */,
-				724E905A1768E0E6007E6939 /* AlbumsListViewController.h */,
-				724E905B1768E0E6007E6939 /* AlbumsListViewController.m */,
-				724E905D1768E0E6007E6939 /* AlbumViewController.h */,
-				724E905F1768E0E6007E6939 /* DetailViewController.m */,
-				724E90601768E0E6007E6939 /* DetailViewController.h */,
-				724E90611768E0E6007E6939 /* AlbumViewController.m */,
 				724E90681768E0E6007E6939 /* shadow_instagram.png */,
 				724E90711768E0E6007E6939 /* Default-568h@2x.png */,
 				724E90721768E0E6007E6939 /* Default.png */,
@@ -903,6 +897,12 @@
 				724E8FAD1768E0E6007E6939 /* BHCollectionViewController.m */,
 				724E8FB41768E0E6007E6939 /* MYAlbumViewController.m */,
 				724E8FB61768E0E6007E6939 /* MYAlbumViewController.h */,
+				724E905A1768E0E6007E6939 /* AlbumsListViewController.h */,
+				724E905B1768E0E6007E6939 /* AlbumsListViewController.m */,
+				724E905D1768E0E6007E6939 /* AlbumViewController.h */,
+				724E905F1768E0E6007E6939 /* DetailViewController.m */,
+				724E90601768E0E6007E6939 /* DetailViewController.h */,
+				724E90611768E0E6007E6939 /* AlbumViewController.m */,
 				724E90621768E0E6007E6939 /* BHAlbum.m */,
 				724E90631768E0E6007E6939 /* BHAlbum.h */,
 				724E90641768E0E6007E6939 /* MyAlbumHelper.m */,
@@ -1399,7 +1399,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.pt.pcristo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcdreams.myphotosmap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -1420,7 +1420,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.pt.pcristo.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pcdreams.myphotosmap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;

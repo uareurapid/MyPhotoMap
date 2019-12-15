@@ -13,6 +13,7 @@
 #import "MYAlbumViewController.h"
 #import "SearchLocationViewController.h"
 #import "PhotosMapViewController.h"
+#import "PCImageUtils.h"
 
 
 @interface BHCollectionViewController ()
@@ -110,7 +111,17 @@
 
 -(void) viewDidAppear:(BOOL)animated {
     
+     
+    
     if(!self.isLoaded) {
+        
+        if(!self.alertViewProgress) {
+            self.alertViewProgress = [PCImageUtils showActivityIndicator:@"Loading, please wait..."];
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+           [self.alertViewProgress show];
+        });
         
         self.isLoaded = true;
         
@@ -586,6 +597,15 @@
             [self parseImagesForAlbum:album fromCollection:collection withLocationDataModel:model];
             
         }
+    
+    if(self.alertViewProgress!=nil) {
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.alertViewProgress setHidden:true];
+            [self.alertViewProgress dismissWithClickedButtonIndex:0 animated:false];
+        });
+        
+    }
 }
 
 /**
@@ -992,7 +1012,6 @@
     }
     
 }
-
 
 //clicked on a empty album and show all the pics inside (if any)
 - (void)didTapAlbumWithGesture:(UITapGestureRecognizer *)tapGesture{

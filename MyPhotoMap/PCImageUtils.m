@@ -10,6 +10,19 @@
 
 @implementation PCImageUtils
 
++(UIAlertView *)showActivityIndicator :(NSString *)message
+{
+
+   // UIAlertController *controller = [[UIAlertController alloc] init];
+    
+    UIAlertView *alertViewProgress = [[UIAlertView alloc] initWithTitle:message message:@"" delegate:nil cancelButtonTitle:nil otherButtonTitles:nil];
+    UIActivityIndicatorView *activity =[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(120,50,37,37)];
+    activity.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhiteLarge;
+    [activity startAnimating];
+    [alertViewProgress addSubview:activity];
+    return alertViewProgress;
+}
+
 +(void) getImageFromPHAsset: (PHAsset *) asset withTargetSize:(CGSize) size  completion:(void (^)(UIImage *))completionBlock {
     
     

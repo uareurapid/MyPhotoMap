@@ -12,6 +12,9 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import "iToast.h"
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/PHAssetCollectionChangeRequest.h>
+#import <Photos/Photos.h>
 
 @interface AlbumsListViewController ()
 
@@ -221,6 +224,8 @@
 
 -(void)saveImage:(UIImage*)image toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock
 {
+    
+   // UIImageWriteToSavedPhotosAlbum 
     //write the image data to the assets library (camera roll)
     [library writeImageToSavedPhotosAlbum:image.CGImage orientation:(ALAssetOrientation)image.imageOrientation
                           completionBlock:^(NSURL* assetURL, NSError* error) {

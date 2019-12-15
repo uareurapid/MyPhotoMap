@@ -58,6 +58,8 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
+@property (strong, nonatomic)  UIAlertView *alertViewProgress;
+
 @property BOOL isLoaded;
 
 
