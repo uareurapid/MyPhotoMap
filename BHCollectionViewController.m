@@ -94,11 +94,6 @@
             forSupplementaryViewOfKind:BHPhotoAlbumLayoutAlbumTitleKind
                    withReuseIdentifier:AlbumTitleIdentifier];
     
-    self.thumbnailQueue = [[NSOperationQueue alloc] init];
-    self.thumbnailQueue.maxConcurrentOperationCount = 3;
-    
-    
-    
     
     self.existingAlbumsNames = [[NSMutableArray alloc] init];
     
@@ -109,6 +104,38 @@
     
 }
 
+-(void) reloadAssetsURLSForAlbumNamed: (PHAssetCollection *) albumCollection {
+    if(self.albums.count > 0) {
+        for(BHAlbum *album in self.albums) {
+            if([album.name isEqualToString:albumCollection.localizedTitle]) {
+              //found it
+                [self updateAlbumWithNewAssetsURLS:albumCollection forAlbum:album];
+                break;
+            }
+        }
+    }
+}
+
+-(void) updateAlbumWithNewAssetsURLS: (PHAssetCollection *) albumCollection forAlbum: (BHAlbum *) album {
+    
+    NSLog(@"UPDATE URLS for album %@", album.name);
+    PHFetchOptions *options = [PHFetchOptions new];
+    options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
+    
+    PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsInAssetCollection:albumCollection options:options];
+    
+    if(assets!=nil) {
+        
+        for(PHAsset *asset in assets) {
+         
+            NSString *url = asset.localIdentifier;
+            if(![album.photosURLs containsObject:url]) {
+                NSLog(@"adding url %@", url);
+                [album.photosURLs addObject:url];
+            }
+        }
+    }
+}
 -(void) viewDidAppear:(BOOL)animated {
     
      
@@ -118,20 +145,17 @@
         if(!self.alertViewProgress) {
             self.alertViewProgress = [PCImageUtils showActivityIndicator:@"Loading, please wait..."];
         }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-           [self.alertViewProgress show];
-        });
+
+        [self.alertViewProgress show];
         
         self.isLoaded = true;
         
         [self fetchLocationRecordsFromDatabase];
         
-        NSLog(@"PARSE ALBUMS ONLY NOW");
         [self checkAuthorizationStatus];
         
         //and now load all existing data from database
-        //[self fetchLocationRecordsFromDatabase];
+
     }
     
 }

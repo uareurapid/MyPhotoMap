@@ -25,7 +25,7 @@
 @synthesize albumsNames;
 @synthesize library;
 @synthesize predefinedAlbum;
-@synthesize imageInfo,imageToSave,photoLocation;
+@synthesize imageInfo,imageToSave,photoLocation, albumController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -36,7 +36,6 @@
             albumsNames = [[NSArray alloc] init];
         
         library = [[ALAssetsLibrary alloc] init];
-        self.title=@"Save to...";
     }
     return self;
 }
@@ -57,6 +56,24 @@
     if (self) {
         // Custom initialization
         albumsNames = [[NSArray alloc] initWithArray:albums copyItems:YES];
+        
+        UIBarButtonItem *fixedItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+        fixedItem.width = self.view.frame.size.width - 120; // or whatever you want
+        
+        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Save"
+                                                                 style:UIBarButtonItemStyleDone target:self action:@selector(performSaveActions:)];
+        [doneButton setBackgroundImage:[UIImage imageNamed:@"concrete"] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+               
+        NSArray *itemsArray = [NSArray arrayWithObjects:fixedItem, doneButton, nil];
+
+
+        UIToolbar *myToolBar = [UIToolbar new];
+        CGRect toolBarFrame = CGRectMake(0, 0, self.view.frame.size.width, 40);
+        [myToolBar setFrame:toolBarFrame];
+        [myToolBar setItems:itemsArray];
+        [self.view addSubview:myToolBar];
+        
+        self.title = @"Available albums";
     }
     return self;
 }
@@ -74,10 +91,14 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.tableView.delegate = self;
+    self.tableView.allowsSelection = true;
+    
+    
+    
 
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
- 
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
   
@@ -106,6 +127,18 @@
       return albumsNames.count;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    NSInteger row = indexPath.row;
+    if(row < albumsNames.count) {
+        NSString *name = [albumsNames objectAtIndex:row];
+        self.predefinedAlbum = name;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+        });
+    }
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -121,33 +154,24 @@
         if(row < albumsNames.count) {
             NSString *name = [albumsNames objectAtIndex:row];
             cell.textLabel.text = name;
-            cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton; 
+            cell.accessoryType = [name isEqualToString:self.predefinedAlbum] ?  UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
             
         }
-  
     
     return cell;
 }
 
--(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    return @"Available albums";
-}
--(void) tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if(indexPath.row < albumsNames.count) {
-        predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
-        if(imageToSave!=nil) {
-            NSLog(@"saving image to %@",predefinedAlbum);
-            [self saveImageMetadata];
-            [self saveOnAlbum:imageToSave];
-        }
-        else {
-            NSLog(@"something is nil here img %@  info %@",imageToSave, imageInfo);
-        }
-    }
 
-    
-    
+-(void) performSaveActions:(id) sender {   
+        
+        if(self.predefinedAlbum!=nil) {
+       
+            if(self.imageToSave!=nil) {
+                NSLog(@"saving image to %@",self.predefinedAlbum);
+                [self saveImageMetadata];
+                [self saveOnAlbum:self.imageToSave];
+            }
+        }
 }
 
 
@@ -190,42 +214,46 @@
 }
 */
 
-#pragma mark - Table view delegate
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
-  
-        if(indexPath.row < albumsNames.count) {
-            predefinedAlbum = [albumsNames objectAtIndex:indexPath.row];
-        }
-    
-}
 
 //save on the album
 - (void)saveOnAlbum: (UIImage*)image{
+    
     [self saveImage:image toAlbum:predefinedAlbum withCompletionBlock:^(NSError *error) {
+        
         if (error!=nil) {
-            NSLog(@"Big error: %@", [error description]);
+            
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Unable to save photo or its data" message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
+            [alert show];
+            
+            [self dismissViewControllerAnimated:YES completion:nil];
         }
         else {
-            [[[[iToast makeText:@"Successfully saved image!"]
-               setGravity:iToastGravityBottom] setDuration:3000] show];
-            [self.navigationController popToRootViewControllerAnimated:YES];
+            //add the asset to the custom photo album
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Successfully saved image!" message:@"" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK",nil];
+            [alert show];
+            
+            [self dismissViewControllerAnimated:YES completion:^{
+                //reload assets/thumbnails and pop to view
+                if(self.albumController!=nil) {
+                   [self.albumController reloadAllAlbumInfo:self.predefinedAlbum];
+                }
+            }];
+     
+            
         }
     }];
 }
 
+//-(void) didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo;{
+ //UIImageWriteToSavedPhotosAlbum(image, self, @selector(didFinishSavingWithError:contextInfo:), nil);
+//}
+
 -(void)saveImage:(UIImage*)image toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock
 {
     
-   // UIImageWriteToSavedPhotosAlbum 
+   
+    
+    
     //write the image data to the assets library (camera roll)
     [library writeImageToSavedPhotosAlbum:image.CGImage orientation:(ALAssetOrientation)image.imageOrientation
                           completionBlock:^(NSURL* assetURL, NSError* error) {
@@ -237,18 +265,20 @@
                               }
                               
                               //add the asset to the custom photo album
-                              [self addAssetURL: assetURL
-                                        toAlbum:albumName
-                            withCompletionBlock:completionBlock];
-                              
-                              
-
-                              
+                              [self addAssetURL: assetURL toAlbum:albumName withCompletionBlock:completionBlock];
+                
                           }];
 }
 
+
+//add the asset to the custom photo album, using ALAssets library
 -(void)addAssetURL:(NSURL*)assetURL toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock
 {
+    
+    
+    //if(self.albumController!=nil) {
+    //    [self.albumController addPhotoWithAssetURLToAlbum:assetURL. albumName:albumName];
+    //}
     
     /**
      
@@ -277,6 +307,7 @@
      };
      
      */
+    
     __block BOOL albumWasFound = NO;
     
     //search all photo albums in the library

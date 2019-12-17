@@ -26,9 +26,10 @@
 #define PERSIST_ALBUM_TAG 1002
 //#import <Photos/PHAssetCollection.h>
 @class PhotosMapViewController;
+@class AlbumsListViewController;
 
-typedef void (^ALAssetsLibraryAssetForURLResultBlock)(ALAsset *asset);
-typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
+//typedef void (^ALAssetsLibraryAssetForURLResultBlock)(ALAsset *asset);
+//typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 
 @interface MYAlbumViewController : UICollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, QBImagePickerControllerDelegate>//BHCollectionViewController
@@ -70,6 +71,8 @@ typedef void (^ALAssetsLibraryAccessFailureBlock)(NSError *error);
 
 @property BOOL isFirstLoad;
 
+-(void) reloadAllAlbumInfo: (NSString *) albumName;
+-(void) addPhotoWithAssetURLToAlbum: (NSArray *) assetURLS albumName: (NSString *) album;
 //- (void)showDetailView: (NSString *) imgURL;
 -(void) addAlbumsNamesFromArray: (NSMutableArray*) names;
 - (void)readAlbumThumbnails;

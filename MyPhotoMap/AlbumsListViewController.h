@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+#import "MYAlbumViewController.h"
 
 @class CLLocation;
 
@@ -22,6 +23,8 @@ typedef void(^SaveImageCompletion)(NSError* error);
 -(void)saveImage:(UIImage*)image toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock;
 -(void)addAssetURL:(NSURL*)assetURL toAlbum:(NSString*)albumName withCompletionBlock:(SaveImageCompletion)completionBlock;
 - (void)saveOnAlbum: (UIImage*)image;
+- (void)image:(UIImage *)image
+didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo;
 
 @property (strong,nonatomic) NSArray *albumsNames;
 @property (strong, atomic) ALAssetsLibrary* library;
@@ -32,5 +35,8 @@ typedef void(^SaveImageCompletion)(NSError* error);
 @property (strong, nonatomic) UIImage* imageToSave;
 @property (strong, nonatomic) NSDictionary* imageInfo;
 @property (strong,nonatomic) CLLocation *photoLocation;
+
+
+@property (strong, nonatomic) MYAlbumViewController* albumController;
 
 @end

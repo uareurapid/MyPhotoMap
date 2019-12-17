@@ -731,8 +731,10 @@
     listAlbumsAvailableController.imageToSave = image;
     listAlbumsAvailableController.imageInfo = editingInfo;
     listAlbumsAvailableController.photoLocation = self.location;
+    //we pass a reference to this controller, so we can call back -(void) addPhotoWithAssetURLToAlbum: (NSArray *) assetURLS albumName: (NSString *) album;
+    listAlbumsAvailableController.albumController = self;
     
-    [self.navigationController pushViewController:listAlbumsAvailableController animated:NO];
+    [self presentViewController:listAlbumsAvailableController animated:NO completion:nil];
 }
 
 
@@ -1453,17 +1455,33 @@
   return [result copy];
 }
 
-#pragma image picker delegate methods
-- (void)qb_imagePickerController:(QBImagePickerController *)imagePickerController didFinishPickingAssets:(NSArray *)assets {
+//receives a list of assets urls and get the equivalent PHAsset and adds it to the current album
+-(void) addPhotoWithAssetURLToAlbum: (NSArray *) assetURLS albumName: (NSString *) album {
+ 
+        //first get the actual PHAsset from this url identifier
+        PHFetchResult *results = [PHAsset fetchAssetsWithLocalIdentifiers: assetURLS options:nil];
+            
+        if(results!=nil && results.count == 1) {
+            //then add it to the target album
+            
+            //TODO NEXT need to check if the album matches the selected one
+            [self addPHAssetsToCurrentAlbum: [results firstObject] dismissView:false currentAlbum:album];
+        }
+        
+    
+}
+
+
+-(void) addPHAssetsToCurrentAlbum: (NSArray *)assets dismissView: (BOOL) shouldDismiss currentAlbum: (NSString *) albumName {
+    
     //first get the album
-    PHAssetCollection *assetCollection = [self findAlbumByName:self.selectedAlbum.name];
+    PHAssetCollection *assetCollection = [self findAlbumByName: albumName];
     if(assetCollection!=nil && assets.count > 0) {
         
         NSMutableArray *assetsArray = [NSMutableArray arrayWithArray:assets];
       
         //save them on album
         [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                //PHAssetChangeRequest *assetChangeRequest = [PHAssetChangeRequest cr:asset];
             PHAssetCollectionChangeRequest *assetCollectionChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:assetCollection];
                 [assetCollectionChangeRequest addAssets:assetsArray];
 
@@ -1472,17 +1490,24 @@
                     NSLog(@"Error persistsing asset: %@", error);
                 } else {
                     NSLog(@"Persisted assets on new album");
-                    //read all? the thumbnails again
                     
-                    //TODO this is wrong i just need to add the new assets urls to the selectedAlbumPhotos URLs and to the dictionary
-                    [self getAllPHAssetsFromAlbum:assetCollection];
+                    NSString *theAlbumURL = assetCollection.localIdentifier;
+                    BOOL isCurrentlySelectedAlbum = self.selectedAlbum!=nil && [albumName isEqualToString:self.selectedAlbum.name];
                     
-                    //TODO NEXT if the album has a location assigned, we should add the location to these assets as well
-                    //TODO NEXT check duplication of annotations on load (timing issue??)
+                    if(isCurrentlySelectedAlbum) {
+                        //read all? the thumbnails again
+                        //TODO this is wrong i just need to add the new assets urls to the selectedAlbumPhotos URLs and to the dictionary
+                        
+                        [self getAllPHAssetsFromAlbum:assetCollection];
+                            
+                        //TODO NEXT if the album has a location assigned, we should add the location to these assets as well
+                        //TODO NEXT check duplication of annotations on load (timing issue??)
+                    }
                     
+                    //check if there is any location record for this album, and add the same location to the photos we are adding to it
                     NSUInteger i = -1;
-                    if(self.selectedAlbum!=nil && self.selectedAlbum.assetURL!=nil) {
-                        NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:self.selectedAlbum.assetURL withManagedContext:self.managedObjectContext];
+                    if(theAlbumURL!=nil) {
+                        NSMutableArray *records = [CoreDataUtils fetchLocationRecordsFromDatabaseWithAssetURL:theAlbumURL withManagedContext:self.managedObjectContext];
                         NSLog(@"WILL persist also the images location if the album has it...");
                         //the album already has a location record, add these images on the same location too
                         if(records!=nil && records.count==1) {
@@ -1507,20 +1532,29 @@
                                     NSLog(@"Adding image location to the map from album location");
                                     NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:identifier, nil];
                                     [self.mapViewController addLocation:location withImage: nil  andTitle: desc forModel:model containingURLS:urls];
-                                } 
+                                }
                             }
                         }
                     }
                     
+                    
+                    
                 }
-            [self dismissViewControllerAnimated:YES completion:NULL];
+            if(shouldDismiss) {
+               [self dismissViewControllerAnimated:YES completion:NULL];
+            }
+            
         }];
-    } else {
+    } else if(shouldDismiss) {
        [self dismissViewControllerAnimated:YES completion:NULL];
     }
+}
+
+#pragma image picker delegate methods
+- (void)qb_imagePickerController:(QBImagePickerController *)imagePickerController didFinishPickingAssets:(NSArray *)assets {
     
-    
-    
+    //called when i add photos that exist already on the device to the current album, in this case i need to reload the album thumbnails
+    [self addPHAssetsToCurrentAlbum:assets dismissView:YES currentAlbum:self.selectedAlbum.name];
 
     
 }
@@ -1586,20 +1620,48 @@
     });
 }*/
 
+//called from album list controller
+-(void) reloadAllAlbumInfo: (NSString *) albumName {
+     
+    PHAssetCollection *albumCollection = [self findAlbumByName:albumName];
+    
+    //if is the same album we reload it, but if not we need to update the main controller
+    if(albumCollection!=nil) {
+        if( [albumName isEqualToString:self.selectedAlbum.name]) {
+          [self getAllPHAssetsFromAlbum:albumCollection];
+        }
+        else if(self.rootViewController!=nil){
+          //just get all the assets urls for that album
+            [self.rootViewController reloadAssetsURLSForAlbumNamed: albumCollection];
+        }
+        
+    }
+    
+}
 //TODO REFACTOR NO ALA ASSETS STUFF
 -(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
     
+    PHFetchOptions *options = [PHFetchOptions new];
+    options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
     //TODO optimize, maybe i don´t need to read them all again?
-    PHFetchResult *results = [PHAsset fetchAssetsInAssetCollection:albumCollection options:nil];
+    PHFetchResult *results = [PHAsset fetchAssetsInAssetCollection:albumCollection options:options];
     if(results!=nil && results.count > 0) {
         
+        self.selectedAction = 0;
+        [self.selectedItems removeAllObjects];
+        
+        
+        //these i can remove
         [self.selectedAlbum.photos removeAllObjects];
-        [self.selectedAlbum.photosURLs removeAllObjects];
+        
         
         for(PHAsset *asset in results) {
-
-            [self.selectedAlbum.photosURLs addObject: asset.localIdentifier];
+            //add missing urls
+            if(![self.selectedAlbum.photosURLs containsObject:asset.localIdentifier]){
+               [self.selectedAlbum.photosURLs addObject: asset.localIdentifier];
+            }
         }
+        //prepare will deal with dictionary
         [self prepareAlbums];
         [self readAlbumThumbnails];
         

@@ -12,6 +12,9 @@
 #import "BHPhoto.h"
 #import "BHPhotoAlbumLayout.h"
 #import  <CoreLocation/CoreLocation.h>
+#import <Photos/PHPhotoLibrary.h>
+#import <Photos/PHAssetCollectionChangeRequest.h>
+#import <Photos/Photos.h>
 
 #define MAX_PHOTO_THUMBNAILS_PER_ALBUM 3
 
@@ -24,13 +27,12 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 @interface BHCollectionViewController : UICollectionViewController <UICollectionViewDataSource, UICollectionViewDelegate>
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle;
-- (void) readCameraRoll;
-//-(void) readNumberOfExistingAlbums;
 -(void) createNewAlbum: (NSString*) albumName completion:(void(^)(BOOL))callback;
 -(void) deleteAlbum: (BHAlbum *) album completion:(void(^)(BOOL))callback;
 - (void) fetchLocationRecordsFromDatabase;
 - (IBAction)addAlbumClicked:(id)sender;
 - (IBAction)settingsClicked:(id)sender;
+-(void) reloadAssetsURLSForAlbumNamed: (PHAssetCollection *) albumCollection;
 
 @property (strong,nonatomic) MYAlbumViewController *albumViewController;
 @property (strong, nonatomic) PhotosMapViewController *mapViewController;
@@ -47,7 +49,6 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 @property (nonatomic, strong) NSMutableArray *albums;
 @property (nonatomic, weak) IBOutlet BHPhotoAlbumLayout *photoAlbumLayout;
-@property (nonatomic, strong) NSOperationQueue *thumbnailQueue;
 
 @property (strong, nonatomic) IBOutlet UITabBar *tabBarController;
 
