@@ -199,21 +199,31 @@
 //will plot an array of "in view" annotations
 - (void)plotMapAnnotationsInsideView{
     
-    //check the ones to plot on map
-    for(id <MKAnnotation> annotation in annotationsArray) {
-        MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)annotation;
-        
-        if([self isCoordinateInMapView:myAnnotation.coordinate]) {
-            //is coordinate inside current map rect?
-            if(![[mapView annotations] containsObject:myAnnotation]) {
-                //only add if not present already
-                [mapView addAnnotation:myAnnotation];
-            }
+    
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    // Add code here to do background processing
+        //check the ones to plot on map
+        for(id <MKAnnotation> annotation in [self.annotationsArray copy]) {
+            MapViewAnnotationPoint *myAnnotation = (MapViewAnnotationPoint *)annotation;
             
+            if([self isCoordinateInMapView:myAnnotation.coordinate]) {
+                //is coordinate inside current map rect?
+                if(![[self.mapView annotations] containsObject:myAnnotation]) {
+                    //only add if not present already
+                    
+                    //dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.mapView addAnnotation:myAnnotation];
+                        
+                    //});
+                }
+                
+                
+            }
             
         }
         
-    }
+    });
+    
 }
 
 //check if the given coordinate is in the map view

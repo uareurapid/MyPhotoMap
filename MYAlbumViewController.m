@@ -10,7 +10,7 @@
 
 #import "AlbumOptionsTableViewController.h"
 #import "PCAppDelegate.h"
-//#import "ALAssetsLibrary+CustomPhotoAlbum.h"
+#import "PCImageUtils.h"
 
 
 #define ACTIONS_TAG 0
@@ -43,7 +43,7 @@
 @synthesize isFirstLoad;
 @synthesize location;
 @synthesize albums;
-@synthesize rootViewController, previouslySelectedAlbum, managedObjectContext, dictionary;
+@synthesize rootViewController, previouslySelectedAlbum, managedObjectContext, dictionary, alertViewProgress;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -109,7 +109,14 @@
   
     if( (self.previouslySelectedAlbum==nil) || (self.previouslySelectedAlbum!=nil && ![self.previouslySelectedAlbum isEqualToString: self.selectedAlbum.name] ) ) {
             //is a different album so do this too
-            [self readAlbumThumbnails];
+        
+        if(!self.alertViewProgress) {
+            self.alertViewProgress = [PCImageUtils showActivityIndicator:@"Loading, please wait..."];
+        }
+
+        [self.alertViewProgress show];
+        
+        [self readAlbumThumbnails];
     }
     
 }
@@ -786,10 +793,12 @@
     NSInteger __block processed = 0;
     NSInteger count = selectedAlbum.photosURLs.count;
     
+    NSLog(@"readAlbumThumbnails called");
     NSLog(@"IMAGES COUNT %ld", (long)count);
     //only if not the same
     
-    //[self.albums removeAllObjects];
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    // Add code here to do background processing
     
     if(count > 0) {
         PHImageManager *imageManager = [PHImageManager defaultManager];
@@ -895,8 +904,18 @@
     } else {
         [self refreshCollection]; //maybe invalidate layout too?
     }
+        
+        
+        if(self.alertViewProgress!=nil) {
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.alertViewProgress setHidden:true];
+                [self.alertViewProgress dismissWithClickedButtonIndex:0 animated:false];
+            });
+            
+        }
    
-    
+    });
 
     
     
@@ -1641,6 +1660,7 @@
 //TODO REFACTOR NO ALA ASSETS STUFF
 -(void) getAllPHAssetsFromAlbum: (PHAssetCollection *) albumCollection {
     
+    NSLog(@"getAllPHAssetsFromAlbum called");
     PHFetchOptions *options = [PHFetchOptions new];
     options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
     //TODO optimize, maybe i don´t need to read them all again?

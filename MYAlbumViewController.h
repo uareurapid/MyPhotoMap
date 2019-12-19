@@ -66,7 +66,7 @@
 @property (strong,nonatomic) NSMutableDictionary *dictionary;
 
 
-//@property (nonatomic, strong) NSMutableArray *selectedPhotoItems;
+@property (strong, nonatomic)  UIAlertView *alertViewProgress;
 
 
 @property BOOL isFirstLoad;

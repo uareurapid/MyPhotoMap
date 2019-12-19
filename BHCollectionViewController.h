@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SHK.h"
+//#import "SHK.h"
 #import "BHAlbum.h"
 #import "BHPhoto.h"
 #import "BHPhotoAlbumLayout.h"
@@ -63,5 +63,6 @@ static NSString * const AlbumTitleIdentifier = @"AlbumTitle";
 
 @property BOOL isLoaded;
 
+@property NSInteger counter;
 
 @end

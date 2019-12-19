@@ -44,6 +44,7 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;
 -(IBAction)closeWindow:(id)sender;
-- (void)readFullSizeImageAndThumbnail;
+- (void)readFullSizeImageForSharing;
+-(void)readThumbnailSizedImage;
 -(void) resetAlbumsListFromList: (NSMutableArray *) listOfAlbums;
 @end

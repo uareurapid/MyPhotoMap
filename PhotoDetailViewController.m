@@ -126,8 +126,6 @@
         }
     }
     
-    NSLog(@"selected index %ld and size is %ld",(long)selectedIndex,(long)albumSize);
-    
     //Curl Animation!!!
     if(self.singleAlbums.count > 0 && selectedIndex < self.singleAlbums.count) {
         
@@ -136,7 +134,6 @@
         //these "albums" are made of only 1 image
         BHPhoto *photo = [albumTap.photos objectAtIndex:0];
         assetURL = photo.imageURL;
-        NSLog(@"ASSET URL : %@",assetURL);
     }else {
         //should never happen
         assetURL =  [enclosingAlbum.photosURLs objectAtIndex:selectedIndex];
@@ -150,7 +147,7 @@
     
     [self updateTitle];
     
-    [self readFullSizeImageAndThumbnail];
+    [self readThumbnailSizedImage];
     
     
 }
@@ -165,6 +162,8 @@
         self.dataModel = [self fetchLocationModelWithAssetURL:self.assetURL ];
         if(self.dataModel!=nil && self.dataModel.desc!=nil){
             self.title = self.dataModel.desc;
+        } else {
+            self.title = [NSString stringWithFormat:@"IMG-%lu",(long)self.selectedIndex];
         }
     }
 }
@@ -191,7 +190,7 @@
     BHPhoto *photo = [self.enclosingAlbum.photos objectAtIndex:0];
     self.photoCellView.imageView.image = photo.image;
     
-    [self readFullSizeImageAndThumbnail];
+    [self readThumbnailSizedImage];
     [self updateTitle];
 }
 
@@ -221,6 +220,15 @@
                                                                    message:@"Where was the photo taken? What´s represented?"
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
+    UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+    
+    UIAlertAction* shareAction = [UIAlertAction actionWithTitle:@"Share..." style:UIAlertActionStyleDefault
+    handler:^(UIAlertAction * action) {
+    
+        [self readFullSizeImageForSharing];
+    }];
+    
+    
     UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Edit Location" style:UIAlertActionStyleDefault
                                                           handler:^(UIAlertAction * action) {
                                                           
@@ -232,7 +240,8 @@
                                                           
                                                               [self changeLabel];
                                                           }];
-    
+    [alert addAction: shareAction];
+    [alert addAction:cancelAction];
     [alert addAction:defaultAction];
     [alert addAction:editTitleAction];
     [self presentViewController:alert animated:YES completion:nil];
@@ -413,7 +422,7 @@
     //[mapView addLocation:location.clLocation withImage:image andTitle:@"Another teste"];
 }
 
-- (void)readFullSizeImageAndThumbnail {
+- (void)readThumbnailSizedImage {
     
     
     PHImageManager *imageManager = [PHImageManager defaultManager];
@@ -453,7 +462,50 @@
     
     
 }
-
+//for sharing
+- (void)readFullSizeImageForSharing {
+    
+    PHImageManager *imageManager = [PHImageManager defaultManager];
+     PHFetchOptions *options = [PHFetchOptions new];
+     options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
+     PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[[NSMutableArray alloc] initWithObjects: self.assetURL,nil] options:options];
+     if(assets!=nil && assets.count >0) {
+         
+         
+         PHAsset *asset = [assets firstObject];
+         if(asset!=nil){
+                PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
+                requestOptions.resizeMode  = PHImageRequestOptionsResizeModeNone;
+                requestOptions.networkAccessAllowed = true;
+                requestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+                requestOptions.synchronous = true;
+                
+                [imageManager requestImageForAsset:asset
+                                       targetSize:PHImageManagerMaximumSize
+                                      contentMode:PHImageContentModeDefault
+                                          options:requestOptions
+                                    resultHandler:^void(UIImage *image, NSDictionary *info) {
+                                        if(image!=nil) {
+                                            
+                                            NSMutableArray *itens = [[NSMutableArray alloc] initWithObjects:image, nil];
+                                             //just dismiss
+                                             UIActivityViewController *shareView = [[UIActivityViewController alloc] initWithActivityItems:itens applicationActivities:nil];
+                                               
+                                            [self presentViewController:shareView animated:YES completion:nil];
+                                            
+                                            
+                                        } else {
+ 
+                                            NSMutableArray *itens = [[NSMutableArray alloc] initWithObjects:self.photoCellView.imageView.image, nil];
+                                             //just dismiss
+                                             UIActivityViewController *shareView = [[UIActivityViewController alloc] initWithActivityItems:itens applicationActivities:nil];
+                                               
+                                            [self presentViewController:shareView animated:YES completion:nil];
+                                        }
+                }];
+         }
+    }
+}
 //[UIImage imageWithCGImage:[asset defaultRepresentation].fullScreenImage scale:1.0 orientation:(UIImageOrientation)[asset defaultRepresentation].orientation];
 +(NSMutableDictionary *)updateExif:(CLLocation *)currentLocation{
     

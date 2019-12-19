@@ -18,8 +18,6 @@
 
 @interface BHCollectionViewController ()
 
-@property NSInteger COUNTER;
-
 @end
 
 @implementation BHCollectionViewController
@@ -34,7 +32,7 @@
 @synthesize location;
 @synthesize databaseRecords;
 @synthesize albumsYears;
-@synthesize managedObjectContext, isLoaded;
+@synthesize managedObjectContext, isLoaded, counter;
 
 
 
@@ -86,7 +84,7 @@
     UIImage *patternImage = [UIImage imageNamed:@"concrete_wall"];
     self.collectionView.backgroundColor = [UIColor colorWithPatternImage:patternImage];
     numExistingAlbums=0;
-    self.COUNTER = 0;
+    self.counter = 0;
     
     [self.collectionView registerClass:[BHAlbumPhotoCell class]
             forCellWithReuseIdentifier:PhotoCellIdentifier];
@@ -142,6 +140,8 @@
     
     if(!self.isLoaded) {
         
+        self.counter = 0;
+        
         if(!self.alertViewProgress) {
             self.alertViewProgress = [PCImageUtils showActivityIndicator:@"Loading, please wait..."];
         }
@@ -150,11 +150,13 @@
         
         self.isLoaded = true;
         
+        NSLog(@"START WITH DB RECORDS");
         [self fetchLocationRecordsFromDatabase];
         
+        NSLog(@"START WITH IMAGES AND ALBUMS");
         [self checkAuthorizationStatus];
         
-        //and now load all existing data from database
+        
 
     }
     
@@ -167,6 +169,9 @@
     if (status == PHAuthorizationStatusAuthorized) {
          // Access has been granted.
         [self readAllAlbumsOnDevice];
+        //and now load all existing data from database
+        
+        NSLog(@"LOADED %ld", (long)self.counter);
     }
 
     else if (status == PHAuthorizationStatusDenied) {
@@ -183,6 +188,9 @@
              if (status == PHAuthorizationStatusAuthorized) {
                  // Access has been granted.
                  [self readAllAlbumsOnDevice];
+                 //and now load all existing data from database
+                 
+                 NSLog(@"LOADED 1 %ld", (long)self.counter);
              }
 
              else {
@@ -212,7 +220,21 @@
         for(LocationDataModel *entity in databaseRecords) {
           //load the thumbnail or not? takes forever
           count++;
-          [self loadAssetInfoFromDataModelIntoMap:entity];
+            
+          dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+              // Add code here to do background processing
+              //
+              //
+              // do background task
+              [self loadAssetInfoFromDataModelIntoMap:entity];
+              //dispatch_async( dispatch_get_main_queue(), ^{
+                  // Add code here to update the UI/send notifications based on the
+                  // results of the background processing
+              //});
+          });
+            
+         
+         
         }
         NSLog(@"PROCESSED %ld", (long)count);
     }
@@ -277,7 +299,7 @@
                                           [processed addObject:asset.localIdentifier];
                                           
                                           //alwyas update the UI in the main thread
-                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                          //dispatch_async(dispatch_get_main_queue(), ^{
                            
                                               //UIImage *imageFinal = imageFull;
                                               CLLocation *locationCL = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue]
@@ -290,7 +312,7 @@
                                               }
                                               [self.mapViewController addLocation:locationCL withImage:thumbnail andTitle:desc forModel:model containingURLS:photos];
                                               
-                                          });
+                                          //});
                                       }
                 
             }];
@@ -539,6 +561,12 @@
     PHFetchOptions *options = [PHFetchOptions new];
     options.predicate = [NSPredicate predicateWithFormat:@"mediaType == %ld", PHAssetMediaTypeImage];
     
+    
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        // Add code here to do background processing
+        
+   
+    
     //smart albums
     PHFetchResult *smartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
         for (PHAssetCollection *collection in smartAlbum){
@@ -621,15 +649,19 @@
             [self parseImagesForAlbum:album fromCollection:collection withLocationDataModel:model];
             
         }
+        
+        if(self.alertViewProgress!=nil) {
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.alertViewProgress setHidden:true];
+                [self.alertViewProgress dismissWithClickedButtonIndex:0 animated:false];
+            });
+            
+        }
+        
+    });
     
-    if(self.alertViewProgress!=nil) {
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.alertViewProgress setHidden:true];
-            [self.alertViewProgress dismissWithClickedButtonIndex:0 animated:false];
-        });
-        
-    }
+    
 }
 
 /**
@@ -665,6 +697,7 @@
         NSMutableArray *processed = [[NSMutableArray alloc] initWithCapacity:assets.count];
         
         for(PHAsset *asset in assets) {
+            
               if(asset!=nil) {
                   //grab the location if any
                   CLLocation *imageLocation = asset.location;
@@ -688,6 +721,8 @@
                   
                   //these are FAKE yearly albums, not on the device itself
                   if(!existsNativeAlbumWithSameName && ![self.albumsYears containsObject:yearSTR] && auxiliar==nil) {
+                      
+                      
                       NSLog(@"ADDING FAKE ALBUM FOR YEAR %@", yearSTR);
                       [self.albumsYears addObject: yearSTR];
                       
@@ -725,7 +760,10 @@
                        
                   __block UIImage *thumbnailImage = nil;
                   
-                    if( (album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) || (auxiliar!=nil && auxiliar.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM)  ) {
+                  //-------------------- PARSE IMAGE
+                  
+                    if( (album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) ||
+                                ( (auxiliar!=nil && auxiliar.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) && [auxiliar.name isEqualToString:yearSTR]) ) {
                         
                         PHImageRequestOptions *requestOptions = [[PHImageRequestOptions alloc] init];
                         requestOptions.resizeMode   = PHImageRequestOptionsResizeModeExact;
@@ -741,12 +779,14 @@
                                               resultHandler:^void(UIImage *thumbnail, NSDictionary *info) {
                                                   if(thumbnail!=nil && ![processed containsObject:assetPhotoURL]) {
                                                       
+                                                      self.counter++;
+                                                      
                                                       [processed addObject:assetPhotoURL];
                                                       
                                                       thumbnailImage = thumbnail;
                                                       
                                                      //add the photo and reload the collection view
-                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                      //dispatch_async(dispatch_get_main_queue(), ^{
                                                           
                                                           if(album.photos.count < MAX_PHOTO_THUMBNAILS_PER_ALBUM) {
                                                               BHPhoto *photo = [BHPhoto photoWithImageData: thumbnail];
@@ -762,20 +802,22 @@
                                                               [auxiliar addPhoto:photo];
                                                           }
                                                           
-                                                          //reload collectiuon view
-                                                          [self.collectionView reloadData];
-                                                          
-                                                          
-                                                      });
+                                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                                              //reload collectiuon view
+                                                              [self.collectionView reloadData];
+                                                              
+                                                              
+                                                          });
                                                   }
                                                   
                         }];
-                        //-------------------- PARSE LOCATION
+                        
                         
                             
                         //---------------------------
                     }
                   
+                        //-------------------- PARSE LOCATION
              
                             //SEE IF WE ALREADY HAVE A CUSTOME RECORD FOR THIS (TAKES PRECEDENCE)
                             LocationDataModel *photoModel = [self getModelFromDatabaseRecords:assetPhotoURL];
@@ -830,24 +872,7 @@
                                                           
                                  }
                             }
-                                //else {
-                                                      
-                                  //we already have location data model
-                                                    
-                                //  if(model!=nil && model.latitude!=nil && model.longitude!=nil) {
-                                       //TODO I ALREADY HAVE THIS INFO, JUST UPDATE THE MAP VIEW
-                                       // NSLog(@"Adding image location to the map from image already existing location data");
-                                //      NSMutableArray *urls = [[NSMutableArray alloc] initWithObjects:assetPhotoURL, nil];
-                                                            
-                                //      CLLocation *location = [[CLLocation alloc] initWithLatitude:[model.latitude doubleValue] longitude:[model.longitude doubleValue]];
-                                //      [self.mapViewController addLocation:location withImage: thumbnailImage  andTitle: model.desc forModel:model containingURLS:urls];
-                                // }
-                             
-                        //}//end else, location already previously saved
-                                                 
-                          // end resultHandler }
-                                              
-                       // }];
+                               
                   //---------------------------------------------------------
 
                     
@@ -1105,14 +1130,14 @@ ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
 - (void)myButtonHandlerAction
 {
 	// Create the item to share (in this example, a url)
-	NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
-	SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
+	//NSURL *url = [NSURL URLWithString:@"http://getsharekit.com"];
+	//SHKItem *item = [SHKItem URL:url title:@"ShareKit is Awesome!"];
     
 	// Get the ShareKit action sheet
-	SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
+	//SHKActionSheet *actionSheet = [SHKActionSheet actionSheetForItem:item];
     
 	// Display the action sheet
-	[actionSheet showFromToolbar:self.navigationController.toolbar];
+	//[actionSheet showFromToolbar:self.navigationController.toolbar];
 }
 
 -(void) deleteAlbum: (BHAlbum *) album completion:(void(^)(BOOL))callback {

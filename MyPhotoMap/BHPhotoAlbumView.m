@@ -39,7 +39,7 @@ CGFloat lastRotation;
         self.layer.rasterizationScale = [UIScreen mainScreen].scale;
         self.layer.shouldRasterize = YES;
         
-        CGRect rect = CGRectMake(frame.origin.x-20, frame.origin.y-20, frame.size.width, frame.size.height-20);
+        CGRect rect = CGRectMake(frame.origin.x-20, frame.origin.y-40, frame.size.width, frame.size.height);
         
         self.imageView = [[UIImageView alloc] initWithFrame: rect];
         self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
