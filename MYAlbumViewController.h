@@ -19,7 +19,7 @@
 #import <Photos/PHPhotoLibrary.h>
 #import <Photos/PHAssetCollectionChangeRequest.h>
 #import <Photos/Photos.h>
-#import <QBImagePickerController/QBImagePickerController.h>
+#import "QBImagePickerController/QBImagePicker/QBImagePickerController.h"
 
 #define DELETE_ABUM_TAG 1000
 #define ADD_ALBUM_ATG 1001

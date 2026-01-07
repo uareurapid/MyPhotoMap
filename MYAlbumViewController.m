@@ -11,7 +11,7 @@
 #import "AlbumOptionsTableViewController.h"
 #import "PCAppDelegate.h"
 #import "PCImageUtils.h"
-
+#import "QBImagePickerController/QBImagePicker/QBImagePickerController.h"
 
 #define ACTIONS_TAG 0
 #define SELECT_ALL_TAG 1
